@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useFavorites } from "@/context/FavoritesContext";
+import { POPULAR_GENRES } from "@/lib/tmdb";
 
 export default function Navbar() {
   const { favoritesCount } = useFavorites();
@@ -50,6 +51,7 @@ export default function Navbar() {
     { href: "/", label: "Home" },
     { href: "/films", label: "Movies" },
     { href: "/series", label: "TV Series" },
+    { href: "/genres", label: "Genres" },
     { href: "/anime", label: "Anime" },
     { href: "/country", label: "Country" },
     { href: "/favorites", label: "Favorites" },
@@ -79,7 +81,66 @@ export default function Navbar() {
             {/* Desktop Nav Links */}
             <nav className="hidden md:flex items-center gap-6" aria-label="Main navigation">
               {navLinks.map((link) => {
-                const isActive = pathname === link.href || (link.href === "/country" && pathname.startsWith("/country"));
+                const isActive = pathname === link.href || (link.href === "/country" && pathname.startsWith("/country")) || (link.href === "/genres" && pathname.startsWith("/genres"));
+                if (link.href === "/genres") {
+                  return (
+                    <div key={link.href} className="relative group">
+                      <Link
+                        href="/genres"
+                        className={`text-sm tracking-wide transition-colors flex items-center gap-1 ${
+                          isActive
+                            ? "text-white font-medium"
+                            : "text-zinc-400 hover:text-zinc-200"
+                        }`}
+                        aria-current={isActive ? "page" : undefined}
+                      >
+                        Genres
+                        <svg
+                          width="10"
+                          height="10"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="transition-transform duration-200 group-hover:rotate-180 text-zinc-500 group-hover:text-zinc-300"
+                          aria-hidden
+                        >
+                          <path d="m6 9 6 6 6-6" />
+                        </svg>
+                      </Link>
+
+                      {/* Dropdown Popover */}
+                      <div className="absolute top-full -left-10 pt-2 hidden group-hover:block z-50">
+                        <div className="w-72 p-3 rounded-2xl bg-[#0c0e15]/95 backdrop-blur-xl border border-white/[0.1] shadow-2xl">
+                          <div className="flex items-center justify-between px-2 pb-2 mb-2 border-b border-white/[0.06]">
+                            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
+                              Popular Genres
+                            </span>
+                            <Link
+                              href="/genres"
+                              className="text-[10px] font-bold text-red-400 hover:text-red-300 transition-colors"
+                            >
+                              All Genres &rarr;
+                            </Link>
+                          </div>
+                          <div className="grid grid-cols-2 gap-1 max-h-72 overflow-y-auto pr-1">
+                            {POPULAR_GENRES.map((g) => (
+                              <Link
+                                key={g.id}
+                                href={`/films?genre=${g.id}`}
+                                className="px-2.5 py-1.5 rounded-lg text-xs text-zinc-300 hover:text-white hover:bg-white/[0.06] transition-colors truncate"
+                              >
+                                {g.name}
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
                 if (link.href === "/country") {
                   return (
                     <div key={link.href} className="relative group">
@@ -269,6 +330,35 @@ export default function Navbar() {
             <nav className="flex flex-col space-y-2" aria-label="Navigasi mobile">
               {navLinks.map((link) => {
                 const isActive = pathname === link.href;
+                if (link.href === "/genres") {
+                  return (
+                    <div key={link.href} className="space-y-1">
+                      <Link
+                        href="/genres"
+                        className={`px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-between ${
+                          isActive
+                            ? "text-white font-medium bg-white/[0.06]"
+                            : "text-zinc-400 hover:text-white hover:bg-white/[0.03]"
+                        }`}
+                        aria-current={isActive ? "page" : undefined}
+                      >
+                        <span>Genres</span>
+                        <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Browse</span>
+                      </Link>
+                      <div className="grid grid-cols-3 gap-1 px-3 py-1">
+                        {POPULAR_GENRES.slice(0, 9).map((g) => (
+                          <Link
+                            key={g.id}
+                            href={`/films?genre=${g.id}`}
+                            className="text-[11px] text-center px-2 py-1 rounded-md bg-white/[0.04] text-zinc-300 hover:text-white border border-white/[0.06] truncate"
+                          >
+                            {g.name}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
                 return (
                   <Link
                     key={link.href}
