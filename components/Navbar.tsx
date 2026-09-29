@@ -70,7 +70,7 @@ export default function Navbar() {
           <Link
             href="/"
             className="flex items-center gap-2 shrink-0"
-            aria-label="CineVault - Beranda"
+            aria-label="FardhanCine - Beranda"
           >
             <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden>
               <rect width="28" height="28" rx="4" fill="#e8a000" />
@@ -81,7 +81,7 @@ export default function Navbar() {
               className="text-xl font-bold tracking-tight"
               style={{ fontFamily: "var(--font-fraunces)", color: "var(--text)" }}
             >
-              CineVault
+              FardhanCine
             </span>
           </Link>
 

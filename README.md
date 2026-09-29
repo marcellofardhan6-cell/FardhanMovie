@@ -1,4 +1,4 @@
-# CineVault
+# FardhanCine
 
 Katalog film & streaming berbasis TMDB. Dark mode, tanpa iklan, multi-server player. Deploy-ready untuk Vercel.
 
@@ -15,7 +15,7 @@ Buka [http://localhost:3000](http://localhost:3000).
 ## Deploy ke Vercel
 
 1. Push repo ini ke GitHub
-2. Import di [vercel.com/new](https://vercel.com/new) — framework terdeteksi otomatis (Next.js)
+2. Import di [vercel.com/new](https://vercel.com/new) — framework terdeteksi otomatis (Next.js), nama project bisa diisi `fardhancine`
 3. Tambahkan Environment Variables di dashboard Vercel:
 
 | Key | Value |

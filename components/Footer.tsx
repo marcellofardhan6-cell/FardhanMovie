@@ -14,7 +14,7 @@ export default function Footer() {
             <circle cx="21" cy="20" r="2.5" fill="#0a0a0f" />
           </svg>
           <span className="text-sm font-semibold" style={{ fontFamily: "var(--font-fraunces)", color: "var(--text)" }}>
-            CineVault
+            FardhanCine
           </span>
         </div>
         <p className="text-xs text-center" style={{ color: "var(--text-muted)" }}>
@@ -27,7 +27,7 @@ export default function Footer() {
             style={{ color: "var(--text-muted)" }}
           >
             The Movie Database (TMDB)
-          </a>. CineVault tidak menyimpan atau mendistribusikan konten film.
+          </a>. FardhanCine tidak menyimpan atau mendistribusikan konten film.
         </p>
         <nav aria-label="Navigasi footer">
           <ul className="flex items-center gap-4" role="list">
