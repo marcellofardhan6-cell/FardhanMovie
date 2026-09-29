@@ -16,42 +16,48 @@ export default async function HomePage() {
     getTopRatedMovies().catch(() => ({ results: EMPTY, total_pages: 0, total_results: 0, page: 1 })),
   ]);
 
-  const hero = trending.results.find((item) => item.backdrop_path) ?? trending.results[0];
-  const trendingItems = trending.results.slice(0, 20);
-
   return (
     <>
-      {/* Streaming Hero */}
-      {hero && <Hero item={{ ...hero }} />}
+      {/* Dynamic Multi-Slide Hero (Top 5 Spotlight) */}
+      <Hero items={trending.results} />
 
-      {/* Movie & Series Rows */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-7 sm:space-y-12">
+      {/* Content Rows with Rich Visual Rhythm */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-8 sm:space-y-14">
+        {/* Continue Watching shelf */}
         <ContinueWatching />
 
+        {/* 1. Top 10 Row (Netflix-Style Giant Architectural Rank Numbers) */}
         <Carousel
-          title="Trending This Week"
-          items={trendingItems}
-          seeAllHref="/films"
+          title="Top 10 Hari Ini"
+          items={trending.results}
+          variant="top10"
+          subtitle="Film dan serial paling banyak ditonton minggu ini"
         />
 
+        {/* 2. Popular Movies (Standard 2:3 Poster Cards) */}
         <Carousel
           title="Popular Movies"
           items={popularMovies.results}
           seeAllHref="/films"
         />
 
+        {/* 3. Top Anime (Cinematic Landscape 16:9 Backdrop Cards) */}
+        <Carousel
+          title="Anime Pilihan"
+          items={anime.results}
+          seeAllHref="/anime"
+          variant="backdrop"
+          subtitle="Animasi Jepang terpopuler dalam format sinematik"
+        />
+
+        {/* 4. Popular TV Series (Standard 2:3 Poster Cards) */}
         <Carousel
           title="Popular TV Series"
           items={popularTV.results}
           seeAllHref="/series"
         />
 
-        <Carousel
-          title="Top Anime"
-          items={anime.results}
-          seeAllHref="/anime"
-        />
-
+        {/* 5. Top Rated Movies (Standard 2:3 Poster Cards) */}
         <Carousel
           title="Top Rated Movies"
           items={topRated.results}
