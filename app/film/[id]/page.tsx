@@ -39,38 +39,38 @@ export default async function FilmDetailPage({ params }: Props) {
   const mainCast = credits.cast.slice(0, 12);
   const director = credits.crew.find((c) => c.job === "Director");
   const writers = credits.crew.filter((c) => c.job === "Screenplay" || c.job === "Writer" || c.job === "Story");
-  const writerNames = writers.slice(0, 2).map((w) => w.name).join(", ");
+  const writerNames = writers.map((w) => w.name).slice(0, 3).join(", ");
   const year = displayYear(movie);
   const runtime = movie.runtime
-    ? `${Math.floor(movie.runtime / 60)}j ${movie.runtime % 60}m`
+    ? `${Math.floor(movie.runtime / 60)}h ${movie.runtime % 60}m`
     : null;
   const releaseDateFormatted = movie.release_date
-    ? new Date(movie.release_date).toLocaleDateString("id-ID", {
+    ? new Date(movie.release_date).toLocaleDateString("en-US", {
         day: "numeric",
         month: "long",
         year: "numeric",
       })
     : null;
   const countries = movie.production_countries && movie.production_countries.length > 0
-    ? movie.production_countries.slice(0, 2).map((c) => c.name).join(", ")
+    ? movie.production_countries.map((c) => c.name).join(", ")
     : null;
   const languages = movie.spoken_languages && movie.spoken_languages.length > 0
-    ? movie.spoken_languages.slice(0, 2).map((l) => l.name || l.english_name).join(", ")
+    ? movie.spoken_languages.map((l) => l.english_name || l.name).join(", ")
     : null;
   const companies = movie.production_companies && movie.production_companies.length > 0
-    ? movie.production_companies.slice(0, 2).map((c) => c.name).join(", ")
+    ? movie.production_companies.map((c) => c.name).slice(0, 3).join(", ")
     : null;
   const budget = movie.budget && movie.budget > 0
-    ? `$${(movie.budget / 1_000_000).toFixed(1)} Juta USD`
+    ? `$${(movie.budget / 1_000_000).toFixed(1)}M USD`
     : null;
   const revenue = movie.revenue && movie.revenue > 0
-    ? `$${(movie.revenue / 1_000_000).toFixed(1)} Juta USD`
+    ? `$${(movie.revenue / 1_000_000).toFixed(1)}M USD`
     : null;
   const statusMap: Record<string, string> = {
-    Released: "Sudah Rilis Bioskop",
-    "Post Production": "Pasca Produksi",
-    "In Production": "Sedang Diproduksi",
-    Planned: "Direncanakan",
+    Released: "Released in Theaters",
+    "Post Production": "Post Production",
+    "In Production": "In Production",
+    Planned: "Planned",
   };
   const statusText = movie.status ? (statusMap[movie.status] || movie.status) : null;
 
@@ -80,9 +80,9 @@ export default async function FilmDetailPage({ params }: Props) {
         {/* Breadcrumb & Film Header */}
         <div className="mb-6">
           <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-zinc-400 mb-3">
-            <Link href="/" className="hover:text-white transition-colors">Beranda</Link>
+            <Link href="/" className="hover:text-white transition-colors">Home</Link>
             <span>/</span>
-            <Link href="/films" className="hover:text-white transition-colors">Film</Link>
+            <Link href="/films" className="hover:text-white transition-colors">Movies</Link>
             <span>/</span>
             <span className="text-zinc-200 truncate max-w-xs sm:max-w-none">{movie.title}</span>
           </nav>
@@ -109,7 +109,7 @@ export default async function FilmDetailPage({ params }: Props) {
                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                 </svg>
                 <span className="text-sm font-bold text-red-400">{movie.vote_average.toFixed(1)}</span>
-                <span className="text-[11px] text-zinc-400">/ 10 ({movie.vote_count.toLocaleString("id-ID")})</span>
+                <span className="text-[11px] text-zinc-400">/ 10 ({movie.vote_count.toLocaleString("en-US")} votes)</span>
               </div>
             )}
           </div>
@@ -168,7 +168,7 @@ export default async function FilmDetailPage({ params }: Props) {
                 4K UHD
               </span>
               <span className="px-2 py-0.5 rounded text-[10px] font-semibold text-zinc-300 border border-white/[0.1] bg-white/[0.04]">
-                Sub Indo
+                Multi-Sub
               </span>
               <span className="px-2 py-0.5 rounded text-[10px] font-semibold text-zinc-300 border border-white/[0.1] bg-white/[0.04]">
                 Dolby 5.1
@@ -183,7 +183,7 @@ export default async function FilmDetailPage({ params }: Props) {
               <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
                 <h2 className="text-xs font-bold uppercase tracking-wider text-red-500 flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
-                  Informasi & Sinopsis Film
+                  Movie Info &amp; Synopsis
                 </h2>
                 {statusText && (
                   <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
@@ -195,7 +195,7 @@ export default async function FilmDetailPage({ params }: Props) {
               {/* Genre Badges (Clickable) */}
               {movie.genres && movie.genres.length > 0 && (
                 <div className="flex flex-wrap items-center gap-2 mb-4">
-                  <span className="text-xs text-zinc-400 font-semibold mr-1">Genre:</span>
+                  <span className="text-xs text-zinc-400 font-semibold mr-1">Genres:</span>
                   {movie.genres.map((g) => (
                     <Link
                       key={g.id}
@@ -210,7 +210,7 @@ export default async function FilmDetailPage({ params }: Props) {
 
               {/* Synopsis Body */}
               <p className="text-sm leading-relaxed text-zinc-300 mb-6 font-normal">
-                {movie.overview || "Sinopsis resmi belum tersedia untuk film ini."}
+                {movie.overview || "Official synopsis is not yet available for this movie."}
               </p>
             </div>
 
@@ -218,72 +218,72 @@ export default async function FilmDetailPage({ params }: Props) {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-3.5 gap-x-6 pt-5 border-t border-white/[0.08] text-xs">
               {director && (
                 <div>
-                  <span className="text-zinc-500 block text-[11px] uppercase tracking-wider mb-0.5">Sutradara</span>
+                  <span className="text-zinc-500 block text-[11px] uppercase tracking-wider mb-0.5">Director</span>
                   <span className="text-white font-medium">{director.name}</span>
                 </div>
               )}
 
               {writerNames && (
                 <div>
-                  <span className="text-zinc-500 block text-[11px] uppercase tracking-wider mb-0.5">Penulis Naskah</span>
+                  <span className="text-zinc-500 block text-[11px] uppercase tracking-wider mb-0.5">Screenplay / Writer</span>
                   <span className="text-white font-medium">{writerNames}</span>
                 </div>
               )}
 
               {releaseDateFormatted && (
                 <div>
-                  <span className="text-zinc-500 block text-[11px] uppercase tracking-wider mb-0.5">Tanggal Rilis</span>
+                  <span className="text-zinc-500 block text-[11px] uppercase tracking-wider mb-0.5">Release Date</span>
                   <span className="text-white font-medium">{releaseDateFormatted}</span>
                 </div>
               )}
 
               {runtime && (
                 <div>
-                  <span className="text-zinc-500 block text-[11px] uppercase tracking-wider mb-0.5">Durasi</span>
+                  <span className="text-zinc-500 block text-[11px] uppercase tracking-wider mb-0.5">Runtime</span>
                   <span className="text-white font-medium">{runtime}</span>
                 </div>
               )}
 
               {countries && (
                 <div>
-                  <span className="text-zinc-500 block text-[11px] uppercase tracking-wider mb-0.5">Negara Asal</span>
+                  <span className="text-zinc-500 block text-[11px] uppercase tracking-wider mb-0.5">Country of Origin</span>
                   <span className="text-white font-medium">{countries}</span>
                 </div>
               )}
 
               {languages && (
                 <div>
-                  <span className="text-zinc-500 block text-[11px] uppercase tracking-wider mb-0.5">Bahasa Audio</span>
+                  <span className="text-zinc-500 block text-[11px] uppercase tracking-wider mb-0.5">Spoken Language</span>
                   <span className="text-white font-medium">{languages}</span>
                 </div>
               )}
 
               {companies && (
                 <div className="sm:col-span-2">
-                  <span className="text-zinc-500 block text-[11px] uppercase tracking-wider mb-0.5">Studio Produksi</span>
+                  <span className="text-zinc-500 block text-[11px] uppercase tracking-wider mb-0.5">Production Studio</span>
                   <span className="text-white font-medium">{companies}</span>
                 </div>
               )}
 
               {budget && (
                 <div>
-                  <span className="text-zinc-500 block text-[11px] uppercase tracking-wider mb-0.5">Biaya Produksi</span>
+                  <span className="text-zinc-500 block text-[11px] uppercase tracking-wider mb-0.5">Budget</span>
                   <span className="text-white font-medium">{budget}</span>
                 </div>
               )}
 
               {revenue && (
                 <div>
-                  <span className="text-zinc-500 block text-[11px] uppercase tracking-wider mb-0.5">Pendapatan Box Office</span>
+                  <span className="text-zinc-500 block text-[11px] uppercase tracking-wider mb-0.5">Box Office Revenue</span>
                   <span className="text-emerald-400 font-medium">{revenue}</span>
                 </div>
               )}
 
               {movie.vote_average > 0 && (
                 <div>
-                  <span className="text-zinc-500 block text-[11px] uppercase tracking-wider mb-0.5">Skor Penonton</span>
+                  <span className="text-zinc-500 block text-[11px] uppercase tracking-wider mb-0.5">Audience Score</span>
                   <span className="text-red-400 font-bold">
-                    ★ {movie.vote_average.toFixed(1)} / 10 ({movie.vote_count.toLocaleString("id-ID")} suara)
+                    ★ {movie.vote_average.toFixed(1)} / 10 ({movie.vote_count.toLocaleString("en-US")} votes)
                   </span>
                 </div>
               )}
@@ -293,11 +293,11 @@ export default async function FilmDetailPage({ params }: Props) {
 
         {/* Cast Section */}
         {mainCast.length > 0 && (
-          <section aria-label="Pemeran" className="mb-14">
+          <section aria-label="Cast" className="mb-14">
             <div className="flex items-center gap-2 mb-6">
               <span className="w-1.5 h-1.5 rounded-full bg-red-600" />
               <h2 className="text-xl font-bold text-white tracking-tight" style={{ fontFamily: "var(--font-fraunces)" }}>
-                Pemeran Utama
+                Main Cast
               </h2>
             </div>
 
@@ -326,11 +326,11 @@ export default async function FilmDetailPage({ params }: Props) {
 
         {/* Recommendations Section */}
         {recommendations.results.length > 0 && (
-          <section aria-label="Rekomendasi" className="mb-16">
+          <section aria-label="Recommendations" className="mb-16">
             <div className="flex items-center gap-2 mb-6">
               <span className="w-1.5 h-1.5 rounded-full bg-red-600" />
               <h2 className="text-xl font-bold text-white tracking-tight" style={{ fontFamily: "var(--font-fraunces)" }}>
-                Film Serupa yang Direkomendasikan
+                More Like This
               </h2>
             </div>
             <MovieGrid items={recommendations.results.slice(0, 10)} />

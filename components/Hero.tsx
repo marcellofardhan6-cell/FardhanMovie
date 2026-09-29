@@ -17,7 +17,7 @@ export default function Hero({ item }: Props) {
     <section
       className="relative w-full overflow-hidden"
       style={{ minHeight: "75vh", background: "#06070a" }}
-      aria-label={`Film unggulan: ${title}`}
+      aria-label={`Featured: ${title}`}
     >
       {/* Full Backdrop */}
       {item.backdrop_path && (
@@ -57,7 +57,7 @@ export default function Hero({ item }: Props) {
             )}
             {year && <span>{year}</span>}
             <span className="text-zinc-500">•</span>
-            <span className="text-zinc-300">{type === "movie" ? "Film" : "Serial"}</span>
+            <span className="text-zinc-300">{type === "movie" ? "Movie" : "TV Series"}</span>
             <span className="text-zinc-500">•</span>
             <span className="border border-zinc-700 px-1 py-0.2 rounded text-[10px] text-zinc-400 font-mono">
               HD
@@ -80,7 +80,7 @@ export default function Hero({ item }: Props) {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
                 <path d="M5 3l14 9-14 9V3z" />
               </svg>
-              <span>Putar Film</span>
+              <span>Play Now</span>
             </Link>
 
             <Link
@@ -91,7 +91,7 @@ export default function Hero({ item }: Props) {
                 <circle cx="12" cy="12" r="10" />
                 <path d="M12 16v-4M12 8h.01" />
               </svg>
-              <span>Detail Film</span>
+              <span>More Details</span>
             </Link>
           </div>
         </div>

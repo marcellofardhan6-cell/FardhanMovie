@@ -50,7 +50,7 @@ export default function Carousel({ title, items, seeAllHref, subtitle }: Props) 
               href={seeAllHref}
               className="text-xs font-semibold tracking-wide text-zinc-400 hover:text-white transition-colors mr-3 flex items-center gap-1 group/link"
             >
-              <span>Lihat Semua</span>
+              <span>See All</span>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="transition-transform group-hover/link:translate-x-0.5" aria-hidden>
                 <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>
@@ -61,7 +61,7 @@ export default function Carousel({ title, items, seeAllHref, subtitle }: Props) 
             <button
               onClick={() => scrollBy("left")}
               disabled={!canScrollLeft}
-              aria-label="Geser ke kiri"
+              aria-label="Scroll left"
               className="w-8 h-8 rounded-full flex items-center justify-center bg-white/[0.04] hover:bg-white/[0.1] disabled:opacity-20 border border-white/[0.08] hover:border-white/30 text-zinc-300 hover:text-white transition-all duration-200 cursor-pointer disabled:cursor-not-allowed"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -71,7 +71,7 @@ export default function Carousel({ title, items, seeAllHref, subtitle }: Props) 
             <button
               onClick={() => scrollBy("right")}
               disabled={!canScrollRight}
-              aria-label="Geser ke kanan"
+              aria-label="Scroll right"
               className="w-8 h-8 rounded-full flex items-center justify-center bg-white/[0.04] hover:bg-white/[0.1] disabled:opacity-20 border border-white/[0.08] hover:border-white/30 text-zinc-300 hover:text-white transition-all duration-200 cursor-pointer disabled:cursor-not-allowed"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -89,7 +89,7 @@ export default function Carousel({ title, items, seeAllHref, subtitle }: Props) 
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         onScroll={updateScrollState}
         tabIndex={0}
-        aria-label={`${title} - gunakan tombol geser atau panah`}
+        aria-label={`${title} - use scroll buttons or arrow keys`}
       >
         <ul className="flex gap-4 sm:gap-5" role="list">
           {items.map((item, i) => (

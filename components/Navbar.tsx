@@ -45,10 +45,11 @@ export default function Navbar() {
   );
 
   const navLinks = [
-    { href: "/", label: "Beranda" },
-    { href: "/films", label: "Film" },
-    { href: "/series", label: "Serial TV" },
+    { href: "/", label: "Home" },
+    { href: "/films", label: "Movies" },
+    { href: "/series", label: "TV Series" },
     { href: "/anime", label: "Anime" },
+    { href: "/country", label: "Country" },
   ];
 
   return (
@@ -73,9 +74,78 @@ export default function Navbar() {
             </Link>
 
             {/* Desktop Nav Links */}
-            <nav className="hidden md:flex items-center gap-6" aria-label="Navigasi utama">
+            <nav className="hidden md:flex items-center gap-6" aria-label="Main navigation">
               {navLinks.map((link) => {
-                const isActive = pathname === link.href;
+                const isActive = pathname === link.href || (link.href === "/country" && pathname.startsWith("/country"));
+                if (link.href === "/country") {
+                  return (
+                    <div key={link.href} className="relative group">
+                      <Link
+                        href="/country"
+                        className={`text-sm tracking-wide transition-colors flex items-center gap-1 ${
+                          isActive
+                            ? "text-white font-medium"
+                            : "text-zinc-400 hover:text-zinc-200"
+                        }`}
+                        aria-current={isActive ? "page" : undefined}
+                      >
+                        Country
+                        <svg
+                          width="10"
+                          height="10"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="transition-transform duration-200 group-hover:rotate-180 text-zinc-500 group-hover:text-zinc-300"
+                          aria-hidden
+                        >
+                          <path d="m6 9 6 6 6-6" />
+                        </svg>
+                      </Link>
+
+                      {/* Quick Country Dropdown on Hover */}
+                      <div className="absolute top-full left-0 pt-2 hidden group-hover:block z-50">
+                        <div className="w-48 py-2 rounded-xl bg-[#0c0e15]/95 backdrop-blur-xl border border-white/[0.1] shadow-2xl">
+                          <div className="px-3 py-1 text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
+                            Popular Countries
+                          </div>
+                          <Link href="/country?code=US" className="flex items-center justify-between px-3 py-1.5 text-xs text-zinc-300 hover:text-white hover:bg-white/[0.06] transition-colors">
+                            <span>United States</span>
+                            <span className="text-[10px] text-zinc-500">US</span>
+                          </Link>
+                          <Link href="/country?code=KR" className="flex items-center justify-between px-3 py-1.5 text-xs text-zinc-300 hover:text-white hover:bg-white/[0.06] transition-colors">
+                            <span>South Korea</span>
+                            <span className="text-[10px] text-zinc-500">KR</span>
+                          </Link>
+                          <Link href="/country?code=JP" className="flex items-center justify-between px-3 py-1.5 text-xs text-zinc-300 hover:text-white hover:bg-white/[0.06] transition-colors">
+                            <span>Japan</span>
+                            <span className="text-[10px] text-zinc-500">JP</span>
+                          </Link>
+                          <Link href="/country?code=ID" className="flex items-center justify-between px-3 py-1.5 text-xs text-zinc-300 hover:text-white hover:bg-white/[0.06] transition-colors">
+                            <span>Indonesia</span>
+                            <span className="text-[10px] text-zinc-500">ID</span>
+                          </Link>
+                          <Link href="/country?code=GB" className="flex items-center justify-between px-3 py-1.5 text-xs text-zinc-300 hover:text-white hover:bg-white/[0.06] transition-colors">
+                            <span>United Kingdom</span>
+                            <span className="text-[10px] text-zinc-500">GB</span>
+                          </Link>
+                          <Link href="/country?code=CN" className="flex items-center justify-between px-3 py-1.5 text-xs text-zinc-300 hover:text-white hover:bg-white/[0.06] transition-colors">
+                            <span>China</span>
+                            <span className="text-[10px] text-zinc-500">CN</span>
+                          </Link>
+                          <div className="my-1 border-t border-white/[0.06]" />
+                          <Link href="/country" className="flex items-center justify-between px-3 py-1.5 text-xs font-semibold text-red-400 hover:text-red-300 hover:bg-red-500/[0.08] transition-colors">
+                            <span>All Countries</span>
+                            <span>&rarr;</span>
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
                 return (
                   <Link
                     key={link.href}
@@ -97,19 +167,19 @@ export default function Navbar() {
           {/* Right: Search & Mobile Trigger */}
           <div className="flex items-center gap-3">
             {/* Search Input */}
-            <form onSubmit={handleSearch} role="search" aria-label="Cari film atau serial">
+            <form onSubmit={handleSearch} role="search" aria-label="Search movies or TV shows">
               <div className="relative">
-                <label htmlFor="navbar-search" className="sr-only">Cari film atau serial</label>
+                <label htmlFor="navbar-search" className="sr-only">Search movies or TV shows</label>
                 <input
                   ref={searchRef}
                   id="navbar-search"
                   type="search"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Cari judul..."
+                  placeholder="Search titles..."
                   autoComplete="off"
                   className="w-36 sm:w-56 text-xs text-white bg-white/[0.05] focus:bg-[#0c0e15] border border-white/[0.08] focus:border-white/30 rounded-lg py-2 pl-8 pr-3 outline-none transition-all placeholder:text-zinc-500"
-                  aria-label="Cari film atau serial TV"
+                  aria-label="Search movies or TV series"
                 />
                 <svg
                   className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none"
@@ -135,7 +205,7 @@ export default function Navbar() {
               onClick={() => setMenuOpen((v) => !v)}
               aria-expanded={menuOpen}
               aria-controls="mobile-menu"
-              aria-label={menuOpen ? "Tutup menu" : "Buka menu navigasi"}
+              aria-label={menuOpen ? "Close menu" : "Open navigation menu"}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
                 {menuOpen ? (

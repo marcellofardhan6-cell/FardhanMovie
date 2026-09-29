@@ -19,14 +19,14 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: { default: "FardhanFlix", template: "%s | FardhanFlix" },
-  description: "Katalog film dan serial TV lengkap. Streaming gratis, tanpa iklan.",
-  keywords: ["film", "streaming", "serial tv", "anime", "bioskop", "nonton online"],
+  title: { default: "FardhanFlix - Free Movies & TV Series Streaming", template: "%s | FardhanFlix" },
+  description: "Watch trending movies, popular TV series, and anime online. Free HD streaming without ads.",
+  keywords: ["movies", "streaming", "tv series", "anime", "cinema", "watch online"],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="id" className={`${inter.variable} ${fraunces.variable}`}>
+    <html lang="en" className={`${inter.variable} ${fraunces.variable}`}>
       <body>
         <Navbar />
         <main className="min-h-screen">{children}</main>

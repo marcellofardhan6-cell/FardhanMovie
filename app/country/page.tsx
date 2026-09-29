@@ -1,0 +1,187 @@
+import { discoverMovies, discoverTV, getMovieGenres, getTVGenres, POPULAR_COUNTRIES } from "@/lib/tmdb";
+import MovieGrid from "@/components/MovieGrid";
+import FilterBar from "@/components/FilterBar";
+import { Suspense } from "react";
+import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Browse by Country",
+  description: "Discover top movies and TV series by origin country.",
+};
+
+export const revalidate = 3600;
+
+interface Props {
+  searchParams: Promise<{ code?: string; type?: string; genre?: string; year?: string; page?: string }>;
+}
+
+export default async function CountryPage({ searchParams }: Props) {
+  const params = await searchParams;
+  const activeCode = (params.code || "US").toUpperCase();
+  const type = params.type || "all";
+  const genre = params.genre;
+  const year = params.year;
+  const page = Number(params.page ?? 1);
+
+  const selectedCountry = POPULAR_COUNTRIES.find((c) => c.code === activeCode) || {
+    code: activeCode,
+    name: activeCode,
+  };
+
+  // Fetch data depending on type
+  const [movieGenres, tvGenres, moviesData, tvData] = await Promise.all([
+    getMovieGenres().catch(() => []),
+    getTVGenres().catch(() => []),
+    type === "tv"
+      ? Promise.resolve({ results: [], total_pages: 0, total_results: 0, page: 1 })
+      : discoverMovies({ genre, year, country: activeCode, page }).catch(() => ({
+          results: [],
+          total_pages: 0,
+          total_results: 0,
+          page: 1,
+        })),
+    type === "movie"
+      ? Promise.resolve({ results: [], total_pages: 0, total_results: 0, page: 1 })
+      : discoverTV({ genre, year, country: activeCode, page }).catch(() => ({
+          results: [],
+          total_pages: 0,
+          total_results: 0,
+          page: 1,
+        })),
+  ]);
+
+  // Combine or select results
+  let items = [];
+  let totalPages = 1;
+
+  if (type === "movie") {
+    items = moviesData.results.map((m) => ({ ...m, media_type: "movie" }));
+    totalPages = moviesData.total_pages;
+  } else if (type === "tv") {
+    items = tvData.results.map((t) => ({ ...t, media_type: "tv" }));
+    totalPages = tvData.total_pages;
+  } else {
+    // Interleave movie and tv results for 'all'
+    const mResults = moviesData.results.map((m) => ({ ...m, media_type: "movie" }));
+    const tResults = tvData.results.map((t) => ({ ...t, media_type: "tv" }));
+    const maxLength = Math.max(mResults.length, tResults.length);
+    for (let i = 0; i < maxLength; i++) {
+      if (mResults[i]) items.push(mResults[i]);
+      if (tResults[i]) items.push(tResults[i]);
+    }
+    totalPages = Math.max(moviesData.total_pages, tvData.total_pages);
+  }
+
+  // Deduplicate genres list for filter
+  const allGenresMap = new Map();
+  [...movieGenres, ...tvGenres].forEach((g) => {
+    if (!allGenresMap.has(g.id)) allGenresMap.set(g.id, g);
+  });
+  const combinedGenres = Array.from(allGenresMap.values());
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-20">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+          Browse by Country
+        </h1>
+        <p className="text-xs sm:text-sm text-zinc-400 mt-1">
+          Explore films and television shows from {selectedCountry.name} and across the world.
+        </p>
+      </div>
+
+      {/* Country Pills Horizontal Scroll */}
+      <div className="mb-8">
+        <div className="flex items-center gap-2 overflow-x-auto pb-3 scroll-snap-x" style={{ scrollbarWidth: "none" }}>
+          {POPULAR_COUNTRIES.map((c) => {
+            const isSelected = c.code === activeCode;
+            const queryParams = new URLSearchParams();
+            queryParams.set("code", c.code);
+            if (type !== "all") queryParams.set("type", type);
+            if (genre) queryParams.set("genre", genre);
+            if (year) queryParams.set("year", year);
+
+            return (
+              <Link
+                key={c.code}
+                href={`/country?${queryParams.toString()}`}
+                className={`shrink-0 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                  isSelected
+                    ? "bg-red-600 text-white shadow-lg shadow-red-600/30 border border-red-500"
+                    : "bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white border border-white/[0.08]"
+                }`}
+              >
+                {c.name}
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Filter Bar with Type, Genre, Year */}
+      <Suspense>
+        <FilterBar
+          genres={combinedGenres}
+          activeGenre={genre}
+          activeYear={year}
+          activeType={type === "all" ? "" : type}
+          activeCountry={activeCode}
+          showTypeFilter={true}
+          showCountryFilter={false}
+          basePath="/country"
+        />
+      </Suspense>
+
+      {/* Results */}
+      {items.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-24 rounded-2xl bg-[#0c0e17] border border-white/[0.08]">
+          <p className="text-lg font-bold text-white mb-2">
+            No titles found for {selectedCountry.name}
+          </p>
+          <p className="text-xs text-zinc-400">Try selecting another genre or release year.</p>
+        </div>
+      ) : (
+        <MovieGrid items={items} />
+      )}
+
+      {/* Luxury Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-3 mt-12">
+          {page > 1 && (
+            <a
+              href={`/country?${new URLSearchParams({
+                code: activeCode,
+                ...(type !== "all" ? { type } : {}),
+                ...(genre ? { genre } : {}),
+                ...(year ? { year } : {}),
+                page: String(page - 1),
+              }).toString()}`}
+              className="px-5 py-2.5 rounded-full text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 border border-white/[0.08] hover:border-red-500/40 transition-all cursor-pointer"
+            >
+              &larr; Previous
+            </a>
+          )}
+          <span className="px-4 py-2 text-xs font-medium text-zinc-400 bg-black/40 rounded-full border border-white/[0.05]">
+            Page {page} of {Math.min(totalPages, 500)}
+          </span>
+          {page < totalPages && page < 500 && (
+            <a
+              href={`/country?${new URLSearchParams({
+                code: activeCode,
+                ...(type !== "all" ? { type } : {}),
+                ...(genre ? { genre } : {}),
+                ...(year ? { year } : {}),
+                page: String(page + 1),
+              }).toString()}`}
+              className="px-5 py-2.5 rounded-full text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 border border-white/[0.08] hover:border-red-500/40 transition-all cursor-pointer"
+            >
+              Next &rarr;
+            </a>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}

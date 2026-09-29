@@ -21,7 +21,7 @@ async function tmdbGet(url: string): Promise<Response> {
 
 async function tmdbFetch<T>(path: string, params?: Record<string, string>): Promise<T> {
   const url = new URL(`${TMDB_BASE}${path}`);
-  url.searchParams.set("language", "id-ID");
+  url.searchParams.set("language", "en-US");
   if (params) {
     Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
   }
@@ -225,9 +225,31 @@ export async function getTVGenres() {
   return data.genres;
 }
 
+export const POPULAR_COUNTRIES = [
+  { code: "US", name: "United States" },
+  { code: "KR", name: "South Korea" },
+  { code: "JP", name: "Japan" },
+  { code: "GB", name: "United Kingdom" },
+  { code: "ID", name: "Indonesia" },
+  { code: "CN", name: "China" },
+  { code: "IN", name: "India" },
+  { code: "FR", name: "France" },
+  { code: "ES", name: "Spain" },
+  { code: "DE", name: "Germany" },
+  { code: "TH", name: "Thailand" },
+  { code: "CA", name: "Canada" },
+  { code: "AU", name: "Australia" },
+  { code: "IT", name: "Italy" },
+  { code: "TR", name: "Turkey" },
+  { code: "PH", name: "Philippines" },
+  { code: "BR", name: "Brazil" },
+  { code: "MX", name: "Mexico" },
+];
+
 export async function discoverMovies(params: {
   genre?: string;
   year?: string;
+  country?: string;
   sort_by?: string;
   page?: number;
 }) {
@@ -238,12 +260,14 @@ export async function discoverMovies(params: {
   };
   if (params.genre) p.with_genres = params.genre;
   if (params.year) p.primary_release_year = params.year;
+  if (params.country) p.with_origin_country = params.country;
   return tmdbFetch<TMDBResponse<Movie>>("/discover/movie", p);
 }
 
 export async function discoverTV(params: {
   genre?: string;
   year?: string;
+  country?: string;
   sort_by?: string;
   page?: number;
 }) {
@@ -253,6 +277,7 @@ export async function discoverTV(params: {
   };
   if (params.genre) p.with_genres = params.genre;
   if (params.year) p.first_air_date_year = params.year;
+  if (params.country) p.with_origin_country = params.country;
   return tmdbFetch<TMDBResponse<Movie>>("/discover/tv", p);
 }
 

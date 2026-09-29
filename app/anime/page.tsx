@@ -2,7 +2,7 @@ import { getAnime } from "@/lib/tmdb";
 import MovieGrid from "@/components/MovieGrid";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Katalog Anime" };
+export const metadata: Metadata = { title: "Anime" };
 export const revalidate = 3600;
 
 interface Props {
@@ -18,10 +18,10 @@ export default async function AnimePage({ searchParams }: Props) {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-20">
       <div className="mb-8">
         <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
-          Koleksi Anime
+          Anime Collection
         </h1>
         <p className="text-xs sm:text-sm text-zinc-400 mt-1">
-          Serial animasi Jepang, shonen, seinen, dan film anime populer.
+          Top Japanese animation series, movies, and trending releases.
         </p>
       </div>
 
@@ -34,18 +34,18 @@ export default async function AnimePage({ searchParams }: Props) {
               href={`/anime?page=${page - 1}`}
               className="px-5 py-2.5 rounded-full text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 border border-white/[0.08] hover:border-red-500/40 transition-all cursor-pointer"
             >
-              &larr; Sebelumnya
+              &larr; Previous
             </a>
           )}
           <span className="px-4 py-2 text-xs font-medium text-zinc-400 bg-black/40 rounded-full border border-white/[0.05]">
-            Halaman {page} dari {Math.min(data.total_pages, 500)}
+            Page {page} of {Math.min(data.total_pages, 500)}
           </span>
           {page < data.total_pages && page < 500 && (
             <a
               href={`/anime?page=${page + 1}`}
               className="px-5 py-2.5 rounded-full text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 border border-white/[0.08] hover:border-red-500/40 transition-all cursor-pointer"
             >
-              Berikutnya &rarr;
+              Next &rarr;
             </a>
           )}
         </div>

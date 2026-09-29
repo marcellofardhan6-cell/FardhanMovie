@@ -54,7 +54,7 @@ export default function MovieCard({ item, priority = false }: Props) {
         {/* Floating Type Pill */}
         {type === "series" ? (
           <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase backdrop-blur-md bg-black/70 text-zinc-200 border border-white/10">
-            Serial
+            Series
           </div>
         ) : (
           <div className="absolute top-2.5 right-2.5 px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase backdrop-blur-md bg-black/70 text-zinc-300 border border-white/10">
@@ -80,7 +80,7 @@ export default function MovieCard({ item, priority = false }: Props) {
         <div className="flex items-center justify-between text-xs text-zinc-400">
           {year ? <span>{year}</span> : <span />}
           <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-medium group-hover:text-red-400/80 transition-colors">
-            {type === "movie" ? "Film" : "TV"}
+            {type === "movie" ? "Movie" : "TV"}
           </span>
         </div>
       </div>

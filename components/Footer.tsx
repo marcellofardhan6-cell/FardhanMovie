@@ -14,31 +14,36 @@ export default function Footer() {
               Fardhan<span className="text-red-600">Flix</span>
             </Link>
             <p className="text-xs text-zinc-400 mt-1">
-              Katalog film dan serial TV lengkap. Streaming gratis, tanpa iklan.
+              Your ultimate movie and TV series streaming catalog. Free and ad-free.
             </p>
           </div>
 
           {/* Quick Links */}
-          <nav aria-label="Navigasi footer">
+          <nav aria-label="Footer navigation">
             <ul className="flex flex-wrap items-center gap-6" role="list">
               <li>
                 <Link href="/" className="text-xs text-zinc-400 hover:text-white transition-colors">
-                  Beranda
+                  Home
                 </Link>
               </li>
               <li>
                 <Link href="/films" className="text-xs text-zinc-400 hover:text-white transition-colors">
-                  Film
+                  Movies
                 </Link>
               </li>
               <li>
                 <Link href="/series" className="text-xs text-zinc-400 hover:text-white transition-colors">
-                  Serial TV
+                  TV Series
                 </Link>
               </li>
               <li>
                 <Link href="/anime" className="text-xs text-zinc-400 hover:text-white transition-colors">
                   Anime
+                </Link>
+              </li>
+              <li>
+                <Link href="/country" className="text-xs text-zinc-400 hover:text-white transition-colors">
+                  Country
                 </Link>
               </li>
             </ul>
@@ -48,7 +53,7 @@ export default function Footer() {
         {/* Legal & Attribution */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-500">
           <p className="text-center sm:text-left">
-            Data &amp; metadata disediakan oleh{" "}
+            Movie &amp; TV metadata provided by{" "}
             <a
               href="https://www.themoviedb.org"
               target="_blank"
@@ -56,7 +61,7 @@ export default function Footer() {
               className="text-zinc-400 hover:text-zinc-200 underline transition-colors"
             >
               TMDB
-            </a>. FardhanFlix tidak menyimpan file video di server sendiri.
+            </a>. FardhanFlix does not host or store any media files on its servers.
           </p>
           <p className="text-zinc-500 text-[11px]">
             &copy; {new Date().getFullYear()} FardhanFlix. All rights reserved.

@@ -26,31 +26,31 @@ export default async function HomePage() {
       {/* Movie & Series Rows (Clean streaming platform experience) */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
         <Carousel
-          title="Trending Minggu Ini"
+          title="Trending This Week"
           items={trendingItems}
           seeAllHref="/films"
         />
 
         <Carousel
-          title="Film Populer"
+          title="Popular Movies"
           items={popularMovies.results}
           seeAllHref="/films"
         />
 
         <Carousel
-          title="Serial TV Populer"
+          title="Popular TV Series"
           items={popularTV.results}
           seeAllHref="/series"
         />
 
         <Carousel
-          title="Anime Pilihan"
+          title="Top Anime"
           items={anime.results}
           seeAllHref="/anime"
         />
 
         <Carousel
-          title="Rating Tertinggi"
+          title="Top Rated Movies"
           items={topRated.results}
           seeAllHref="/films?sort=top_rated"
         />

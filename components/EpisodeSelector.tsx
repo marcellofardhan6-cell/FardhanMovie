@@ -22,7 +22,7 @@ export default function EpisodeSelector({
   const episodes = episodesMap[currentSeason] ?? [];
 
   return (
-    <section aria-label="Pilih episode" className="rounded-2xl overflow-hidden border border-white/[0.08] bg-[#0a0c12]">
+    <section aria-label="Select episode" className="rounded-2xl overflow-hidden border border-white/[0.08] bg-[#0a0c12]">
       {/* Header & Season Selector */}
       <div className="flex flex-wrap items-center justify-between gap-4 p-4 sm:p-5 bg-gradient-to-r from-[#0e1018] via-[#121522] to-[#0e1018] border-b border-white/[0.08]">
         <div className="flex items-center gap-3">
@@ -40,25 +40,25 @@ export default function EpisodeSelector({
           </div>
           <div>
             <h3 className="text-base font-bold text-white tracking-tight" style={{ fontFamily: "var(--font-fraunces)" }}>
-              Daftar Episode
+              Episodes List
             </h3>
-            <p className="text-[11px] text-zinc-400">Pilih season dan nomor episode</p>
+            <p className="text-[11px] text-zinc-400">Select season and episode number</p>
           </div>
         </div>
 
         {/* Season Selector Dropdown */}
         <div className="relative">
-          <label htmlFor="season-select" className="sr-only">Pilih season</label>
+          <label htmlFor="season-select" className="sr-only">Select season</label>
           <select
             id="season-select"
             value={currentSeason}
             onChange={(e) => onSeasonChange(Number(e.target.value))}
             className="text-xs font-semibold rounded-xl px-4 py-2.5 bg-white/[0.06] border border-white/[0.12] hover:border-red-500/40 text-zinc-200 outline-none cursor-pointer transition-colors"
-            aria-label="Pilih season"
+            aria-label="Select season"
           >
             {validSeasons.map((s) => (
               <option key={s.season_number} value={s.season_number} className="bg-[#0e1018] text-white">
-                {s.name || `Season ${s.season_number}`} ({s.episode_count} Episode)
+                {s.name || `Season ${s.season_number}`} ({s.episode_count} Episodes)
               </option>
             ))}
           </select>
@@ -69,7 +69,7 @@ export default function EpisodeSelector({
       <div className="p-4 sm:p-5 bg-[#07080d]">
         {episodes.length === 0 ? (
           <div className="py-10 text-center">
-            <p className="text-xs text-zinc-400">Memuat episode Season {currentSeason}...</p>
+            <p className="text-xs text-zinc-400">Loading episodes for Season {currentSeason}...</p>
           </div>
         ) : (
           <ul
