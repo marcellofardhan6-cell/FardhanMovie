@@ -9,10 +9,12 @@ export default function Navbar() {
   const { favoritesCount } = useFavorites();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
   const pathname = usePathname();
   const searchRef = useRef<HTMLInputElement>(null);
+  const mobileSearchRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20);
@@ -22,13 +24,16 @@ export default function Navbar() {
 
   useEffect(() => {
     setMenuOpen(false);
+    setMobileSearchOpen(false);
   }, [pathname]);
 
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
       if (e.key === "Escape") {
         setMenuOpen(false);
+        setMobileSearchOpen(false);
         searchRef.current?.blur();
+        mobileSearchRef.current?.blur();
       }
     }
     document.addEventListener("keydown", handleKey);
@@ -229,9 +234,9 @@ export default function Navbar() {
           </div>
 
           {/* Right: Search & Mobile Trigger */}
-          <div className="flex items-center gap-3">
-            {/* Search Input */}
-            <form onSubmit={handleSearch} role="search" aria-label="Search movies or TV shows">
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Desktop Search Input (Hidden on mobile) */}
+            <form onSubmit={handleSearch} role="search" aria-label="Search movies or TV shows" className="hidden sm:block">
               <div className="relative">
                 <label htmlFor="navbar-search" className="sr-only">Search movies or TV shows</label>
                 <input
@@ -262,6 +267,30 @@ export default function Navbar() {
                 </svg>
               </div>
             </form>
+
+            {/* Mobile Search Toggle Icon Button */}
+            <button
+              type="button"
+              onClick={() => setMobileSearchOpen((v) => !v)}
+              className="sm:hidden p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.05] transition-colors"
+              aria-label="Search"
+              title="Search"
+            >
+              <svg
+                width="19"
+                height="19"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden
+              >
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.35-4.35" />
+              </svg>
+            </button>
 
             {/* Favorites Icon Button */}
             <Link
@@ -319,6 +348,86 @@ export default function Navbar() {
               </svg>
             </button>
           </div>
+        </div>
+
+        {/* Mobile Expandable Search Bar */}
+        {mobileSearchOpen && (
+          <div className="sm:hidden pb-3 pt-1 border-t border-white/[0.06] animate-fade-in">
+            <form onSubmit={handleSearch} role="search" aria-label="Search movies or TV shows">
+              <div className="relative">
+                <input
+                  ref={mobileSearchRef}
+                  type="search"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search movies, series, anime..."
+                  autoComplete="off"
+                  autoFocus
+                  className="w-full text-xs text-white bg-white/[0.08] focus:bg-[#0c0e15] border border-white/20 focus:border-red-500 rounded-full py-2 pl-9 pr-3 outline-none transition-all placeholder:text-zinc-400 shadow-inner"
+                  aria-label="Search movies or TV series"
+                />
+                <svg
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none"
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="m21 21-4.35-4.35" />
+                </svg>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Mobile 7reels Sub-Nav Tab Bar (Home, Movies, Series, My List) */}
+        <div className="md:hidden flex items-center justify-around py-2 border-t border-white/[0.06] -mx-4 px-4 bg-[#06070a]/95 backdrop-blur-md">
+          <Link
+            href="/"
+            className={`px-4 py-1 rounded-full text-xs font-bold transition-all ${
+              pathname === "/"
+                ? "bg-white/15 text-white shadow-sm ring-1 ring-white/20"
+                : "text-zinc-400 hover:text-white"
+            }`}
+          >
+            Home
+          </Link>
+          <Link
+            href="/films"
+            className={`px-4 py-1 rounded-full text-xs font-bold transition-all ${
+              pathname === "/films"
+                ? "bg-white/15 text-white shadow-sm ring-1 ring-white/20"
+                : "text-zinc-400 hover:text-white"
+            }`}
+          >
+            Movies
+          </Link>
+          <Link
+            href="/series"
+            className={`px-4 py-1 rounded-full text-xs font-bold transition-all ${
+              pathname.startsWith("/series")
+                ? "bg-white/15 text-white shadow-sm ring-1 ring-white/20"
+                : "text-zinc-400 hover:text-white"
+            }`}
+          >
+            Series
+          </Link>
+          <Link
+            href="/favorites"
+            className={`px-4 py-1 rounded-full text-xs font-bold transition-all ${
+              pathname === "/favorites"
+                ? "bg-white/15 text-white shadow-sm ring-1 ring-white/20"
+                : "text-zinc-400 hover:text-white"
+            }`}
+          >
+            My List
+          </Link>
         </div>
 
         {/* Mobile Dropdown */}

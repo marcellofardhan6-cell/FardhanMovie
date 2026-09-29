@@ -57,7 +57,7 @@ export default function Carousel({ title, items, seeAllHref, subtitle }: Props) 
             </Link>
           )}
 
-          <div className="flex items-center gap-1.5">
+          <div className="hidden md:flex items-center gap-1.5">
             <button
               onClick={() => scrollBy("left")}
               disabled={!canScrollLeft}
@@ -85,15 +85,15 @@ export default function Carousel({ title, items, seeAllHref, subtitle }: Props) 
       {/* Cards Slider Track */}
       <div
         ref={scrollRef}
-        className="flex gap-4 sm:gap-5 overflow-x-auto scroll-snap-x pb-4 pt-1"
+        className="flex gap-3 sm:gap-5 overflow-x-auto scroll-snap-x pb-4 pt-1"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         onScroll={updateScrollState}
         tabIndex={0}
         aria-label={`${title} - use scroll buttons or arrow keys`}
       >
-        <ul className="flex gap-4 sm:gap-5" role="list">
+        <ul className="flex gap-3 sm:gap-5" role="list">
           {items.map((item, i) => (
-            <li key={`${item.id}-${i}`} className="scroll-snap-item shrink-0 w-[160px] sm:w-[190px]">
+            <li key={`${item.id}-${i}`} className="scroll-snap-item shrink-0 w-[130px] sm:w-[160px] md:w-[190px]">
               <MovieCard item={item} priority={i < 4} />
             </li>
           ))}
