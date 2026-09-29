@@ -103,7 +103,7 @@ export default function Hero({ item }: Props) {
           {/* Luxury CTA Actions */}
           <div className="flex flex-wrap items-center gap-4">
             <Link
-              href={`${href}?autoplay=1`}
+              href={href}
               className="group inline-flex items-center gap-2.5 px-7 py-3.5 rounded-full font-bold text-sm text-[#07080c] transition-all duration-300 transform hover:-translate-y-0.5 shadow-[0_0_35px_rgba(229,169,59,0.35)] hover:shadow-[0_0_50px_rgba(229,169,59,0.55)] cursor-pointer"
               style={{
                 background: "linear-gradient(135deg, #fce289 0%, #e5a93b 55%, #bd8016 100%)",
