@@ -6,13 +6,12 @@
   --surface-2: #151822;
   --surface-3: #1c202d;
   --border: rgba(255, 255, 255, 0.08);
-  --border-focus: rgba(229, 169, 59, 0.4);
-  --text: #f7f6f2;
+  --border-focus: rgba(229, 9, 20, 0.5);
+  --text: #ffffff;
   --text-muted: #8b8e9e;
-  --accent: #e5a93b;
-  --accent-hover: #f3c669;
-  --accent-glow: rgba(229, 169, 59, 0.25);
-  --gold-gradient: linear-gradient(135deg, #f5c563 0%, #e5a93b 50%, #c4871e 100%);
+  --accent: #e50914;
+  --accent-hover: #b80710;
+  --accent-glow: rgba(229, 9, 20, 0.3);
 }
 
 * {
@@ -34,7 +33,7 @@ body {
   overflow-x: hidden;
 }
 
-/* Luxury Scrollbar */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 7px;
   height: 7px;
@@ -98,13 +97,6 @@ body {
   box-shadow: 0 0 80px -20px var(--accent-glow);
 }
 
-/* Subtle gold text gradient */
-.text-gold {
-  background: var(--gold-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
 /* Fade-in animation */
 @keyframes fadeIn {
   from {
@@ -117,7 +109,7 @@ body {
   }
 }
 .animate-fade-in {
-  animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* Skeleton shimmer */

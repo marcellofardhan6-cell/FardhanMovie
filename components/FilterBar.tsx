@@ -49,7 +49,7 @@ export default function FilterBar({
       aria-label="Filter katalog"
     >
       <div className="flex items-center gap-2 mr-2 text-zinc-400">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-400">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-500">
           <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
         </svg>
         <span className="text-xs font-bold uppercase tracking-wider text-zinc-300">Filter:</span>
@@ -62,7 +62,7 @@ export default function FilterBar({
             id="filter-type"
             value={activeType ?? ""}
             onChange={(e) => updateFilter("type", e.target.value)}
-            className="text-xs font-semibold rounded-xl px-3.5 py-2.5 bg-white/[0.04] border border-white/[0.1] hover:border-amber-400/40 text-zinc-200 outline-none cursor-pointer transition-colors"
+            className="text-xs font-semibold rounded-xl px-3.5 py-2.5 bg-white/[0.04] border border-white/[0.1] hover:border-red-500/40 text-zinc-200 outline-none cursor-pointer transition-colors"
             disabled={isPending}
           >
             <option value="" className="bg-[#0e1018]">Semua Tipe</option>
@@ -78,7 +78,7 @@ export default function FilterBar({
           id="filter-genre"
           value={activeGenre ?? ""}
           onChange={(e) => updateFilter("genre", e.target.value)}
-          className="text-xs font-semibold rounded-xl px-3.5 py-2.5 bg-white/[0.04] border border-white/[0.1] hover:border-amber-400/40 text-zinc-200 outline-none cursor-pointer transition-colors"
+          className="text-xs font-semibold rounded-xl px-3.5 py-2.5 bg-white/[0.04] border border-white/[0.1] hover:border-red-500/40 text-zinc-200 outline-none cursor-pointer transition-colors"
           disabled={isPending}
         >
           <option value="" className="bg-[#0e1018]">Semua Genre</option>
@@ -96,7 +96,7 @@ export default function FilterBar({
           id="filter-year"
           value={activeYear ?? ""}
           onChange={(e) => updateFilter("year", e.target.value)}
-          className="text-xs font-semibold rounded-xl px-3.5 py-2.5 bg-white/[0.04] border border-white/[0.1] hover:border-amber-400/40 text-zinc-200 outline-none cursor-pointer transition-colors"
+          className="text-xs font-semibold rounded-xl px-3.5 py-2.5 bg-white/[0.04] border border-white/[0.1] hover:border-red-500/40 text-zinc-200 outline-none cursor-pointer transition-colors"
           disabled={isPending}
         >
           <option value="" className="bg-[#0e1018]">Semua Tahun</option>
@@ -122,7 +122,7 @@ export default function FilterBar({
 
       {isPending && (
         <div
-          className="w-4 h-4 border-2 border-transparent border-t-amber-400 rounded-full animate-spin ml-auto"
+          className="w-4 h-4 border-2 border-transparent border-t-red-600 rounded-full animate-spin ml-auto"
           aria-label="Memuat..."
           role="status"
         />

@@ -11,7 +11,7 @@ export default function Footer() {
               href="/"
               className="text-xl font-black tracking-tight text-white hover:opacity-95 transition-opacity"
             >
-              Fardhan<span className="text-amber-500">Flix</span>
+              Fardhan<span className="text-red-600">Flix</span>
             </Link>
             <p className="text-xs text-zinc-400 mt-1">
               Katalog film dan serial TV lengkap. Streaming gratis, tanpa iklan.

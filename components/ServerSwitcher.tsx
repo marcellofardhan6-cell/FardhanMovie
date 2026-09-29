@@ -109,7 +109,7 @@ export default function ServerSwitcher(props: Props) {
   return (
     <section aria-label="Video player" className="relative w-full">
       {/* Ambient Cinema Theater Glow behind the player */}
-      <div className="absolute -inset-4 bg-gradient-to-r from-amber-500/10 via-amber-400/5 to-amber-600/10 rounded-3xl blur-2xl opacity-60 pointer-events-none" />
+      <div className="absolute -inset-4 bg-gradient-to-r from-red-600/15 via-red-500/8 to-red-700/15 rounded-3xl blur-2xl opacity-60 pointer-events-none" />
 
       {/* Main Player Frame */}
       <div className="relative rounded-2xl overflow-hidden border border-white/[0.1] bg-[#08090e] shadow-[0_20px_60px_rgba(0,0,0,0.9)]">
@@ -134,7 +134,7 @@ export default function ServerSwitcher(props: Props) {
                   aria-label={`Ganti ke ${server.name}`}
                   className={`relative px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer ${
                     isActive
-                      ? "bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 text-black shadow-[0_0_15px_rgba(229,169,59,0.4)]"
+                      ? "bg-red-600 text-white shadow-[0_0_15px_rgba(229,9,20,0.45)]"
                       : "bg-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/[0.08] border border-white/[0.06]"
                   }`}
                 >
@@ -143,8 +143,8 @@ export default function ServerSwitcher(props: Props) {
                     <span
                       className={`ml-1 text-[9px] px-1 py-0.2 rounded font-extrabold uppercase ${
                         isActive
-                          ? "bg-black/30 text-black"
-                          : "bg-amber-400/20 text-amber-300 border border-amber-400/30"
+                          ? "bg-black/40 text-white"
+                          : "bg-red-600/20 text-red-400 border border-red-600/30"
                       }`}
                     >
                       {server.badge}
@@ -167,16 +167,16 @@ export default function ServerSwitcher(props: Props) {
             <div className="absolute inset-0 flex items-center justify-center z-10 bg-black/90 backdrop-blur-sm">
               <div className="flex flex-col items-center gap-3.5">
                 <div
-                  className="w-12 h-12 border-3 border-transparent border-t-amber-400 rounded-full animate-spin"
+                  className="w-12 h-12 border-3 border-transparent border-t-red-600 rounded-full animate-spin"
                   role="status"
                   aria-label="Memuat video..."
                 />
                 <p className="text-sm font-semibold text-zinc-300">
-                  Menghubungkan ke <span className="text-amber-400">{currentServer.name}</span>...
+                  Menghubungkan ke <span className="text-red-500">{currentServer.name}</span>...
                 </p>
                 <button
                   onClick={handleLoadTimeout}
-                  className="text-xs text-zinc-400 hover:text-amber-300 underline cursor-pointer mt-1"
+                  className="text-xs text-zinc-400 hover:text-red-400 underline cursor-pointer mt-1"
                 >
                   Terlalu lama? Coba server lain
                 </button>
@@ -188,7 +188,7 @@ export default function ServerSwitcher(props: Props) {
           {showHelp && (
             <div className="absolute inset-0 flex items-center justify-center z-10 bg-black/95 backdrop-blur-md">
               <div className="text-center px-6 max-w-md">
-                <div className="w-14 h-14 rounded-full bg-amber-400/10 border border-amber-400/30 flex items-center justify-center mx-auto mb-3 text-amber-400 text-2xl">
+                <div className="w-14 h-14 rounded-full bg-red-600/15 border border-red-600/30 flex items-center justify-center mx-auto mb-3 text-red-500 text-2xl">
                   📡
                 </div>
                 <p
@@ -203,10 +203,7 @@ export default function ServerSwitcher(props: Props) {
                 <div className="flex gap-2.5 justify-center">
                   <button
                     onClick={() => switchServer((activeServer + 1) % SERVERS.length)}
-                    className="px-5 py-2.5 rounded-full text-xs font-bold text-black shadow-lg cursor-pointer"
-                    style={{
-                      background: "linear-gradient(135deg, #fce289 0%, #e5a93b 55%, #bd8016 100%)",
-                    }}
+                    className="px-5 py-2.5 rounded-full text-xs font-bold text-white bg-red-600 hover:bg-red-700 shadow-[0_0_20px_rgba(229,9,20,0.5)] cursor-pointer transition-colors"
                   >
                     Ganti ke Server Berikutnya
                   </button>

@@ -48,7 +48,7 @@ export default function Carousel({ title, items, seeAllHref, subtitle }: Props) 
           {seeAllHref && (
             <Link
               href={seeAllHref}
-              className="text-xs font-semibold tracking-wide text-zinc-400 hover:text-amber-300 transition-colors mr-3 flex items-center gap-1 group/link"
+              className="text-xs font-semibold tracking-wide text-zinc-400 hover:text-white transition-colors mr-3 flex items-center gap-1 group/link"
             >
               <span>Lihat Semua</span>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="transition-transform group-hover/link:translate-x-0.5" aria-hidden>
@@ -62,7 +62,7 @@ export default function Carousel({ title, items, seeAllHref, subtitle }: Props) 
               onClick={() => scrollBy("left")}
               disabled={!canScrollLeft}
               aria-label="Geser ke kiri"
-              className="w-8 h-8 rounded-full flex items-center justify-center bg-white/[0.04] hover:bg-white/[0.1] disabled:opacity-20 border border-white/[0.08] hover:border-amber-400/40 text-zinc-300 hover:text-amber-300 transition-all duration-200 cursor-pointer disabled:cursor-not-allowed"
+              className="w-8 h-8 rounded-full flex items-center justify-center bg-white/[0.04] hover:bg-white/[0.1] disabled:opacity-20 border border-white/[0.08] hover:border-white/30 text-zinc-300 hover:text-white transition-all duration-200 cursor-pointer disabled:cursor-not-allowed"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                 <path d="m15 18-6-6 6-6" />
@@ -72,7 +72,7 @@ export default function Carousel({ title, items, seeAllHref, subtitle }: Props) 
               onClick={() => scrollBy("right")}
               disabled={!canScrollRight}
               aria-label="Geser ke kanan"
-              className="w-8 h-8 rounded-full flex items-center justify-center bg-white/[0.04] hover:bg-white/[0.1] disabled:opacity-20 border border-white/[0.08] hover:border-amber-400/40 text-zinc-300 hover:text-amber-300 transition-all duration-200 cursor-pointer disabled:cursor-not-allowed"
+              className="w-8 h-8 rounded-full flex items-center justify-center bg-white/[0.04] hover:bg-white/[0.1] disabled:opacity-20 border border-white/[0.08] hover:border-white/30 text-zinc-300 hover:text-white transition-all duration-200 cursor-pointer disabled:cursor-not-allowed"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                 <path d="m9 18 6-6-6-6" />

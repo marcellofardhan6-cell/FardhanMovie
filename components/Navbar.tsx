@@ -69,7 +69,7 @@ export default function Navbar() {
               className="text-xl sm:text-2xl font-black tracking-tight text-white hover:opacity-95 transition-opacity"
               aria-label="FardhanFlix"
             >
-              Fardhan<span className="text-amber-500">Flix</span>
+              Fardhan<span className="text-red-600">Flix</span>
             </Link>
 
             {/* Desktop Nav Links */}

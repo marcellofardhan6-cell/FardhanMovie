@@ -76,7 +76,7 @@ export default async function SearchPage({ searchParams }: Props) {
           {page > 1 && (
             <a
               href={`/search?q=${encodeURIComponent(query)}&page=${page - 1}`}
-              className="px-5 py-2.5 rounded-full text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 border border-white/[0.08] hover:border-amber-400/40 transition-all cursor-pointer"
+              className="px-5 py-2.5 rounded-full text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 border border-white/[0.08] hover:border-red-500/40 transition-all cursor-pointer"
             >
               &larr; Sebelumnya
             </a>
@@ -87,7 +87,7 @@ export default async function SearchPage({ searchParams }: Props) {
           {page < data.total_pages && page < 500 && (
             <a
               href={`/search?q=${encodeURIComponent(query)}&page=${page + 1}`}
-              className="px-5 py-2.5 rounded-full text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 border border-white/[0.08] hover:border-amber-400/40 transition-all cursor-pointer"
+              className="px-5 py-2.5 rounded-full text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 border border-white/[0.08] hover:border-red-500/40 transition-all cursor-pointer"
             >
               Berikutnya &rarr;
             </a>

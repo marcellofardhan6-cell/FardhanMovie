@@ -73,11 +73,11 @@ export default async function FilmDetailPage({ params }: Props) {
 
             {/* Rating Badge */}
             {movie.vote_average > 0 && (
-              <div className="self-start sm:self-auto flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/60 border border-amber-400/30 shrink-0">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-amber-400" aria-hidden>
+              <div className="self-start sm:self-auto flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/60 border border-red-500/30 shrink-0">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-red-500" aria-hidden>
                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                 </svg>
-                <span className="text-sm font-bold text-amber-300">{movie.vote_average.toFixed(1)}</span>
+                <span className="text-sm font-bold text-red-400">{movie.vote_average.toFixed(1)}</span>
                 <span className="text-[11px] text-zinc-400">/ 10 ({movie.vote_count.toLocaleString("id-ID")})</span>
               </div>
             )}
@@ -95,14 +95,14 @@ export default async function FilmDetailPage({ params }: Props) {
                 {runtime}
               </span>
             )}
-            <span className="px-2 py-0.5 rounded text-[10px] font-bold text-amber-400 border border-amber-400/30 bg-amber-400/[0.05]">
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold text-red-400 border border-red-500/30 bg-red-500/[0.05]">
               4K UHD
             </span>
             {movie.genres?.map((g) => (
               <Link
                 key={g.id}
                 href={`/films?genre=${g.id}`}
-                className="px-2.5 py-1 rounded-md bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-amber-300 border border-white/[0.08] transition-colors"
+                className="px-2.5 py-1 rounded-md bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-red-400 border border-white/[0.08] transition-colors"
               >
                 {g.name}
               </Link>
@@ -135,7 +135,7 @@ export default async function FilmDetailPage({ params }: Props) {
 
           {/* Synopsis & Metadata */}
           <div className="flex-1 flex flex-col justify-center">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-amber-400 mb-2">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-red-500 mb-2">
               Sinopsis Film
             </h2>
             <p className="text-sm leading-relaxed text-zinc-300 mb-4">
@@ -165,7 +165,7 @@ export default async function FilmDetailPage({ params }: Props) {
         {mainCast.length > 0 && (
           <section aria-label="Pemeran" className="mb-14">
             <div className="flex items-center gap-2 mb-6">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+              <span className="w-1.5 h-1.5 rounded-full bg-red-600" />
               <h2 className="text-xl font-bold text-white tracking-tight" style={{ fontFamily: "var(--font-fraunces)" }}>
                 Pemeran Utama
               </h2>
@@ -198,7 +198,7 @@ export default async function FilmDetailPage({ params }: Props) {
         {recommendations.results.length > 0 && (
           <section aria-label="Rekomendasi" className="mb-16">
             <div className="flex items-center gap-2 mb-6">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+              <span className="w-1.5 h-1.5 rounded-full bg-red-600" />
               <h2 className="text-xl font-bold text-white tracking-tight" style={{ fontFamily: "var(--font-fraunces)" }}>
                 Film Serupa yang Direkomendasikan
               </h2>

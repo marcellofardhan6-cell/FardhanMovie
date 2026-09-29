@@ -50,7 +50,7 @@ export default function Hero({ item }: Props) {
           {/* Clean Metadata Row (Netflix style: no tacky glowing pill badges) */}
           <div className="flex items-center gap-3 mb-4 text-xs font-medium text-zinc-300">
             {rating && (
-              <span className="flex items-center gap-1 font-bold text-amber-400">
+              <span className="flex items-center gap-1 font-bold text-red-500">
                 <span>★</span>
                 <span>{rating}</span>
               </span>
