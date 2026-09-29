@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Logo from "@/components/Logo";
 
 export default function Footer() {
   return (
@@ -7,12 +8,7 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-8 border-b border-white/[0.06]">
           {/* Logo & Description */}
           <div>
-            <Link
-              href="/"
-              className="text-xl font-black tracking-tight text-white hover:opacity-95 transition-opacity"
-            >
-              Fardhan<span className="text-red-600">Flix</span>
-            </Link>
+            <Logo size="md" />
             <p className="text-xs text-zinc-400 mt-1">
               Your ultimate movie and TV series streaming catalog. Free and ad-free.
             </p>

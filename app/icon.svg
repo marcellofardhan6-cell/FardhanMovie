@@ -1,0 +1,32 @@
+<svg width="32" height="32" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="ff-bg" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1a1d28" />
+      <stop offset="100%" stop-color="#0b0d13" />
+    </linearGradient>
+    <linearGradient id="ff-crimson" x1="8" y1="6" x2="28" y2="30" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FF3842" />
+      <stop offset="50%" stop-color="#E50914" />
+      <stop offset="100%" stop-color="#8A040B" />
+    </linearGradient>
+    <linearGradient id="ff-highlight" x1="14" y1="7" x2="28" y2="14" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FF5C66" />
+      <stop offset="100%" stop-color="#D80813" />
+    </linearGradient>
+  </defs>
+
+  <rect width="36" height="36" rx="9" fill="url(#ff-bg)" />
+  <rect x="0.75" y="0.75" width="34.5" height="34.5" rx="8.25" stroke="rgba(255, 255, 255, 0.12)" stroke-width="1.5" />
+
+  <!-- Vertical Spine of "F" -->
+  <path d="M9.5 8C9.5 7.45 9.95 7 10.5 7H14.5C15.05 7 15.5 7.45 15.5 8V28C15.5 28.55 15.05 29 14.5 29H10.5C9.95 29 9.5 28.55 9.5 28V8Z" fill="url(#ff-crimson)" />
+
+  <!-- Top Horizontal Bar -->
+  <path d="M15.5 7H25.2C26.15 7 26.8 8.01 26.4 8.87L24.8 12.37C24.55 12.92 24.01 13.27 23.41 13.27H15.5V7Z" fill="url(#ff-highlight)" />
+
+  <!-- Mid Horizontal Bar -->
+  <path d="M15.5 15.5H22.5C23.46 15.5 24.11 16.52 23.69 17.38L22.25 20.34C22.02 20.82 21.54 21.12 21 21.12H15.5V15.5Z" fill="url(#ff-crimson)" />
+
+  <!-- Cinema Shutter Dot -->
+  <circle cx="20.5" cy="26.5" r="2" fill="#FF3842" />
+</svg>

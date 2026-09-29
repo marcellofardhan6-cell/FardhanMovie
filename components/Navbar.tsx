@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import { useFavorites } from "@/context/FavoritesContext";
 import { POPULAR_GENRES, img } from "@/lib/tmdb";
+import Logo from "@/components/Logo";
 
 interface LiveSearchResult {
   id: number;
@@ -140,14 +141,8 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16 sm:h-18">
           {/* Left: Brand Wordmark + Nav Links */}
           <div className="flex items-center gap-8 sm:gap-10">
-            {/* Wordmark Logo */}
-            <Link
-              href="/"
-              className="text-xl sm:text-2xl font-black tracking-tight text-white hover:opacity-95 transition-opacity"
-              aria-label="FardhanFlix"
-            >
-              Fardhan<span className="text-red-600">Flix</span>
-            </Link>
+            {/* Bespoke Cinema Monogram & Wordmark Logo */}
+            <Logo size="md" />
 
             {/* Desktop Nav Links */}
             <nav className="hidden md:flex items-center gap-6" aria-label="Main navigation">
