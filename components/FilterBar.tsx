@@ -42,72 +42,68 @@ export default function FilterBar({
     [router, searchParams, basePath]
   );
 
-  const selectStyle = {
-    background: "var(--surface)",
-    border: "1px solid var(--border)",
-    color: "var(--text)",
-    borderRadius: "6px",
-    padding: "8px 12px",
-    fontSize: "14px",
-    outline: "none",
-    cursor: "pointer",
-    opacity: isPending ? 0.6 : 1,
-  };
-
   return (
     <div
-      className="flex flex-wrap gap-3 items-center p-4 rounded-lg mb-6"
-      style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+      className="flex flex-wrap gap-3 items-center p-4 sm:p-5 rounded-2xl mb-8 bg-[#0a0c12]/90 border border-white/[0.08] backdrop-blur-xl shadow-lg"
       role="group"
-      aria-label="Filter konten"
+      aria-label="Filter katalog"
     >
-      <span className="text-sm font-medium mr-1" style={{ color: "var(--text-muted)" }}>Filter:</span>
+      <div className="flex items-center gap-2 mr-2 text-zinc-400">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-400">
+          <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+        </svg>
+        <span className="text-xs font-bold uppercase tracking-wider text-zinc-300">Filter:</span>
+      </div>
 
       {showTypeFilter && (
-        <div>
+        <div className="relative">
           <label htmlFor="filter-type" className="sr-only">Tipe konten</label>
           <select
             id="filter-type"
             value={activeType ?? ""}
             onChange={(e) => updateFilter("type", e.target.value)}
-            style={selectStyle}
+            className="text-xs font-semibold rounded-xl px-3.5 py-2.5 bg-white/[0.04] border border-white/[0.1] hover:border-amber-400/40 text-zinc-200 outline-none cursor-pointer transition-colors"
             disabled={isPending}
           >
-            <option value="">Semua Tipe</option>
-            <option value="movie">Film</option>
-            <option value="tv">Serial TV</option>
+            <option value="" className="bg-[#0e1018]">Semua Tipe</option>
+            <option value="movie" className="bg-[#0e1018]">Film Bioskop</option>
+            <option value="tv" className="bg-[#0e1018]">Serial TV</option>
           </select>
         </div>
       )}
 
-      <div>
+      <div className="relative">
         <label htmlFor="filter-genre" className="sr-only">Genre</label>
         <select
           id="filter-genre"
           value={activeGenre ?? ""}
           onChange={(e) => updateFilter("genre", e.target.value)}
-          style={selectStyle}
+          className="text-xs font-semibold rounded-xl px-3.5 py-2.5 bg-white/[0.04] border border-white/[0.1] hover:border-amber-400/40 text-zinc-200 outline-none cursor-pointer transition-colors"
           disabled={isPending}
         >
-          <option value="">Semua Genre</option>
+          <option value="" className="bg-[#0e1018]">Semua Genre</option>
           {genres.map((g) => (
-            <option key={g.id} value={String(g.id)}>{g.name}</option>
+            <option key={g.id} value={String(g.id)} className="bg-[#0e1018]">
+              {g.name}
+            </option>
           ))}
         </select>
       </div>
 
-      <div>
+      <div className="relative">
         <label htmlFor="filter-year" className="sr-only">Tahun rilis</label>
         <select
           id="filter-year"
           value={activeYear ?? ""}
           onChange={(e) => updateFilter("year", e.target.value)}
-          style={selectStyle}
+          className="text-xs font-semibold rounded-xl px-3.5 py-2.5 bg-white/[0.04] border border-white/[0.1] hover:border-amber-400/40 text-zinc-200 outline-none cursor-pointer transition-colors"
           disabled={isPending}
         >
-          <option value="">Semua Tahun</option>
+          <option value="" className="bg-[#0e1018]">Semua Tahun</option>
           {YEARS.map((y) => (
-            <option key={y} value={y}>{y}</option>
+            <option key={y} value={y} className="bg-[#0e1018]">
+              {y}
+            </option>
           ))}
         </select>
       </div>
@@ -115,21 +111,18 @@ export default function FilterBar({
       {(activeGenre || activeYear || activeType) && (
         <button
           onClick={() => {
-            const params = new URLSearchParams();
             startTransition(() => router.push(basePath));
           }}
-          className="text-xs font-medium transition-colors px-3 py-2 rounded"
-          style={{ color: "var(--text-muted)", border: "1px solid var(--border)", background: "transparent" }}
+          className="text-xs font-semibold px-3.5 py-2 rounded-xl text-zinc-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] transition-colors cursor-pointer"
           disabled={isPending}
         >
-          Reset
+          Reset Filter
         </button>
       )}
 
       {isPending && (
         <div
-          className="w-4 h-4 border-2 border-transparent rounded-full animate-spin"
-          style={{ borderTopColor: "var(--accent)" }}
+          className="w-4 h-4 border-2 border-transparent border-t-amber-400 rounded-full animate-spin ml-auto"
           aria-label="Memuat..."
           role="status"
         />

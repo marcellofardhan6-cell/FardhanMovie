@@ -51,62 +51,76 @@ export default function Navbar() {
   const navLinks = [
     { href: "/", label: "Beranda" },
     { href: "/films", label: "Film" },
-    { href: "/series", label: "Serial" },
+    { href: "/series", label: "Serial TV" },
     { href: "/anime", label: "Anime" },
   ];
 
   return (
     <header
-      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
-      style={{
-        background: scrolled ? "rgba(10,10,15,0.96)" : "transparent",
-        backdropFilter: scrolled ? "blur(12px)" : "none",
-        borderBottom: scrolled ? "1px solid var(--border)" : "1px solid transparent",
-      }}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        scrolled
+          ? "bg-[#06070a]/85 backdrop-blur-xl border-b border-white/[0.08] shadow-[0_4px_30px_rgba(0,0,0,0.8)]"
+          : "bg-gradient-to-b from-[#06070a]/90 via-[#06070a]/40 to-transparent border-b border-transparent"
+      }`}
     >
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" aria-label="Navigasi utama">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
+        <div className="flex items-center justify-between h-20">
+          {/* Logo with gold emblem */}
           <Link
             href="/"
-            className="flex items-center gap-2 shrink-0"
+            className="group flex items-center gap-3 shrink-0"
             aria-label="FardhanCine - Beranda"
           >
-            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden>
-              <rect width="28" height="28" rx="4" fill="#e8a000" />
-              <path d="M7 8h14M7 14h10M7 20h12" stroke="#0a0a0f" strokeWidth="2.2" strokeLinecap="round" />
-              <circle cx="21" cy="20" r="2.5" fill="#0a0a0f" />
-            </svg>
-            <span
-              className="text-xl font-bold tracking-tight"
-              style={{ fontFamily: "var(--font-fraunces)", color: "var(--text)" }}
-            >
-              FardhanCine
-            </span>
+            <div className="relative w-9 h-9 rounded-xl flex items-center justify-center bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 p-[1px] shadow-[0_0_20px_rgba(229,169,59,0.3)] transition-transform duration-300 group-hover:scale-105">
+              <div className="w-full h-full bg-[#08090d] rounded-[11px] flex items-center justify-center">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-amber-400">
+                  <path
+                    d="M19.82 2H4.18C2.97 2 2 2.97 2 4.18v15.64C2 21.03 2.97 22 4.18 22h15.64c1.21 0 2.18-.97 2.18-2.18V4.18C22 2.97 21.03 2 19.82 2z"
+                    stroke="currentColor"
+                    strokeWidth="1.75"
+                  />
+                  <path d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 17h5M17 7h5" stroke="currentColor" strokeWidth="1.75" />
+                </svg>
+              </div>
+            </div>
+            <div className="flex flex-col">
+              <span
+                className="text-xl font-black tracking-tight text-white transition-colors duration-300 group-hover:text-amber-300"
+                style={{ fontFamily: "var(--font-fraunces)" }}
+              >
+                FARDHAN<span className="text-amber-400">CINE</span>
+              </span>
+              <span className="text-[9px] tracking-[0.25em] uppercase text-zinc-400 -mt-1 font-medium">
+                Cinema Premiere
+              </span>
+            </div>
           </Link>
 
           {/* Desktop nav links */}
-          <ul className="hidden md:flex items-center gap-1" role="list">
-            {navLinks.map((link) => (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  className="px-4 py-2 rounded text-sm font-medium transition-colors"
-                  style={{
-                    color: pathname === link.href ? "var(--accent)" : "var(--text-muted)",
-                    background: pathname === link.href ? "rgba(232,160,0,0.08)" : "transparent",
-                  }}
-                  aria-current={pathname === link.href ? "page" : undefined}
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
+          <ul className="hidden md:flex items-center gap-1.5 bg-white/[0.03] p-1.5 rounded-full border border-white/[0.06] backdrop-blur-md" role="list">
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href;
+              return (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all duration-200 ${
+                      isActive
+                        ? "bg-gradient-to-r from-amber-500/20 to-amber-400/20 text-amber-300 border border-amber-400/30 shadow-[0_0_15px_rgba(229,169,59,0.15)]"
+                        : "text-zinc-400 hover:text-white hover:bg-white/[0.05]"
+                    }`}
+                    aria-current={isActive ? "page" : undefined}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
 
-          {/* Search + mobile menu */}
-          <div className="flex items-center gap-2">
-            {/* Search */}
+          {/* Search + Mobile Trigger */}
+          <div className="flex items-center gap-3">
+            {/* Search Bar */}
             <form onSubmit={handleSearch} role="search" aria-label="Cari film atau serial">
               <div className="relative">
                 <label htmlFor="navbar-search" className="sr-only">Cari film atau serial</label>
@@ -117,30 +131,29 @@ export default function Navbar() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => setSearchFocused(true)}
-                  onBlur={() => setTimeout(() => setSearchFocused(false), 150)}
-                  placeholder="Cari film..."
+                  onBlur={() => setTimeout(() => setSearchFocused(false), 200)}
+                  placeholder="Cari judul film, serial, anime..."
                   autoComplete="off"
-                  className="text-sm rounded py-2 pl-9 pr-3 transition-all duration-200"
-                  style={{
-                    background: "var(--surface)",
-                    border: `1px solid ${searchFocused ? "var(--accent)" : "var(--border)"}`,
-                    color: "var(--text)",
-                    width: searchFocused ? "200px" : "140px",
-                    outline: "none",
-                  }}
+                  className={`text-xs rounded-full py-2.5 pl-9 pr-3 transition-all duration-300 ease-out border backdrop-blur-md ${
+                    searchFocused
+                      ? "w-64 bg-[#0e1017]/95 border-amber-400/50 shadow-[0_0_20px_rgba(229,169,59,0.2)] text-white"
+                      : "w-40 sm:w-48 bg-white/[0.04] border-white/[0.08] text-zinc-300 hover:border-white/20"
+                  }`}
+                  style={{ outline: "none" }}
                   aria-label="Cari film atau serial TV"
                 />
                 <svg
-                  className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+                  className={`absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none transition-colors duration-200 ${
+                    searchFocused ? "text-amber-400" : "text-zinc-500"
+                  }`}
                   width="14"
                   height="14"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="2"
+                  strokeWidth="2.2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  style={{ color: "var(--text-muted)" }}
                   aria-hidden
                 >
                   <circle cx="11" cy="11" r="8" />
@@ -151,12 +164,11 @@ export default function Navbar() {
 
             {/* Mobile menu button */}
             <button
-              className="md:hidden p-2 rounded transition-colors"
+              className="md:hidden p-2.5 rounded-xl border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.08] transition-colors text-zinc-300"
               onClick={() => setMenuOpen((v) => !v)}
               aria-expanded={menuOpen}
               aria-controls="mobile-menu"
               aria-label={menuOpen ? "Tutup menu" : "Buka menu navigasi"}
-              style={{ color: "var(--text-muted)" }}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
                 {menuOpen ? (
@@ -181,25 +193,27 @@ export default function Navbar() {
           <div
             id="mobile-menu"
             ref={menuRef}
-            className="md:hidden pb-4"
-            style={{ borderTop: "1px solid var(--border)" }}
+            className="md:hidden p-4 rounded-2xl my-2 bg-[#0c0e14]/95 backdrop-blur-2xl border border-white/[0.08] shadow-2xl animate-fade-in"
           >
-            <ul className="pt-3 space-y-1" role="list">
-              {navLinks.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="block px-4 py-3 rounded text-sm font-medium transition-colors"
-                    style={{
-                      color: pathname === link.href ? "var(--accent)" : "var(--text-muted)",
-                      background: pathname === link.href ? "rgba(232,160,0,0.08)" : "transparent",
-                    }}
-                    aria-current={pathname === link.href ? "page" : undefined}
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
+            <ul className="space-y-1" role="list">
+              {navLinks.map((link) => {
+                const isActive = pathname === link.href;
+                return (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className={`block px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
+                        isActive
+                          ? "bg-amber-400/15 text-amber-300 border border-amber-400/25"
+                          : "text-zinc-300 hover:text-white hover:bg-white/[0.04]"
+                      }`}
+                      aria-current={isActive ? "page" : undefined}
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         )}

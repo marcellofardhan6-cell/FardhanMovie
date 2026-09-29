@@ -8,9 +8,10 @@ interface Props {
   title: string;
   items: Movie[];
   seeAllHref?: string;
+  subtitle?: string;
 }
 
-export default function Carousel({ title, items, seeAllHref }: Props) {
+export default function Carousel({ title, items, seeAllHref, subtitle }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -33,60 +34,75 @@ export default function Carousel({ title, items, seeAllHref }: Props) {
   if (items.length === 0) return null;
 
   return (
-    <section aria-label={title} className="relative">
-      <div className="flex items-center justify-between mb-4">
-        <h2
-          className="text-xl font-bold"
-          style={{ fontFamily: "var(--font-fraunces)", color: "var(--text)" }}
-        >
-          {title}
-        </h2>
+    <section aria-label={title} className="relative group/carousel">
+      {/* Section Header */}
+      <div className="flex items-end justify-between mb-5">
+        <div>
+          {subtitle && (
+            <span className="block text-[11px] font-bold tracking-[0.2em] uppercase text-amber-400/90 mb-1">
+              {subtitle}
+            </span>
+          )}
+          <h2
+            className="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-3"
+            style={{ fontFamily: "var(--font-fraunces)" }}
+          >
+            {title}
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+          </h2>
+        </div>
+
+        {/* Carousel Actions */}
         <div className="flex items-center gap-2">
           {seeAllHref && (
             <Link
               href={seeAllHref}
-              className="text-xs font-medium transition-colors mr-2"
-              style={{ color: "var(--accent)" }}
+              className="text-xs font-semibold tracking-wide text-zinc-400 hover:text-amber-300 transition-colors mr-3 flex items-center gap-1 group/link"
             >
-              Lihat semua
+              <span>Lihat Semua</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" className="transition-transform group-hover/link:translate-x-0.5" aria-hidden>
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
             </Link>
           )}
-          <button
-            onClick={() => scrollBy("left")}
-            disabled={!canScrollLeft}
-            aria-label="Geser kiri"
-            className="p-2 rounded transition-colors disabled:opacity-30"
-            style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-muted)" }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
-              <path d="m15 18-6-6 6-6" />
-            </svg>
-          </button>
-          <button
-            onClick={() => scrollBy("right")}
-            disabled={!canScrollRight}
-            aria-label="Geser kanan"
-            className="p-2 rounded transition-colors disabled:opacity-30"
-            style={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text-muted)" }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
-              <path d="m9 18 6-6-6-6" />
-            </svg>
-          </button>
+
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => scrollBy("left")}
+              disabled={!canScrollLeft}
+              aria-label="Geser ke kiri"
+              className="w-8 h-8 rounded-full flex items-center justify-center bg-white/[0.04] hover:bg-white/[0.1] disabled:opacity-20 border border-white/[0.08] hover:border-amber-400/40 text-zinc-300 hover:text-amber-300 transition-all duration-200 cursor-pointer disabled:cursor-not-allowed"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <path d="m15 18-6-6 6-6" />
+              </svg>
+            </button>
+            <button
+              onClick={() => scrollBy("right")}
+              disabled={!canScrollRight}
+              aria-label="Geser ke kanan"
+              className="w-8 h-8 rounded-full flex items-center justify-center bg-white/[0.04] hover:bg-white/[0.1] disabled:opacity-20 border border-white/[0.08] hover:border-amber-400/40 text-zinc-300 hover:text-amber-300 transition-all duration-200 cursor-pointer disabled:cursor-not-allowed"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <path d="m9 18 6-6-6-6" />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
 
+      {/* Cards Slider Track */}
       <div
         ref={scrollRef}
-        className="flex gap-4 overflow-x-auto scroll-snap-x pb-2"
+        className="flex gap-4 sm:gap-5 overflow-x-auto scroll-snap-x pb-4 pt-1"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         onScroll={updateScrollState}
         tabIndex={0}
-        aria-label={`${title} - gunakan tombol panah untuk menggeser`}
+        aria-label={`${title} - gunakan tombol geser atau panah`}
       >
-        <ul className="flex gap-4" role="list">
+        <ul className="flex gap-4 sm:gap-5" role="list">
           {items.map((item, i) => (
-            <li key={`${item.id}-${i}`} className="scroll-snap-item shrink-0 w-[160px] sm:w-[180px]">
+            <li key={`${item.id}-${i}`} className="scroll-snap-item shrink-0 w-[160px] sm:w-[190px]">
               <MovieCard item={item} priority={i < 4} />
             </li>
           ))}
