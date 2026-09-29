@@ -1,0 +1,270 @@
+const TMDB_BASE = "https://api.themoviedb.org/3";
+const TOKEN = process.env.TMDB_READ_ACCESS_TOKEN!;
+/** TMDB kadang lelet dari jaringan Indonesia — abort cepat biar UI gak nunggu lama */
+const FETCH_TIMEOUT_MS = 8000;
+
+const headers = {
+  Authorization: `Bearer ${TOKEN}`,
+  "Content-Type": "application/json",
+};
+
+async function tmdbGet(url: string): Promise<Response> {
+  return fetch(url, {
+    headers,
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    next: { revalidate: 3600 },
+  });
+}
+
+async function tmdbFetch<T>(path: string, params?: Record<string, string>): Promise<T> {
+  const url = new URL(`${TMDB_BASE}${path}`);
+  url.searchParams.set("language", "id-ID");
+  if (params) {
+    Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+  }
+
+  let res: Response;
+  try {
+    res = await tmdbGet(url.toString());
+  } catch {
+    // Timeout / network error: coba sekali lagi sebelum menyerah
+    res = await tmdbGet(url.toString());
+  }
+
+  if (!res.ok) {
+    // Fallback to en-US if id-ID returns error
+    url.searchParams.set("language", "en-US");
+    const fallback = await tmdbGet(url.toString());
+    if (!fallback.ok) throw new Error(`TMDB error: ${res.status} ${path}`);
+    return fallback.json();
+  }
+
+  const data = await res.json();
+
+  // Jika overview kosong (id-ID belum ada terjemahan), ambil en-US.
+  // Cek hanya untuk response detail (punya field overview string).
+  if (typeof data?.overview === "string" && data.overview === "") {
+    url.searchParams.set("language", "en-US");
+    try {
+      const fallback = await tmdbGet(url.toString());
+      if (fallback.ok) {
+        const fallbackData = await fallback.json();
+        return { ...data, overview: fallbackData.overview } as T;
+      }
+    } catch {
+      // fallback gagal — pakai data id-ID apa adanya
+    }
+  }
+
+  return data;
+}
+
+// ---- Types ----
+export interface Movie {
+  id: number;
+  title?: string;
+  name?: string;
+  overview: string;
+  poster_path: string | null;
+  backdrop_path: string | null;
+  vote_average: number;
+  vote_count: number;
+  release_date?: string;
+  first_air_date?: string;
+  genre_ids?: number[];
+  genres?: Genre[];
+  runtime?: number;
+  number_of_seasons?: number;
+  media_type?: string;
+  imdb_id?: string;
+}
+
+export interface Genre {
+  id: number;
+  name: string;
+}
+
+export interface Cast {
+  id: number;
+  name: string;
+  character: string;
+  profile_path: string | null;
+  order: number;
+}
+
+export interface Season {
+  id: number;
+  season_number: number;
+  name: string;
+  episode_count: number;
+  poster_path: string | null;
+  air_date: string | null;
+}
+
+export interface Episode {
+  id: number;
+  episode_number: number;
+  name: string;
+  overview: string;
+  still_path: string | null;
+  air_date: string | null;
+  runtime: number | null;
+}
+
+export interface TMDBResponse<T> {
+  results: T[];
+  total_pages: number;
+  total_results: number;
+  page: number;
+}
+
+export interface MovieDetail extends Movie {
+  genres: Genre[];
+  runtime?: number;
+  number_of_seasons?: number;
+  number_of_episodes?: number;
+  seasons?: Season[];
+  imdb_id?: string;
+  tagline?: string;
+  status?: string;
+  production_countries?: { iso_3166_1: string; name: string }[];
+}
+
+export interface CreditsResponse {
+  cast: Cast[];
+  crew: { id: number; name: string; job: string; profile_path: string | null }[];
+}
+
+// ---- API Functions ----
+
+export async function getTrending(type: "all" | "movie" | "tv" = "all", timeWindow: "day" | "week" = "week") {
+  return tmdbFetch<TMDBResponse<Movie>>(`/trending/${type}/${timeWindow}`);
+}
+
+export async function getPopularMovies(page = 1) {
+  return tmdbFetch<TMDBResponse<Movie>>("/movie/popular", { page: String(page) });
+}
+
+export async function getPopularTV(page = 1) {
+  return tmdbFetch<TMDBResponse<Movie>>("/tv/popular", { page: String(page) });
+}
+
+export async function getTopRatedMovies(page = 1) {
+  return tmdbFetch<TMDBResponse<Movie>>("/movie/top_rated", { page: String(page) });
+}
+
+export async function getTopRatedTV(page = 1) {
+  return tmdbFetch<TMDBResponse<Movie>>("/tv/top_rated", { page: String(page) });
+}
+
+export async function getAnime(page = 1) {
+  // Anime: Japanese animation on TV category
+  return tmdbFetch<TMDBResponse<Movie>>("/discover/tv", {
+    with_genres: "16",
+    with_origin_country: "JP",
+    sort_by: "popularity.desc",
+    page: String(page),
+  });
+}
+
+export async function getMovieDetail(id: string) {
+  return tmdbFetch<MovieDetail>(`/movie/${id}`);
+}
+
+export async function getTVDetail(id: string) {
+  return tmdbFetch<MovieDetail>(`/tv/${id}`);
+}
+
+export async function getMovieCredits(id: string) {
+  return tmdbFetch<CreditsResponse>(`/movie/${id}/credits`);
+}
+
+export async function getTVCredits(id: string) {
+  return tmdbFetch<CreditsResponse>(`/tv/${id}/credits`);
+}
+
+export async function getMovieRecommendations(id: string) {
+  return tmdbFetch<TMDBResponse<Movie>>(`/movie/${id}/recommendations`);
+}
+
+export async function getTVRecommendations(id: string) {
+  return tmdbFetch<TMDBResponse<Movie>>(`/tv/${id}/recommendations`);
+}
+
+export async function getSeasonEpisodes(tvId: string, season: number) {
+  const data = await tmdbFetch<{ episodes: Episode[] }>(`/tv/${tvId}/season/${season}`);
+  return data.episodes;
+}
+
+export async function searchMulti(query: string, page = 1) {
+  return tmdbFetch<TMDBResponse<Movie>>("/search/multi", {
+    query,
+    page: String(page),
+    include_adult: "false",
+  });
+}
+
+export async function getMovieGenres() {
+  const data = await tmdbFetch<{ genres: Genre[] }>("/genre/movie/list");
+  return data.genres;
+}
+
+export async function getTVGenres() {
+  const data = await tmdbFetch<{ genres: Genre[] }>("/genre/tv/list");
+  return data.genres;
+}
+
+export async function discoverMovies(params: {
+  genre?: string;
+  year?: string;
+  sort_by?: string;
+  page?: number;
+}) {
+  const p: Record<string, string> = {
+    sort_by: params.sort_by ?? "popularity.desc",
+    page: String(params.page ?? 1),
+    include_adult: "false",
+  };
+  if (params.genre) p.with_genres = params.genre;
+  if (params.year) p.primary_release_year = params.year;
+  return tmdbFetch<TMDBResponse<Movie>>("/discover/movie", p);
+}
+
+export async function discoverTV(params: {
+  genre?: string;
+  year?: string;
+  sort_by?: string;
+  page?: number;
+}) {
+  const p: Record<string, string> = {
+    sort_by: params.sort_by ?? "popularity.desc",
+    page: String(params.page ?? 1),
+  };
+  if (params.genre) p.with_genres = params.genre;
+  if (params.year) p.first_air_date_year = params.year;
+  return tmdbFetch<TMDBResponse<Movie>>("/discover/tv", p);
+}
+
+// ---- Image Helpers ----
+export function img(path: string | null, size: string = "w500"): string {
+  if (!path) return "/poster-placeholder.svg";
+  return `https://image.tmdb.org/t/p/${size}${path}`;
+}
+
+export function backdrop(path: string | null): string {
+  if (!path) return "/backdrop-placeholder.svg";
+  return `https://image.tmdb.org/t/p/original${path}`;
+}
+
+export function displayTitle(item: Movie): string {
+  return item.title ?? item.name ?? "Untitled";
+}
+
+export function displayYear(item: Movie): string {
+  const date = item.release_date ?? item.first_air_date ?? "";
+  return date ? date.slice(0, 4) : "";
+}
+
+export function isTV(item: Movie): boolean {
+  return Boolean(item.name && !item.title) || item.media_type === "tv";
+}
