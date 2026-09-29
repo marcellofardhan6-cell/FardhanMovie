@@ -79,9 +79,8 @@ const SERVERS: Server[] = [
 ];
 
 export default function ServerSwitcher(props: Props) {
-  const { trailerKey, videos = [], title } = props;
+  const { trailerKey, title } = props;
   const [activeServer, setActiveServer] = useState(0);
-  const [selectedTrailerKey, setSelectedTrailerKey] = useState<string | null>(trailerKey || null);
   const [isTrailerActive, setIsTrailerActive] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [showHelp, setShowHelp] = useState(false);
@@ -89,14 +88,9 @@ export default function ServerSwitcher(props: Props) {
   const [showAllServers, setShowAllServers] = useState(true);
   const playerContainerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    setSelectedTrailerKey(trailerKey || null);
-  }, [trailerKey]);
-
-  const activeTrailerKey = selectedTrailerKey || trailerKey;
   const currentServer = SERVERS[activeServer] || SERVERS[0];
-  const trailerEmbedUrl = activeTrailerKey
-    ? `https://www.youtube.com/embed/${activeTrailerKey}?autoplay=1&rel=0`
+  const trailerEmbedUrl = trailerKey
+    ? `https://www.youtube.com/embed/${trailerKey}?autoplay=1&rel=0`
     : null;
 
   const src = isTrailerActive && trailerEmbedUrl
@@ -146,11 +140,12 @@ export default function ServerSwitcher(props: Props) {
   }, []);
 
   const switchServer = useCallback((idx: number) => {
-    if (idx === activeServer) return;
+    if (idx === activeServer && !isTrailerActive) return;
+    setIsTrailerActive(false);
     setActiveServer(idx);
     setIsLoading(true);
     setShowHelp(false);
-  }, [activeServer]);
+  }, [activeServer, isTrailerActive]);
 
   const handleLoad = useCallback(() => {
     setIsLoading(false);
@@ -171,30 +166,30 @@ export default function ServerSwitcher(props: Props) {
       {/* Main Player Container */}
       <div className="relative rounded-2xl overflow-hidden border border-white/[0.08] bg-[#0c0e15] shadow-2xl">
         {/* Sleek Servers Header & Pill Bar */}
-        <div className="p-4 sm:p-5 bg-[#12141c] border-b border-white/[0.08]">
+        <div className="p-3.5 sm:p-5 bg-[#12141c] border-b border-white/[0.08]">
           {/* Header Row: SERVERS + Active Server Name */}
-          <div className="flex items-center justify-between mb-3.5">
-            <div className="flex items-center gap-2.5">
-              <span className="text-[11px] font-bold tracking-[0.2em] text-zinc-500 uppercase">
+          <div className="flex items-center justify-between mb-2.5 sm:mb-3.5">
+            <div className="flex items-center gap-2 sm:gap-2.5">
+              <span className="text-[10px] sm:text-[11px] font-bold tracking-[0.2em] text-zinc-500 uppercase">
                 {isTrailerActive ? "TRAILER" : "SERVERS"}
               </span>
-              <span className="text-sm font-bold text-white tracking-wide">
+              <span className="text-xs sm:text-sm font-bold text-white tracking-wide truncate max-w-[170px] sm:max-w-none">
                 {isTrailerActive ? "Official Trailer (YouTube 4K)" : currentServer.name}
               </span>
             </div>
 
             {/* Right: Fullscreen Toggle and Direct YouTube link */}
-            <div className="flex items-center gap-1.5">
-              {isTrailerActive && activeTrailerKey && (
+            <div className="flex items-center gap-1.5 shrink-0">
+              {isTrailerActive && trailerKey && (
                 <a
-                  href={`https://www.youtube.com/watch?v=${activeTrailerKey}`}
+                  href={`https://www.youtube.com/watch?v=${trailerKey}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold text-red-400 hover:text-white bg-red-600/10 hover:bg-red-600 border border-red-500/20 transition-all cursor-pointer"
+                  className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-lg text-xs font-semibold text-red-400 hover:text-white bg-red-600/10 hover:bg-red-600 border border-red-500/20 transition-all cursor-pointer"
                   title="Buka langsung di YouTube"
                 >
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                    <path d="M10 15l5.19-3L10 9v6m11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25.9-.83 1.48-1.73 1.73-.47.13-1.33.22-2.65.28-1.3.07-2.49.1-3.59.1L12 22c-4.19 0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83-1.48 1.73-1.73.47-.13 1.33-.22 2.65-.28 1.3-.07 2.49-.1 3.59-.1L12 2c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73z"/>
+                    <path d="M10 15l5.19-3L10 9v6m11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25.9-.83 1.48-1.73 1.73-.47.13-1.33.22-2.65.28-1.3.07-2.49.1-3.59.1L12 2c-4.19 0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83-1.48 1.73-1.73.47-.13 1.33-.22 2.65-.28 1.3-.07 2.49-.1 3.59-.1L12 2c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73z"/>
                   </svg>
                   <span className="hidden sm:inline text-[11px]">Buka YouTube</span>
                 </a>
@@ -203,7 +198,7 @@ export default function ServerSwitcher(props: Props) {
               <button
                 type="button"
                 onClick={toggleFullscreen}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold text-zinc-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] transition-colors cursor-pointer"
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold text-zinc-300 hover:text-white bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.1] transition-colors cursor-pointer"
                 title={isFullscreen ? "Exit Fullscreen" : "Fullscreen Player"}
                 aria-label={isFullscreen ? "Exit Fullscreen" : "Fullscreen Player"}
               >
@@ -212,56 +207,28 @@ export default function ServerSwitcher(props: Props) {
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                       <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
                     </svg>
-                    <span className="hidden sm:inline text-[11px]">Exit</span>
+                    <span className="text-[11px] font-bold">Exit</span>
                   </>
                 ) : (
                   <>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                       <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
                     </svg>
-                    <span className="hidden sm:inline text-[11px]">Fullscreen</span>
+                    <span className="text-[11px] font-bold">Layar Penuh</span>
                   </>
                 )}
               </button>
             </div>
           </div>
 
-          {/* Servers Pills Row */}
-          <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Streaming server options">
-            {/* Multiple Trailer / Teaser Pills */}
-            {videos && videos.length > 1 ? (
-              videos.slice(0, 3).map((v, i) => {
-                const isActive = isTrailerActive && activeTrailerKey === v.key;
-                return (
-                  <button
-                    key={v.key}
-                    type="button"
-                    onClick={() => {
-                      setSelectedTrailerKey(v.key);
-                      setIsTrailerActive(true);
-                      setIsLoading(true);
-                      setShowHelp(false);
-                    }}
-                    aria-pressed={isActive}
-                    className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer ${
-                      isActive
-                        ? "bg-amber-500 text-black shadow-[0_0_18px_rgba(245,158,11,0.5)] ring-2 ring-amber-400/50"
-                        : "bg-[#181a22] text-amber-300 hover:text-white hover:bg-[#20232e] border border-amber-500/30"
-                    }`}
-                  >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                      <path d="M5 3l14 9-14 9V3z" />
-                    </svg>
-                    <span>{v.type} {i + 1}</span>
-                    {isActive && (
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-black ml-0.5 shrink-0" aria-hidden>
-                        <path d="M20 6 9 17l-5-5" />
-                      </svg>
-                    )}
-                  </button>
-                );
-              })
-            ) : trailerEmbedUrl ? (
+          {/* Servers Pills Row: Horizontal Swipeable on Mobile, Wrapped on Desktop */}
+          <div
+            className="flex items-center gap-2 overflow-x-auto sm:overflow-visible sm:flex-wrap pb-2 sm:pb-0 scroll-snap-x scrollbar-none -mx-1 px-1 sm:mx-0 sm:px-0"
+            role="group"
+            aria-label="Pilihan server streaming"
+          >
+            {/* Optional Trailer Button */}
+            {trailerEmbedUrl && (
               <button
                 type="button"
                 onClick={() => {
@@ -271,7 +238,7 @@ export default function ServerSwitcher(props: Props) {
                 }}
                 aria-pressed={isTrailerActive}
                 aria-label="Putar Trailer"
-                className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer ${
+                className={`shrink-0 scroll-snap-item flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer ${
                   isTrailerActive
                     ? "bg-amber-500 text-black shadow-[0_0_18px_rgba(245,158,11,0.5)] ring-2 ring-amber-400/50"
                     : "bg-[#181a22] text-amber-300 hover:text-white hover:bg-[#20232e] border border-amber-500/30"
@@ -303,7 +270,7 @@ export default function ServerSwitcher(props: Props) {
                   </svg>
                 )}
               </button>
-            ) : null}
+            )}
 
             {/* Streaming Servers */}
             {displayedServers.map((server) => {
@@ -312,25 +279,22 @@ export default function ServerSwitcher(props: Props) {
               return (
                 <button
                   key={server.id}
-                  onClick={() => {
-                    setIsTrailerActive(false);
-                    switchServer(idx);
-                  }}
+                  onClick={() => switchServer(idx)}
                   aria-pressed={isActive}
                   aria-label={`Switch to ${server.name}`}
-                  className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer ${
+                  className={`shrink-0 scroll-snap-item flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer ${
                     isActive
                       ? "bg-[#22252e] text-white border border-white/20 shadow-md ring-1 ring-white/10"
                       : "bg-[#181a22] text-zinc-300 hover:text-white hover:bg-[#1f222c] border border-white/[0.05]"
                   }`}
                 >
                   {/* Status Indicator Dot */}
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shrink-0 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
+                  <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-emerald-400 shrink-0 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
 
                   {/* Server Name */}
-                  <span>{server.name}</span>
+                  <span className="whitespace-nowrap">{server.name}</span>
 
-                  {/* 4K Badge */}
+                  {/* Badge */}
                   {server.badge && (
                     <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-[#3b2354]/60 text-purple-300 border border-purple-400/25">
                       {server.badge}
@@ -358,11 +322,11 @@ export default function ServerSwitcher(props: Props) {
               );
             })}
 
-            {/* FEWER / MORE Expander Toggle */}
+            {/* Desktop FEWER / MORE Expander Toggle */}
             <button
               type="button"
               onClick={() => setShowAllServers((v) => !v)}
-              className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-bold text-zinc-400 hover:text-white uppercase tracking-wider transition-colors cursor-pointer ml-auto sm:ml-0"
+              className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-bold text-zinc-400 hover:text-white uppercase tracking-wider transition-colors cursor-pointer ml-auto sm:ml-0 shrink-0"
               aria-label={showAllServers ? "Show fewer servers" : "Show more servers"}
             >
               <span>{showAllServers ? "FEWER" : "MORE"}</span>
@@ -373,10 +337,10 @@ export default function ServerSwitcher(props: Props) {
           </div>
         </div>
 
-        {/* Video Player Display */}
+        {/* Video Player Display: Responsive height so subtitle popups have room on mobile */}
         <div
           ref={playerContainerRef}
-          className="relative w-full aspect-video bg-black [&:fullscreen]:aspect-auto [&:fullscreen]:w-screen [&:fullscreen]:h-screen"
+          className="relative w-full aspect-video min-h-[275px] xs:min-h-[310px] sm:min-h-0 bg-black [&:fullscreen]:aspect-auto [&:fullscreen]:w-screen [&:fullscreen]:h-screen"
         >
           {/* Floating Exit Fullscreen Button when in fullscreen mode */}
           {isFullscreen && (
@@ -452,6 +416,26 @@ export default function ServerSwitcher(props: Props) {
             onLoad={handleLoad}
             onError={handleIframeError}
           />
+        </div>
+
+        {/* Mobile Touch Area / Scroll Gutter (Prevents getting trapped by iframe touches) */}
+        <div className="sm:hidden flex items-center justify-between px-3.5 py-2 bg-[#0e1017] border-t border-white/[0.05] text-[11px] text-zinc-400 select-none">
+          <span className="flex items-center gap-1.5 text-zinc-400">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-red-500">
+              <path d="M12 5v14M5 12l7 7 7-7"/>
+            </svg>
+            Geser di sini untuk info & sinopsis
+          </span>
+          <button
+            type="button"
+            onClick={toggleFullscreen}
+            className="flex items-center gap-1 text-zinc-300 hover:text-white font-semibold cursor-pointer"
+          >
+            <span>Putar Fullscreen</span>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+            </svg>
+          </button>
         </div>
       </div>
     </section>

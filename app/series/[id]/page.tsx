@@ -59,7 +59,7 @@ export default async function SeriesDetailPage({ params, searchParams }: Props) 
 
   return (
     <article className="min-h-screen bg-[#06070a] text-zinc-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-24 pb-20">
         {/* Breadcrumb & Action Row */}
         <div className="flex items-center justify-between gap-4 mb-4">
           <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-zinc-400">

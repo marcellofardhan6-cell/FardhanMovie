@@ -401,7 +401,7 @@ export default function Navbar() {
           <Link
             href="/films"
             className={`px-4 py-1 rounded-full text-xs font-bold transition-all ${
-              pathname === "/films"
+              pathname === "/films" || pathname.startsWith("/film")
                 ? "bg-white/15 text-white shadow-sm ring-1 ring-white/20"
                 : "text-zinc-400 hover:text-white"
             }`}
