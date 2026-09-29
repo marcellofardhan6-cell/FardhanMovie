@@ -611,44 +611,44 @@ export default function Navbar() {
           </div>
         )}
 
-        {/* Mobile 7reels Sub-Nav Tab Bar (Home, Movies, Series, My List) */}
-        <div className="md:hidden flex items-center justify-around py-2 border-t border-white/[0.06] -mx-4 px-4 bg-[#06070a]/95 backdrop-blur-md">
+        {/* Mobile Sub-Nav Tab Bar (Home, Movies, Series, My List) */}
+        <div className="md:hidden flex items-center justify-around py-2 border-t border-white/[0.06] -mx-4 px-4 bg-transparent">
           <Link
             href="/"
-            className={`px-4 py-1 rounded-full text-xs font-bold transition-all ${
+            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
               pathname === "/"
-                ? "bg-white/15 text-white shadow-sm ring-1 ring-white/20"
-                : "text-zinc-400 hover:text-white"
+                ? "bg-white/20 text-white shadow-sm ring-1 ring-white/30 backdrop-blur-sm"
+                : "text-zinc-300 hover:text-white drop-shadow-sm"
             }`}
           >
             Home
           </Link>
           <Link
             href="/films"
-            className={`px-4 py-1 rounded-full text-xs font-bold transition-all ${
+            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
               pathname === "/films" || pathname.startsWith("/film")
-                ? "bg-white/15 text-white shadow-sm ring-1 ring-white/20"
-                : "text-zinc-400 hover:text-white"
+                ? "bg-white/20 text-white shadow-sm ring-1 ring-white/30 backdrop-blur-sm"
+                : "text-zinc-300 hover:text-white drop-shadow-sm"
             }`}
           >
             Movies
           </Link>
           <Link
             href="/series"
-            className={`px-4 py-1 rounded-full text-xs font-bold transition-all ${
+            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
               pathname.startsWith("/series")
-                ? "bg-white/15 text-white shadow-sm ring-1 ring-white/20"
-                : "text-zinc-400 hover:text-white"
+                ? "bg-white/20 text-white shadow-sm ring-1 ring-white/30 backdrop-blur-sm"
+                : "text-zinc-300 hover:text-white drop-shadow-sm"
             }`}
           >
             Series
           </Link>
           <Link
             href="/favorites"
-            className={`px-4 py-1 rounded-full text-xs font-bold transition-all ${
+            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
               pathname === "/favorites"
-                ? "bg-white/15 text-white shadow-sm ring-1 ring-white/20"
-                : "text-zinc-400 hover:text-white"
+                ? "bg-white/20 text-white shadow-sm ring-1 ring-white/30 backdrop-blur-sm"
+                : "text-zinc-300 hover:text-white drop-shadow-sm"
             }`}
           >
             My List
