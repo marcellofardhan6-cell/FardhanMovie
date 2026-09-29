@@ -71,13 +71,13 @@ export default async function SeriesDetailPage({ params, searchParams }: Props) 
       })
     : null;
   const countries = show.production_countries && show.production_countries.length > 0
-    ? show.production_countries.map((c) => c.name).join(", ")
+    ? show.production_countries.slice(0, 2).map((c) => c.name).join(", ")
     : null;
   const languages = show.spoken_languages && show.spoken_languages.length > 0
-    ? show.spoken_languages.map((l) => l.name || l.english_name).join(", ")
+    ? show.spoken_languages.slice(0, 2).map((l) => l.name || l.english_name).join(", ")
     : null;
   const companies = show.production_companies && show.production_companies.length > 0
-    ? show.production_companies.map((c) => c.name).slice(0, 3).join(", ")
+    ? show.production_companies.slice(0, 2).map((c) => c.name).join(", ")
     : null;
   const statusMap: Record<string, string> = {
     "Returning Series": "Sedang Tayang (Ongoing)",

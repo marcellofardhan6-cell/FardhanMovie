@@ -39,7 +39,7 @@ export default async function FilmDetailPage({ params }: Props) {
   const mainCast = credits.cast.slice(0, 12);
   const director = credits.crew.find((c) => c.job === "Director");
   const writers = credits.crew.filter((c) => c.job === "Screenplay" || c.job === "Writer" || c.job === "Story");
-  const writerNames = writers.map((w) => w.name).slice(0, 3).join(", ");
+  const writerNames = writers.slice(0, 2).map((w) => w.name).join(", ");
   const year = displayYear(movie);
   const runtime = movie.runtime
     ? `${Math.floor(movie.runtime / 60)}j ${movie.runtime % 60}m`
@@ -52,13 +52,13 @@ export default async function FilmDetailPage({ params }: Props) {
       })
     : null;
   const countries = movie.production_countries && movie.production_countries.length > 0
-    ? movie.production_countries.map((c) => c.name).join(", ")
+    ? movie.production_countries.slice(0, 2).map((c) => c.name).join(", ")
     : null;
   const languages = movie.spoken_languages && movie.spoken_languages.length > 0
-    ? movie.spoken_languages.map((l) => l.name || l.english_name).join(", ")
+    ? movie.spoken_languages.slice(0, 2).map((l) => l.name || l.english_name).join(", ")
     : null;
   const companies = movie.production_companies && movie.production_companies.length > 0
-    ? movie.production_companies.map((c) => c.name).slice(0, 3).join(", ")
+    ? movie.production_companies.slice(0, 2).map((c) => c.name).join(", ")
     : null;
   const budget = movie.budget && movie.budget > 0
     ? `$${(movie.budget / 1_000_000).toFixed(1)} Juta USD`
