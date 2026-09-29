@@ -1,5 +1,5 @@
 "use client";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 
 interface Server {
   id: number;
@@ -66,6 +66,8 @@ export default function ServerSwitcher(props: Props) {
   const [activeServer, setActiveServer] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [showHelp, setShowHelp] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const playerContainerRef = useRef<HTMLDivElement>(null);
 
   const currentServer = SERVERS[activeServer];
   const src = buildServerUrl(currentServer, props);
@@ -80,6 +82,38 @@ export default function ServerSwitcher(props: Props) {
     return () => clearTimeout(timer);
   }, [src]);
 
+  // Sync fullscreen state with document
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    };
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
+    };
+  }, []);
+
+  const toggleFullscreen = useCallback(() => {
+    const el = playerContainerRef.current;
+    if (!el) return;
+
+    if (!document.fullscreenElement) {
+      if (el.requestFullscreen) {
+        el.requestFullscreen().catch(() => {});
+      } else if ((el as any).webkitRequestFullscreen) {
+        (el as any).webkitRequestFullscreen();
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      } else if ((document as any).webkitExitFullscreen) {
+        (document as any).webkitExitFullscreen();
+      }
+    }
+  }, []);
+
   const switchServer = useCallback((idx: number) => {
     if (idx === activeServer) return;
     setActiveServer(idx);
@@ -92,11 +126,6 @@ export default function ServerSwitcher(props: Props) {
   }, []);
 
   const handleIframeError = useCallback(() => {
-    setIsLoading(false);
-    setShowHelp(true);
-  }, []);
-
-  const handleLoadTimeout = useCallback(() => {
     setIsLoading(false);
     setShowHelp(true);
   }, []);
@@ -150,13 +179,53 @@ export default function ServerSwitcher(props: Props) {
             })}
           </div>
 
-          <div className="text-[11px] text-zinc-400 hidden xl:block">
-            If video buffers or fails to play, switch to another server
+          {/* Fullscreen Button */}
+          <div className="flex items-center gap-2 ml-auto">
+            <button
+              type="button"
+              onClick={toggleFullscreen}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-zinc-300 hover:text-white bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.08] transition-colors cursor-pointer"
+              title={isFullscreen ? "Exit Fullscreen" : "Fullscreen Player"}
+              aria-label={isFullscreen ? "Exit Fullscreen" : "Fullscreen Player"}
+            >
+              {isFullscreen ? (
+                <>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
+                  </svg>
+                  <span className="hidden sm:inline">Exit Fullscreen</span>
+                </>
+              ) : (
+                <>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                  </svg>
+                  <span className="hidden sm:inline">Fullscreen</span>
+                </>
+              )}
+            </button>
           </div>
         </div>
 
         {/* Video Player Display */}
-        <div className="relative w-full aspect-video bg-black">
+        <div
+          ref={playerContainerRef}
+          className="relative w-full aspect-video bg-black [&:fullscreen]:aspect-auto [&:fullscreen]:w-screen [&:fullscreen]:h-screen"
+        >
+          {/* Floating Exit Fullscreen Button when in fullscreen mode */}
+          {isFullscreen && (
+            <button
+              type="button"
+              onClick={toggleFullscreen}
+              className="absolute top-4 right-4 z-50 flex items-center gap-2 px-4 py-2 rounded-xl bg-black/80 hover:bg-black text-white text-xs font-bold border border-white/20 shadow-2xl backdrop-blur-md cursor-pointer transition-all"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
+              </svg>
+              <span>Exit Fullscreen</span>
+            </button>
+          )}
+
           {/* Subtle non-blocking Loading Indicator */}
           {isLoading && (
             <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 py-2 bg-black/70 backdrop-blur-sm pointer-events-none">
@@ -208,14 +277,18 @@ export default function ServerSwitcher(props: Props) {
             </div>
           )}
 
-          {/* Streaming Iframe */}
+          {/* Streaming Iframe with full permissions for nested multiembed frames */}
           <iframe
             key={src}
             src={src}
             title={`Video player - ${currentServer.name}`}
             className="absolute inset-0 w-full h-full"
-            allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen *"
             allowFullScreen
+            {...{
+              webkitallowfullscreen: "true",
+              mozallowfullscreen: "true",
+            }}
             referrerPolicy="no-referrer"
             onLoad={handleLoad}
             onError={handleIframeError}

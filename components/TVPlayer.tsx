@@ -68,9 +68,9 @@ export default function TVPlayer({
                 className="w-5 h-5 border-2 border-transparent rounded-full animate-spin"
                 style={{ borderTopColor: "var(--accent)" }}
                 role="status"
-                aria-label="Memuat episode..."
+                aria-label="Loading episodes..."
               />
-              <p className="text-sm" style={{ color: "var(--text-muted)" }}>Memuat episode...</p>
+              <p className="text-sm" style={{ color: "var(--text-muted)" }}>Loading episodes...</p>
             </div>
           </div>
         ) : (
