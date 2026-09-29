@@ -132,8 +132,8 @@ export default function Navbar() {
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${
-        scrolled
-          ? "bg-[#06070a]/95 backdrop-blur-md border-b border-white/[0.06]"
+        scrolled || menuOpen || mobileSearchOpen
+          ? "bg-[#06070a]/98 backdrop-blur-md border-b border-white/[0.08]"
           : "bg-gradient-to-b from-[#06070a]/90 via-[#06070a]/40 to-transparent"
       }`}
     >
@@ -655,36 +655,38 @@ export default function Navbar() {
           </Link>
         </div>
 
-        {/* Mobile Dropdown */}
+        {/* Mobile Dropdown Panel with 100% Opaque Solid Dark Background */}
         {menuOpen && (
           <div
             id="mobile-menu"
-            className="md:hidden py-4 border-t border-white/[0.08] animate-fade-in"
+            className="md:hidden -mx-4 px-5 pt-3 pb-6 bg-[#0a0c14] border-t border-white/[0.08] shadow-2xl max-h-[80vh] overflow-y-auto animate-fade-in"
           >
-            <nav className="flex flex-col space-y-2" aria-label="Navigasi mobile">
+            <nav className="flex flex-col space-y-1.5" aria-label="Navigasi mobile">
               {navLinks.map((link) => {
                 const isActive = pathname === link.href;
                 if (link.href === "/genres") {
                   return (
-                    <div key={link.href} className="space-y-1">
+                    <div key={link.href} className="pt-1 pb-2">
                       <Link
                         href="/genres"
-                        className={`px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-between ${
+                        onClick={() => setMenuOpen(false)}
+                        className={`px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors flex items-center justify-between ${
                           isActive
-                            ? "text-white font-medium bg-white/[0.06]"
-                            : "text-zinc-400 hover:text-white hover:bg-white/[0.03]"
+                            ? "text-white bg-white/[0.08]"
+                            : "text-zinc-300 hover:text-white hover:bg-white/[0.05]"
                         }`}
                         aria-current={isActive ? "page" : undefined}
                       >
                         <span>Genres</span>
-                        <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Browse</span>
+                        <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Browse All &rarr;</span>
                       </Link>
-                      <div className="grid grid-cols-3 gap-1 px-3 py-1">
+                      <div className="grid grid-cols-3 gap-1.5 px-1 pt-2">
                         {POPULAR_GENRES.slice(0, 9).map((g) => (
                           <Link
                             key={g.id}
                             href={`/films?genre=${g.id}`}
-                            className="text-[11px] text-center px-2 py-1 rounded-md bg-white/[0.04] text-zinc-300 hover:text-white border border-white/[0.06] truncate"
+                            onClick={() => setMenuOpen(false)}
+                            className="text-xs text-center py-2 px-1 rounded-lg bg-white/[0.04] hover:bg-red-600/20 text-zinc-300 hover:text-white border border-white/[0.08] truncate font-medium transition-colors"
                           >
                             {g.name}
                           </Link>
@@ -697,14 +699,16 @@ export default function Navbar() {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`px-3 py-2 rounded-lg text-sm transition-colors ${
+                    onClick={() => setMenuOpen(false)}
+                    className={`px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors flex items-center justify-between ${
                       isActive
-                        ? "text-white font-medium bg-white/[0.06]"
-                        : "text-zinc-400 hover:text-white hover:bg-white/[0.03]"
+                        ? "text-white bg-white/[0.08]"
+                        : "text-zinc-300 hover:text-white hover:bg-white/[0.05]"
                     }`}
                     aria-current={isActive ? "page" : undefined}
                   >
-                    {link.label}
+                    <span>{link.label}</span>
+                    <span className="text-zinc-600 text-xs">&rarr;</span>
                   </Link>
                 );
               })}
