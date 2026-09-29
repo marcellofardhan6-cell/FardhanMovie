@@ -18,16 +18,21 @@ interface Props {
 
 export default async function CountryPage({ searchParams }: Props) {
   const params = await searchParams;
-  const activeCode = (params.code || "US").toUpperCase();
+  const isAll = !params.code || params.code.toUpperCase() === "ALL";
+  const activeCode = isAll ? "ALL" : params.code!.toUpperCase();
   const type = params.type || "all";
   const genre = params.genre;
   const year = params.year;
   const page = Number(params.page ?? 1);
 
-  const selectedCountry = POPULAR_COUNTRIES.find((c) => c.code === activeCode) || {
-    code: activeCode,
-    name: activeCode,
-  };
+  const selectedCountry = isAll
+    ? { code: "ALL", name: "All Countries" }
+    : POPULAR_COUNTRIES.find((c) => c.code === activeCode) || {
+        code: activeCode,
+        name: activeCode,
+      };
+
+  const countryParam = isAll ? undefined : activeCode;
 
   // Fetch data depending on type
   const [movieGenres, tvGenres, moviesData, tvData] = await Promise.all([
@@ -35,7 +40,7 @@ export default async function CountryPage({ searchParams }: Props) {
     getTVGenres().catch(() => []),
     type === "tv"
       ? Promise.resolve({ results: [], total_pages: 0, total_results: 0, page: 1 })
-      : discoverMovies({ genre, year, country: activeCode, page }).catch(() => ({
+      : discoverMovies({ genre, year, country: countryParam, page }).catch(() => ({
           results: [],
           total_pages: 0,
           total_results: 0,
@@ -43,7 +48,7 @@ export default async function CountryPage({ searchParams }: Props) {
         })),
     type === "movie"
       ? Promise.resolve({ results: [], total_pages: 0, total_results: 0, page: 1 })
-      : discoverTV({ genre, year, country: activeCode, page }).catch(() => ({
+      : discoverTV({ genre, year, country: countryParam, page }).catch(() => ({
           results: [],
           total_pages: 0,
           total_results: 0,
@@ -80,6 +85,16 @@ export default async function CountryPage({ searchParams }: Props) {
   });
   const combinedGenres = Array.from(allGenresMap.values());
 
+  // Base query helper
+  const buildCountryHref = (code: string) => {
+    const q = new URLSearchParams();
+    q.set("code", code);
+    if (type !== "all") q.set("type", type);
+    if (genre) q.set("genre", genre);
+    if (year) q.set("year", year);
+    return `/country?${q.toString()}`;
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-20">
       {/* Header */}
@@ -88,25 +103,34 @@ export default async function CountryPage({ searchParams }: Props) {
           Browse by Country
         </h1>
         <p className="text-xs sm:text-sm text-zinc-400 mt-1">
-          Explore films and television shows from {selectedCountry.name} and across the world.
+          {isAll
+            ? "Explore popular films and television shows from all countries worldwide."
+            : `Explore films and television shows from ${selectedCountry.name} and across the world.`}
         </p>
       </div>
 
-      {/* Country Pills Horizontal Scroll */}
+      {/* Country Pills Horizontal Scroll with 'All Countries' to the left of United States */}
       <div className="mb-8">
         <div className="flex items-center gap-2 overflow-x-auto pb-3 scroll-snap-x" style={{ scrollbarWidth: "none" }}>
+          {/* All Countries Pill (Left of United States) */}
+          <Link
+            href={buildCountryHref("ALL")}
+            className={`shrink-0 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+              activeCode === "ALL"
+                ? "bg-red-600 text-white shadow-lg shadow-red-600/30 border border-red-500"
+                : "bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white border border-white/[0.08]"
+            }`}
+          >
+            All Countries
+          </Link>
+
+          {/* Individual Countries */}
           {POPULAR_COUNTRIES.map((c) => {
             const isSelected = c.code === activeCode;
-            const queryParams = new URLSearchParams();
-            queryParams.set("code", c.code);
-            if (type !== "all") queryParams.set("type", type);
-            if (genre) queryParams.set("genre", genre);
-            if (year) queryParams.set("year", year);
-
             return (
               <Link
                 key={c.code}
-                href={`/country?${queryParams.toString()}`}
+                href={buildCountryHref(c.code)}
                 className={`shrink-0 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
                   isSelected
                     ? "bg-red-600 text-white shadow-lg shadow-red-600/30 border border-red-500"
@@ -127,7 +151,7 @@ export default async function CountryPage({ searchParams }: Props) {
           activeGenre={genre}
           activeYear={year}
           activeType={type === "all" ? "" : type}
-          activeCountry={activeCode}
+          activeCountry={isAll ? "" : activeCode}
           showTypeFilter={true}
           showCountryFilter={false}
           basePath="/country"
