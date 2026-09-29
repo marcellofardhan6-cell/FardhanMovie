@@ -94,30 +94,6 @@ export default function Hero({ items, item }: Props) {
           </div>
         ))}
 
-        {/* Desktop Prev/Next Navigation Chevrons */}
-        {heroList.length > 1 && (
-          <div className="hidden md:flex absolute inset-y-0 inset-x-4 items-center justify-between z-20 pointer-events-none opacity-0 group-hover/hero:opacity-100 transition-opacity duration-300">
-            <button
-              onClick={prevSlide}
-              aria-label="Previous featured title"
-              className="pointer-events-auto w-11 h-11 rounded-full flex items-center justify-center bg-black/60 hover:bg-red-600/90 text-white backdrop-blur-md border border-white/15 transition-all shadow-xl cursor-pointer"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="m15 18-6-6 6-6" />
-              </svg>
-            </button>
-            <button
-              onClick={nextSlide}
-              aria-label="Next featured title"
-              className="pointer-events-auto w-11 h-11 rounded-full flex items-center justify-center bg-black/60 hover:bg-red-600/90 text-white backdrop-blur-md border border-white/15 transition-all shadow-xl cursor-pointer"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="m9 18 6-6-6-6" />
-              </svg>
-            </button>
-          </div>
-        )}
-
         {/* Hero Content Container */}
         <div
           className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-end z-10"
@@ -235,21 +211,51 @@ export default function Hero({ items, item }: Props) {
               <FavoriteButton item={currentItem} className="px-3.5 py-3 !rounded-xl" />
             </div>
 
-            {/* Slide Navigation Dots / Indicators */}
+            {/* Slide Navigation & Controls (Cleanly positioned below buttons, never covers title) */}
             {heroList.length > 1 && (
-              <div className="flex items-center gap-2 mt-6" aria-label="Hero slide indicators">
-                {heroList.map((m, idx) => (
-                  <button
-                    key={`dot-${m.id}`}
-                    onClick={() => setCurrentIndex(idx)}
-                    aria-label={`Jump to slide ${idx + 1}: ${displayTitle(m)}`}
-                    className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
-                      idx === currentIndex
-                        ? "w-8 bg-red-600 shadow-md shadow-red-600/50"
-                        : "w-2 bg-white/30 hover:bg-white/60"
-                    }`}
-                  />
-                ))}
+              <div className="flex items-center gap-2.5 sm:gap-3 mt-6 sm:mt-7" aria-label="Hero slide navigation">
+                {/* Prev Slide Arrow */}
+                <button
+                  onClick={prevSlide}
+                  aria-label="Previous slide"
+                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center bg-white/10 hover:bg-red-600 text-white border border-white/15 transition-all shadow-md active:scale-95 cursor-pointer"
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="m15 18-6-6 6-6" />
+                  </svg>
+                </button>
+
+                {/* Dot Indicators */}
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  {heroList.map((m, idx) => (
+                    <button
+                      key={`dot-${m.id}`}
+                      onClick={() => setCurrentIndex(idx)}
+                      aria-label={`Jump to slide ${idx + 1}: ${displayTitle(m)}`}
+                      className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
+                        idx === currentIndex
+                          ? "w-7 sm:w-8 bg-red-600 shadow-md shadow-red-600/50"
+                          : "w-2 bg-white/30 hover:bg-white/60"
+                      }`}
+                    />
+                  ))}
+                </div>
+
+                {/* Next Slide Arrow */}
+                <button
+                  onClick={nextSlide}
+                  aria-label="Next slide"
+                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center bg-white/10 hover:bg-red-600 text-white border border-white/15 transition-all shadow-md active:scale-95 cursor-pointer"
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="m9 18 6-6-6-6" />
+                  </svg>
+                </button>
+
+                {/* Slide Counter */}
+                <span className="text-[11px] font-mono text-zinc-400 font-bold ml-1">
+                  {currentIndex + 1} / {heroList.length}
+                </span>
               </div>
             )}
           </div>
