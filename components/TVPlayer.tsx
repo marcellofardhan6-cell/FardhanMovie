@@ -12,8 +12,6 @@ interface Props {
   initialEpisodesMap: Record<number, Episode[]>;
   title?: string;
   trailerKey?: string | null;
-  isUnreleased?: boolean;
-  releaseDateText?: string | null;
 }
 
 export default function TVPlayer({
@@ -24,8 +22,6 @@ export default function TVPlayer({
   initialEpisodesMap,
   title,
   trailerKey,
-  isUnreleased,
-  releaseDateText,
 }: Props) {
   const [currentSeason, setCurrentSeason] = useState(initialSeason);
   const [currentEpisode, setCurrentEpisode] = useState(initialEpisode);
@@ -65,8 +61,6 @@ export default function TVPlayer({
         season={currentSeason}
         episode={currentEpisode}
         trailerKey={trailerKey}
-        isUnreleased={isUnreleased}
-        releaseDateText={releaseDateText}
       />
 
       <div>

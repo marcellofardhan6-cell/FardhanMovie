@@ -1,4 +1,4 @@
-import { getMovieDetail, getMovieCredits, getMovieRecommendations, getMovieVideos, findBestTrailer, isUnreleasedContent, displayYear } from "@/lib/tmdb";
+import { getMovieDetail, getMovieCredits, getMovieRecommendations, getMovieVideos, findBestTrailer, displayYear } from "@/lib/tmdb";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import MovieGrid from "@/components/MovieGrid";
@@ -39,24 +39,6 @@ export default async function FilmDetailPage({ params }: Props) {
   if (!movie) notFound();
 
   const bestTrailer = findBestTrailer(videos);
-  const isUnreleased = isUnreleasedContent(movie);
-
-  let releaseDateText: string | null = null;
-  if (movie.release_date) {
-    try {
-      const d = new Date(movie.release_date);
-      const isFuture = d.getTime() > Date.now();
-      const formatted = d.toLocaleDateString("id-ID", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      });
-      releaseDateText = isFuture ? formatted : `${formatted} (Sedang di Bioskop)`;
-    } catch {
-      releaseDateText = movie.release_date;
-    }
-  }
-
   const mainCast = credits.cast.slice(0, 15);
   const year = displayYear(movie);
   const runtime = movie.runtime
@@ -78,7 +60,7 @@ export default async function FilmDetailPage({ params }: Props) {
           <FavoriteButton item={movie} showText={true} className="px-3 py-1.5 text-xs font-bold shrink-0" />
         </div>
 
-        {/* INSTANT VIDEO PLAYER WITH SERVER SWITCHER & TRAILER */}
+        {/* INSTANT VIDEO PLAYER WITH SERVER SWITCHER & OPTIONAL TRAILER */}
         <div className="mb-8" id="player">
           <ServerSwitcher
             tmdbId={Number(id)}
@@ -86,12 +68,10 @@ export default async function FilmDetailPage({ params }: Props) {
             title={movie.title}
             trailerKey={bestTrailer?.key}
             videos={videos}
-            isUnreleased={isUnreleased}
-            releaseDateText={releaseDateText}
           />
         </div>
 
-        {/* Clean Detail & Cast Card (Matching media_1790663254230.png) */}
+        {/* Clean Detail & Cast Card */}
         <div className="mb-14">
           <DetailCard
             title={movie.title}
@@ -103,8 +83,6 @@ export default async function FilmDetailPage({ params }: Props) {
             overview={movie.overview}
             cast={mainCast}
             type="movie"
-            isUnreleased={isUnreleased}
-            releaseDateText={releaseDateText}
           />
         </div>
 

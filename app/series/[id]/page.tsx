@@ -1,4 +1,4 @@
-import { getTVDetail, getTVCredits, getTVRecommendations, getTVVideos, findBestTrailer, isUnreleasedContent, getSeasonEpisodes, displayYear } from "@/lib/tmdb";
+import { getTVDetail, getTVCredits, getTVRecommendations, getTVVideos, findBestTrailer, getSeasonEpisodes, displayYear } from "@/lib/tmdb";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import MovieGrid from "@/components/MovieGrid";
@@ -43,24 +43,6 @@ export default async function SeriesDetailPage({ params, searchParams }: Props) 
   if (!show) notFound();
 
   const bestTrailer = findBestTrailer(videos);
-  const isUnreleased = isUnreleasedContent(show);
-
-  let releaseDateText: string | null = null;
-  if (show.first_air_date) {
-    try {
-      const d = new Date(show.first_air_date);
-      const isFuture = d.getTime() > Date.now();
-      const formatted = d.toLocaleDateString("id-ID", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      });
-      releaseDateText = isFuture ? formatted : `${formatted} (Baru Tayang)`;
-    } catch {
-      releaseDateText = show.first_air_date;
-    }
-  }
-
   const validSeasons = (show.seasons ?? []).filter((s) => s.season_number > 0);
   const firstSeason = validSeasons[0]?.season_number ?? 1;
   const seasonToLoad = validSeasons.find((s) => s.season_number === initialSeason)
@@ -101,13 +83,11 @@ export default async function SeriesDetailPage({ params, searchParams }: Props) 
               initialEpisodesMap={{ [seasonToLoad]: initialEpisodes }}
               title={show.name}
               trailerKey={bestTrailer?.key}
-              isUnreleased={isUnreleased}
-              releaseDateText={releaseDateText}
             />
           </div>
         )}
 
-        {/* Clean Detail & Cast Card (Matching media_1790663254230.png) */}
+        {/* Clean Detail & Cast Card */}
         <div className="mb-14">
           <DetailCard
             title={show.name}
@@ -119,8 +99,6 @@ export default async function SeriesDetailPage({ params, searchParams }: Props) 
             overview={show.overview}
             cast={mainCast}
             type="tv"
-            isUnreleased={isUnreleased}
-            releaseDateText={releaseDateText}
           />
         </div>
 
