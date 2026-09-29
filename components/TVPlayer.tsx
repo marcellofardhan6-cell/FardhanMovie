@@ -31,6 +31,8 @@ export default function TVPlayer({
   const [currentEpisode, setCurrentEpisode] = useState(initialEpisode);
   const [episodesMap, setEpisodesMap] = useState<Record<number, Episode[]>>(initialEpisodesMap);
   const [loadingEpisodes, setLoadingEpisodes] = useState(false);
+  const [autoNextEnabled, setAutoNextEnabled] = useState(true);
+  const [autoNextToast, setAutoNextToast] = useState<string | null>(null);
 
   const validSeasons = seasons.filter((s) => s.season_number > 0);
   const currentSeasonObj = validSeasons.find((s) => s.season_number === currentSeason);
@@ -106,6 +108,38 @@ export default function TVPlayer({
     }
   }, [currentEpisode, totalEpisodesInCurrentSeason, currentSeasonIndex, validSeasons, handleEpisodeSelect, handleSeasonChange]);
 
+  // True auto-next listener via postMessage from embed video player (VidLink, PlayerJS, etc.)
+  useEffect(() => {
+    if (!autoNextEnabled) return;
+
+    const handleMessage = (event: MessageEvent) => {
+      try {
+        let payload = event.data;
+        if (typeof payload === "string") {
+          try {
+            payload = JSON.parse(payload);
+          } catch {}
+        }
+        if (
+          payload?.type === "ended" ||
+          payload?.event === "ended" ||
+          payload === "ended" ||
+          payload?.data?.event === "ended"
+        ) {
+          setAutoNextToast(`Video selesai. Memutar Episode ${currentEpisode + 1}...`);
+          const timer = setTimeout(() => {
+            handleNextEpisode();
+            setAutoNextToast(null);
+          }, 2500);
+          return () => clearTimeout(timer);
+        }
+      } catch {}
+    };
+
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [autoNextEnabled, currentEpisode, handleNextEpisode]);
+
   return (
     <div className="space-y-4">
       {/* Streaming Server Switcher */}
@@ -120,8 +154,33 @@ export default function TVPlayer({
         backdropPath={backdropPath}
       />
 
-      {/* Quick Episode Navigator: Prev, Current Badge & Next Episode */}
-      <div className="flex items-center justify-between gap-2 p-3 sm:p-4 rounded-xl bg-[#0f1118] border border-white/[0.08] shadow-lg">
+      {/* Auto-Next Countdown Toast */}
+      {autoNextToast && (
+        <div className="p-3 rounded-xl bg-red-600/90 text-white text-xs font-bold flex items-center justify-between shadow-2xl animate-fade-in backdrop-blur-md">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-white animate-ping" />
+            <span>{autoNextToast}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setAutoNextToast(null)}
+            className="px-2 py-0.5 rounded bg-black/30 hover:bg-black/50 text-white text-[11px]"
+          >
+            Batal
+          </button>
+        </div>
+      )}
+
+      {/* Helpful fallback hint when VidSrcWiki is unavailable for a specific episode */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 sm:p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/25 text-xs text-amber-200">
+        <div className="flex items-center gap-2">
+          <span className="text-amber-400 text-sm shrink-0">💡</span>
+          <span>Jika server menampilkan <em>&quot;Check back later&quot;</em>, silakan klik server <strong>SuperEmbed Cinema</strong>, <strong>VidSrc VIP</strong>, atau <strong>VidLink Pro</strong> di atas.</span>
+        </div>
+      </div>
+
+      {/* Quick Episode Navigator: Prev, Current Badge, Auto-Next Toggle & Next Episode */}
+      <div className="flex flex-wrap items-center justify-between gap-2 p-3 sm:p-4 rounded-xl bg-[#0f1118] border border-white/[0.08] shadow-lg">
         <button
           type="button"
           onClick={handlePrevEpisode}
@@ -136,16 +195,29 @@ export default function TVPlayer({
           <span className="xs:hidden">Sebelumnya</span>
         </button>
 
-        {/* Active Episode Badge & Name */}
+        {/* Center: Current Episode Status & Auto-Next Toggle */}
         <div className="flex items-center gap-2 text-center min-w-0 px-1">
           <span className="px-2.5 py-1 rounded-md text-xs font-black tracking-wider bg-red-600/20 text-red-400 border border-red-500/30 shrink-0">
             S{currentSeason} : E{currentEpisode}
           </span>
           {currentEpisodeData?.name && (
-            <span className="hidden sm:inline text-xs font-medium text-zinc-300 max-w-[220px] truncate" title={currentEpisodeData.name}>
+            <span className="hidden sm:inline text-xs font-medium text-zinc-300 max-w-[180px] truncate" title={currentEpisodeData.name}>
               {currentEpisodeData.name}
             </span>
           )}
+          <button
+            type="button"
+            onClick={() => setAutoNextEnabled((v) => !v)}
+            className={`px-2 py-0.5 rounded text-[10px] font-bold transition-colors cursor-pointer flex items-center gap-1 shrink-0 ${
+              autoNextEnabled
+                ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
+                : "bg-white/[0.05] text-zinc-500 border border-white/[0.08]"
+            }`}
+            title={autoNextEnabled ? "Auto-Next Aktif: Otomatis memutar episode berikutnya" : "Auto-Next Nonaktif"}
+          >
+            <span className={`w-1.5 h-1.5 rounded-full ${autoNextEnabled ? "bg-emerald-400 animate-pulse" : "bg-zinc-600"}`} />
+            <span>Auto-Next: {autoNextEnabled ? "ON" : "OFF"}</span>
+          </button>
         </div>
 
         <button
