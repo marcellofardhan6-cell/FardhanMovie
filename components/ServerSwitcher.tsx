@@ -13,6 +13,9 @@ interface Props {
   type: "movie" | "tv";
   season?: number;
   episode?: number;
+  trailerKey?: string | null;
+  isUnreleased?: boolean;
+  releaseDateText?: string | null;
 }
 
 function buildServerUrl(server: Server, props: Props): string {
@@ -69,16 +72,26 @@ const SERVERS: Server[] = [
 ];
 
 export default function ServerSwitcher(props: Props) {
-  // VidLink (4K) as ultra-fast primary default
+  const { trailerKey, isUnreleased, releaseDateText } = props;
   const [activeServer, setActiveServer] = useState(0);
+  const [isTrailerActive, setIsTrailerActive] = useState(Boolean(isUnreleased && trailerKey));
   const [isLoading, setIsLoading] = useState(true);
   const [showHelp, setShowHelp] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showAllServers, setShowAllServers] = useState(true);
   const playerContainerRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    if (isUnreleased && trailerKey) {
+      setIsTrailerActive(true);
+    }
+  }, [isUnreleased, trailerKey, props.tmdbId]);
+
   const currentServer = SERVERS[activeServer] || SERVERS[0];
-  const src = buildServerUrl(currentServer, props);
+  const trailerEmbedUrl = trailerKey
+    ? `https://www.youtube-nocookie.com/embed/${trailerKey}?autoplay=1&rel=0`
+    : null;
+  const src = isTrailerActive && trailerEmbedUrl ? trailerEmbedUrl : buildServerUrl(currentServer, props);
 
   // Auto-dismiss loading after 2.5s so iframe controls are never blocked
   useEffect(() => {
@@ -145,6 +158,42 @@ export default function ServerSwitcher(props: Props) {
       {/* Ambient Cinema Theater Glow behind the player */}
       <div className="absolute -inset-3 bg-gradient-to-r from-red-600/10 via-red-500/5 to-red-700/10 rounded-3xl blur-2xl opacity-50 pointer-events-none" />
 
+      {/* Coming Soon Notice Banner for unreleased content */}
+      {isUnreleased && (
+        <div className="relative mb-3.5 px-4 py-3 sm:py-3.5 rounded-2xl bg-amber-500/[0.08] border border-amber-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xl backdrop-blur-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center shrink-0 shadow-inner">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <rect width="18" height="18" x="3" y="3" rx="2" />
+                <path d="M7 3v18M17 3v18M3 7.5h4M3 12h18M3 16.5h4M17 7.5h4M17 16.5h4" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-xs sm:text-sm font-bold text-amber-200">
+                Film Ini Belum Rilis di Bioskop
+                {releaseDateText ? ` • Jadwal Rilis: ${releaseDateText}` : ""}
+              </p>
+              <p className="text-[11px] text-amber-300/80 leading-relaxed">
+                Server streaming online belum tersedia hingga film resmi rilis. Putar Official Trailer 4K di bawah ini.
+              </p>
+            </div>
+          </div>
+          {trailerKey && !isTrailerActive && (
+            <button
+              type="button"
+              onClick={() => {
+                setIsTrailerActive(true);
+                setIsLoading(true);
+                setShowHelp(false);
+              }}
+              className="px-3.5 py-1.5 rounded-xl text-xs font-bold text-black bg-amber-500 hover:bg-amber-400 transition-colors shadow-md cursor-pointer shrink-0"
+            >
+              🎬 Putar Trailer
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Main Player Container */}
       <div className="relative rounded-2xl overflow-hidden border border-white/[0.08] bg-[#0c0e15] shadow-2xl">
         {/* Sleek Servers Header & Pill Bar (Matching media_1790671890532.png) */}
@@ -153,10 +202,10 @@ export default function ServerSwitcher(props: Props) {
           <div className="flex items-center justify-between mb-3.5">
             <div className="flex items-center gap-2.5">
               <span className="text-[11px] font-bold tracking-[0.2em] text-zinc-500 uppercase">
-                SERVERS
+                {isTrailerActive ? "PLAYER" : "SERVERS"}
               </span>
               <span className="text-sm font-bold text-white tracking-wide">
-                {currentServer.name}
+                {isTrailerActive ? "Official Trailer (YouTube 4K)" : currentServer.name}
               </span>
             </div>
 
@@ -188,13 +237,62 @@ export default function ServerSwitcher(props: Props) {
 
           {/* Servers Pills Row */}
           <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Streaming server options">
+            {/* Official Trailer Button (Always available if trailerKey exists) */}
+            {trailerKey && (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsTrailerActive(true);
+                  setIsLoading(true);
+                  setShowHelp(false);
+                }}
+                aria-pressed={isTrailerActive}
+                aria-label="Putar Official Trailer"
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer ${
+                  isTrailerActive
+                    ? "bg-amber-500 text-black font-bold shadow-[0_0_15px_rgba(245,158,11,0.35)] ring-1 ring-amber-400"
+                    : "bg-[#181a22] text-amber-300 hover:text-white hover:bg-[#20232e] border border-amber-500/30"
+                }`}
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                  <path d="M5 3l14 9-14 9V3z" />
+                </svg>
+                <span>Trailer</span>
+                <span className={`text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded ${
+                  isTrailerActive ? "bg-black/30 text-black" : "bg-amber-500/20 text-amber-300"
+                }`}>
+                  4K
+                </span>
+                {isTrailerActive && (
+                  <svg
+                    width="13"
+                    height="13"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="text-black ml-0.5 shrink-0"
+                    aria-hidden
+                  >
+                    <path d="M20 6 9 17l-5-5" />
+                  </svg>
+                )}
+              </button>
+            )}
+
+            {/* Streaming Servers */}
             {displayedServers.map((server) => {
               const idx = SERVERS.findIndex((s) => s.id === server.id);
-              const isActive = idx === activeServer;
+              const isActive = !isTrailerActive && idx === activeServer;
               return (
                 <button
                   key={server.id}
-                  onClick={() => switchServer(idx)}
+                  onClick={() => {
+                    setIsTrailerActive(false);
+                    switchServer(idx);
+                  }}
                   aria-pressed={isActive}
                   aria-label={`Switch to ${server.name}`}
                   className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer ${
@@ -281,7 +379,7 @@ export default function ServerSwitcher(props: Props) {
                   aria-label="Loading video..."
                 />
                 <p className="text-xs font-medium text-zinc-300">
-                  Connecting to <span className="text-red-400 font-semibold">{currentServer.name}</span>...
+                  Connecting to <span className="text-red-400 font-semibold">{isTrailerActive ? "Official Trailer" : currentServer.name}</span>...
                 </p>
               </div>
               <span className="text-[11px] text-zinc-500">Fast streaming</span>
@@ -321,9 +419,9 @@ export default function ServerSwitcher(props: Props) {
 
           {/* High compatibility wildcard fullscreen iframe */}
           <iframe
-            key={`${src}-${activeServer}`}
+            key={`${src}-${isTrailerActive ? "trailer" : activeServer}`}
             src={src}
-            title={`Streaming Player - ${currentServer.name}`}
+            title={isTrailerActive ? "Official Trailer" : `Streaming Player - ${currentServer.name}`}
             className="absolute inset-0 w-full h-full border-0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen *"
             allowFullScreen={true}

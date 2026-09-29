@@ -1,4 +1,4 @@
-import { getMovieDetail, getMovieCredits, getMovieRecommendations, displayYear } from "@/lib/tmdb";
+import { getMovieDetail, getMovieCredits, getMovieRecommendations, getMovieVideos, findBestTrailer, displayYear } from "@/lib/tmdb";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import MovieGrid from "@/components/MovieGrid";
@@ -29,13 +29,33 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function FilmDetailPage({ params }: Props) {
   const { id } = await params;
 
-  const [movie, credits, recommendations] = await Promise.all([
+  const [movie, credits, recommendations, videos] = await Promise.all([
     getMovieDetail(id).catch(() => null),
     getMovieCredits(id).catch(() => ({ cast: [], crew: [] })),
     getMovieRecommendations(id).catch(() => ({ results: [], total_pages: 0, total_results: 0, page: 1 })),
+    getMovieVideos(id).catch(() => []),
   ]);
 
   if (!movie) notFound();
+
+  const bestTrailer = findBestTrailer(videos);
+  const isUnreleased = Boolean(
+    movie.release_date && new Date(movie.release_date).getTime() > Date.now()
+  );
+
+  let releaseDateText: string | null = null;
+  if (movie.release_date) {
+    try {
+      const d = new Date(movie.release_date);
+      releaseDateText = d.toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+    } catch {
+      releaseDateText = movie.release_date;
+    }
+  }
 
   const mainCast = credits.cast.slice(0, 15);
   const year = displayYear(movie);
@@ -58,9 +78,15 @@ export default async function FilmDetailPage({ params }: Props) {
           <FavoriteButton item={movie} showText={true} className="px-3 py-1.5 text-xs font-bold shrink-0" />
         </div>
 
-        {/* INSTANT VIDEO PLAYER WITH SERVER SWITCHER */}
+        {/* INSTANT VIDEO PLAYER WITH SERVER SWITCHER & TRAILER */}
         <div className="mb-8" id="player">
-          <ServerSwitcher tmdbId={Number(id)} type="movie" />
+          <ServerSwitcher
+            tmdbId={Number(id)}
+            type="movie"
+            trailerKey={bestTrailer?.key}
+            isUnreleased={isUnreleased}
+            releaseDateText={releaseDateText}
+          />
         </div>
 
         {/* Clean Detail & Cast Card (Matching media_1790663254230.png) */}

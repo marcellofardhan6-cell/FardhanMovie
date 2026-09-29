@@ -225,6 +225,36 @@ export async function getTVGenres() {
   return data.genres;
 }
 
+export interface VideoItem {
+  id: string;
+  key: string;
+  name: string;
+  site: string;
+  type: string;
+  official: boolean;
+}
+
+export async function getMovieVideos(id: string) {
+  const data = await tmdbFetch<{ results: VideoItem[] }>(`/movie/${id}/videos`);
+  return data.results || [];
+}
+
+export async function getTVVideos(id: string) {
+  const data = await tmdbFetch<{ results: VideoItem[] }>(`/tv/${id}/videos`);
+  return data.results || [];
+}
+
+export function findBestTrailer(videos: VideoItem[]): VideoItem | null {
+  if (!videos || videos.length === 0) return null;
+  const officialTrailer = videos.find((v) => v.site === "YouTube" && v.type === "Trailer" && v.official);
+  if (officialTrailer) return officialTrailer;
+  const anyTrailer = videos.find((v) => v.site === "YouTube" && v.type === "Trailer");
+  if (anyTrailer) return anyTrailer;
+  const teaser = videos.find((v) => v.site === "YouTube" && v.type === "Teaser");
+  if (teaser) return teaser;
+  return videos.find((v) => v.site === "YouTube") ?? null;
+}
+
 export const POPULAR_GENRES: Genre[] = [
   { id: 28, name: "Action" },
   { id: 12, name: "Adventure" },

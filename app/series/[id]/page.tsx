@@ -1,4 +1,4 @@
-import { getTVDetail, getTVCredits, getTVRecommendations, getSeasonEpisodes, displayYear } from "@/lib/tmdb";
+import { getTVDetail, getTVCredits, getTVRecommendations, getTVVideos, findBestTrailer, getSeasonEpisodes, displayYear } from "@/lib/tmdb";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import MovieGrid from "@/components/MovieGrid";
@@ -33,13 +33,33 @@ export default async function SeriesDetailPage({ params, searchParams }: Props) 
   const initialSeason = Number(sp.season ?? 1);
   const initialEpisode = Number(sp.episode ?? 1);
 
-  const [show, credits, recommendations] = await Promise.all([
+  const [show, credits, recommendations, videos] = await Promise.all([
     getTVDetail(id).catch(() => null),
     getTVCredits(id).catch(() => ({ cast: [], crew: [] })),
     getTVRecommendations(id).catch(() => ({ results: [], total_pages: 0, total_results: 0, page: 1 })),
+    getTVVideos(id).catch(() => []),
   ]);
 
   if (!show) notFound();
+
+  const bestTrailer = findBestTrailer(videos);
+  const isUnreleased = Boolean(
+    show.first_air_date && new Date(show.first_air_date).getTime() > Date.now()
+  );
+
+  let releaseDateText: string | null = null;
+  if (show.first_air_date) {
+    try {
+      const d = new Date(show.first_air_date);
+      releaseDateText = d.toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+    } catch {
+      releaseDateText = show.first_air_date;
+    }
+  }
 
   const validSeasons = (show.seasons ?? []).filter((s) => s.season_number > 0);
   const firstSeason = validSeasons[0]?.season_number ?? 1;
@@ -79,6 +99,9 @@ export default async function SeriesDetailPage({ params, searchParams }: Props) 
               initialSeason={seasonToLoad}
               initialEpisode={initialEpisode}
               initialEpisodesMap={{ [seasonToLoad]: initialEpisodes }}
+              trailerKey={bestTrailer?.key}
+              isUnreleased={isUnreleased}
+              releaseDateText={releaseDateText}
             />
           </div>
         )}
