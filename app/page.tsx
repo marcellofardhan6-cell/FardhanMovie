@@ -1,16 +1,19 @@
-import { getTrending, getPopularMovies, getPopularTV, getAnime, getTopRatedMovies } from "@/lib/tmdb";
+import { getTrending, getPopularMovies, getPopularTV, getAnime, getTopRatedMovies, Movie } from "@/lib/tmdb";
 import Hero from "@/components/Hero";
 import Carousel from "@/components/Carousel";
 
 export const revalidate = 3600;
 
+const EMPTY: Movie[] = [];
+
 export default async function HomePage() {
+  // Halaman tetap render walau TMDB gagal (mis. env belum diset saat build)
   const [trending, popularMovies, popularTV, anime, topRated] = await Promise.all([
-    getTrending("all", "week"),
-    getPopularMovies(),
-    getPopularTV(),
-    getAnime(),
-    getTopRatedMovies(),
+    getTrending("all", "week").catch(() => ({ results: EMPTY, total_pages: 0, total_results: 0, page: 1 })),
+    getPopularMovies().catch(() => ({ results: EMPTY, total_pages: 0, total_results: 0, page: 1 })),
+    getPopularTV().catch(() => ({ results: EMPTY, total_pages: 0, total_results: 0, page: 1 })),
+    getAnime().catch(() => ({ results: EMPTY, total_pages: 0, total_results: 0, page: 1 })),
+    getTopRatedMovies().catch(() => ({ results: EMPTY, total_pages: 0, total_results: 0, page: 1 })),
   ]);
 
   const hero = trending.results.find((item) => item.backdrop_path) ?? trending.results[0];

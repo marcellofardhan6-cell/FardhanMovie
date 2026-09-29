@@ -1,6 +1,7 @@
 import { getMovieDetail, getMovieCredits, getMovieRecommendations, img, backdrop, displayYear } from "@/lib/tmdb";
 import Image from "next/image";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import MovieGrid from "@/components/MovieGrid";
 import ServerSwitcher from "@/components/ServerSwitcher";
 import type { Metadata } from "next";
@@ -31,10 +32,12 @@ export default async function FilmDetailPage({ params, searchParams }: Props) {
   const showPlayer = sp.autoplay === "1";
 
   const [movie, credits, recommendations] = await Promise.all([
-    getMovieDetail(id),
-    getMovieCredits(id),
-    getMovieRecommendations(id),
+    getMovieDetail(id).catch(() => null),
+    getMovieCredits(id).catch(() => ({ cast: [], crew: [] })),
+    getMovieRecommendations(id).catch(() => ({ results: [], total_pages: 0, total_results: 0, page: 1 })),
   ]);
+
+  if (!movie) notFound();
 
   const mainCast = credits.cast.slice(0, 12);
   const director = credits.crew.find((c) => c.job === "Director");

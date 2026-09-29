@@ -9,6 +9,9 @@ const headers = {
 };
 
 async function tmdbGet(url: string): Promise<Response> {
+  if (!TOKEN) {
+    throw new Error("TMDB_READ_ACCESS_TOKEN belum diset di environment variables");
+  }
   return fetch(url, {
     headers,
     signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),

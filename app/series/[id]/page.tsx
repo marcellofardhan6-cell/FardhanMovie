@@ -1,6 +1,7 @@
 import { getTVDetail, getTVCredits, getTVRecommendations, getSeasonEpisodes, img, backdrop, displayYear } from "@/lib/tmdb";
 import Image from "next/image";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import MovieGrid from "@/components/MovieGrid";
 import TVPlayer from "@/components/TVPlayer";
 import type { Metadata } from "next";
@@ -33,10 +34,12 @@ export default async function SeriesDetailPage({ params, searchParams }: Props) 
   const initialEpisode = Number(sp.episode ?? 1);
 
   const [show, credits, recommendations] = await Promise.all([
-    getTVDetail(id),
-    getTVCredits(id),
-    getTVRecommendations(id),
+    getTVDetail(id).catch(() => null),
+    getTVCredits(id).catch(() => ({ cast: [], crew: [] })),
+    getTVRecommendations(id).catch(() => ({ results: [], total_pages: 0, total_results: 0, page: 1 })),
   ]);
+
+  if (!show) notFound();
 
   const validSeasons = (show.seasons ?? []).filter((s) => s.season_number > 0);
   const firstSeason = validSeasons[0]?.season_number ?? 1;
