@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import MovieGrid from "@/components/MovieGrid";
 import TVPlayer from "@/components/TVPlayer";
+import FavoriteButton from "@/components/FavoriteButton";
 import type { Metadata } from "next";
 
 export const revalidate = 86400;
@@ -110,16 +111,19 @@ export default async function SeriesDetailPage({ params, searchParams }: Props) 
               </h1>
             </div>
 
-            {/* Rating Badge */}
-            {show.vote_average > 0 && (
-              <div className="self-start sm:self-auto flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/60 border border-red-500/30 shrink-0">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-red-500" aria-hidden>
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                </svg>
-                <span className="text-sm font-bold text-red-400">{show.vote_average.toFixed(1)}</span>
-                <span className="text-[11px] text-zinc-400">/ 10 ({show.vote_count.toLocaleString("en-US")} votes)</span>
-              </div>
-            )}
+            {/* Action Buttons: Favorite & Rating */}
+            <div className="self-start sm:self-auto flex items-center gap-2.5 shrink-0">
+              <FavoriteButton item={show} showText={true} className="px-3.5 py-1.5 text-xs font-bold" />
+              {show.vote_average > 0 && (
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/60 border border-red-500/30">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-red-500" aria-hidden>
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                  </svg>
+                  <span className="text-sm font-bold text-red-400">{show.vote_average.toFixed(1)}</span>
+                  <span className="text-[11px] text-zinc-400">/ 10 ({show.vote_count.toLocaleString("en-US")} votes)</span>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Specifications Chips */}

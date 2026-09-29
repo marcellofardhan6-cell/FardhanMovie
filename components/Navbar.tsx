@@ -2,8 +2,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
+import { useFavorites } from "@/context/FavoritesContext";
 
 export default function Navbar() {
+  const { favoritesCount } = useFavorites();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -50,6 +52,7 @@ export default function Navbar() {
     { href: "/series", label: "TV Series" },
     { href: "/anime", label: "Anime" },
     { href: "/country", label: "Country" },
+    { href: "/favorites", label: "Favorites" },
   ];
 
   return (
@@ -198,6 +201,38 @@ export default function Navbar() {
                 </svg>
               </div>
             </form>
+
+            {/* Favorites Icon Button */}
+            <Link
+              href="/favorites"
+              className={`relative p-2 rounded-lg transition-colors flex items-center justify-center ${
+                pathname === "/favorites"
+                  ? "text-red-500 bg-red-500/10"
+                  : "text-zinc-400 hover:text-white hover:bg-white/[0.05]"
+              }`}
+              aria-label={`Favorites (${favoritesCount})`}
+              title="My Favorites"
+            >
+              <svg
+                width="19"
+                height="19"
+                viewBox="0 0 24 24"
+                fill={favoritesCount > 0 ? "currentColor" : "none"}
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className={favoritesCount > 0 ? "text-red-500" : ""}
+                aria-hidden
+              >
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+              </svg>
+              {favoritesCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 flex items-center justify-center min-w-[16px] h-[16px] px-1 text-[9px] font-bold text-white bg-red-600 rounded-full shadow-sm">
+                  {favoritesCount > 99 ? "99+" : favoritesCount}
+                </span>
+              )}
+            </Link>
 
             {/* Mobile Hamburger Button */}
             <button

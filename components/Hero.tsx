@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Movie, backdrop, displayTitle, displayYear, isTV } from "@/lib/tmdb";
+import FavoriteButton from "./FavoriteButton";
 
 interface Props {
   item: Movie;
@@ -93,6 +94,8 @@ export default function Hero({ item }: Props) {
               </svg>
               <span>More Details</span>
             </Link>
+
+            <FavoriteButton item={item} className="px-3 py-2.5 !rounded-md" />
           </div>
         </div>
       </div>

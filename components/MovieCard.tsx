@@ -1,6 +1,8 @@
+"use client";
 import Link from "next/link";
 import Image from "next/image";
 import { Movie, img, displayTitle, displayYear, isTV } from "@/lib/tmdb";
+import { useFavorites } from "@/context/FavoritesContext";
 
 interface Props {
   item: Movie;
@@ -8,6 +10,8 @@ interface Props {
 }
 
 export default function MovieCard({ item, priority = false }: Props) {
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const fav = isFavorite(item.id);
   const title = displayTitle(item);
   const year = displayYear(item);
   const type = item.media_type === "tv" || isTV(item) ? "series" : "movie";
@@ -51,8 +55,17 @@ export default function MovieCard({ item, priority = false }: Props) {
           </div>
         )}
 
-        {/* Floating Type Pill */}
-        {type === "series" ? (
+        {/* Floating Type Pill or Saved Heart Badge */}
+        {fav ? (
+          <div
+            className="absolute top-2.5 right-2.5 z-10 flex items-center justify-center w-6 h-6 rounded-full bg-red-600/90 text-white shadow-md border border-red-400/40 group-hover:opacity-0 transition-opacity"
+            title="Saved in Favorites"
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+              <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+            </svg>
+          </div>
+        ) : type === "series" ? (
           <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase backdrop-blur-md bg-black/70 text-zinc-200 border border-white/10">
             Series
           </div>
@@ -62,13 +75,49 @@ export default function MovieCard({ item, priority = false }: Props) {
           </div>
         )}
 
-        {/* Play Icon Reveal on Hover (Red & White streaming style) */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/40 backdrop-blur-[2px]">
-          <div className="w-12 h-12 rounded-full flex items-center justify-center bg-red-600 text-white shadow-[0_0_30px_rgba(229,9,20,0.8)] transform scale-75 group-hover:scale-100 transition-transform duration-300">
+        {/* Play & Love Buttons Reveal on Hover */}
+        <div className="absolute inset-0 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/50 backdrop-blur-[2px]">
+          {/* Play Button */}
+          <div
+            className="w-11 h-11 rounded-full flex items-center justify-center bg-red-600 text-white shadow-[0_0_25px_rgba(229,9,20,0.8)] transform scale-90 group-hover:scale-100 hover:scale-110 hover:bg-red-500 transition-all duration-200 cursor-pointer"
+            aria-label="Play title"
+          >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" className="ml-0.5" aria-hidden>
               <path d="M5 3l14 9-14 9V3z" />
             </svg>
           </div>
+
+          {/* Love / Favorite Button */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              toggleFavorite(item);
+            }}
+            className={`w-11 h-11 rounded-full flex items-center justify-center backdrop-blur-md border transform scale-90 group-hover:scale-100 hover:scale-110 transition-all duration-200 cursor-pointer ${
+              fav
+                ? "bg-red-600 text-white border-red-500 shadow-[0_0_20px_rgba(229,9,20,0.8)]"
+                : "bg-black/60 text-white hover:text-red-400 border-white/20 hover:border-red-500/50 hover:bg-black/80"
+            }`}
+            aria-label={fav ? "Remove from favorites" : "Add to favorites"}
+            title={fav ? "Remove from favorites" : "Add to favorites"}
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill={fav ? "currentColor" : "none"}
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className={`transition-transform duration-200 ${fav ? "scale-110" : ""}`}
+              aria-hidden
+            >
+              <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+            </svg>
+          </button>
         </div>
       </div>
 
