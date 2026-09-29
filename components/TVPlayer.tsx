@@ -10,6 +10,7 @@ interface Props {
   initialSeason: number;
   initialEpisode: number;
   initialEpisodesMap: Record<number, Episode[]>;
+  title?: string;
   trailerKey?: string | null;
   isUnreleased?: boolean;
   releaseDateText?: string | null;
@@ -21,6 +22,7 @@ export default function TVPlayer({
   initialSeason,
   initialEpisode,
   initialEpisodesMap,
+  title,
   trailerKey,
   isUnreleased,
   releaseDateText,
@@ -59,6 +61,7 @@ export default function TVPlayer({
       <ServerSwitcher
         tmdbId={tmdbId}
         type="tv"
+        title={title}
         season={currentSeason}
         episode={currentEpisode}
         trailerKey={trailerKey}

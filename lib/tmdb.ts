@@ -255,6 +255,41 @@ export function findBestTrailer(videos: VideoItem[]): VideoItem | null {
   return videos.find((v) => v.site === "YouTube") ?? null;
 }
 
+export function isUnreleasedContent(item?: {
+  release_date?: string;
+  first_air_date?: string;
+  status?: string;
+  vote_count?: number;
+} | null): boolean {
+  if (!item) return false;
+
+  // 1. Explicit TMDB status not released
+  if (
+    item.status &&
+    ["Post Production", "In Production", "Planned", "Rumored", "Upcoming"].includes(
+      item.status
+    )
+  ) {
+    return true;
+  }
+
+  // 2. Future release date
+  const dateStr = item.release_date || item.first_air_date;
+  if (dateStr) {
+    const releaseTime = new Date(dateStr).getTime();
+    if (!isNaN(releaseTime)) {
+      if (releaseTime > Date.now()) return true;
+      // Theatrical release within last 25 days with zero/minimal votes (still in theaters only)
+      const daysSinceRelease = (Date.now() - releaseTime) / (1000 * 60 * 60 * 24);
+      if (daysSinceRelease >= 0 && daysSinceRelease < 25 && (item.vote_count ?? 0) === 0) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
 export const POPULAR_GENRES: Genre[] = [
   { id: 28, name: "Action" },
   { id: 12, name: "Adventure" },

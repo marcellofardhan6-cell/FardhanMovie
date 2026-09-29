@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { Movie, img, displayTitle, displayYear, isTV } from "@/lib/tmdb";
+import { Movie, img, displayTitle, displayYear, isTV, isUnreleasedContent } from "@/lib/tmdb";
 import { useFavorites } from "@/context/FavoritesContext";
 
 interface Props {
@@ -18,6 +18,7 @@ export default function MovieCard({ item, priority = false }: Props) {
   const href = `/${type === "movie" ? "film" : "series"}/${item.id}`;
   const posterUrl = img(item.poster_path, "w342");
   const rating = item.vote_average ? item.vote_average.toFixed(1) : null;
+  const isUnreleased = isUnreleasedContent(item);
 
   return (
     <Link
@@ -55,7 +56,7 @@ export default function MovieCard({ item, priority = false }: Props) {
           </div>
         )}
 
-        {/* Floating Type Pill or Saved Heart Badge */}
+        {/* Floating Type Pill or Saved Heart Badge or COMING SOON */}
         {fav ? (
           <div
             className="absolute top-2.5 right-2.5 z-10 flex items-center justify-center w-6 h-6 rounded-full bg-red-600/90 text-white shadow-md border border-red-400/40 group-hover:opacity-0 transition-opacity"
@@ -64,6 +65,10 @@ export default function MovieCard({ item, priority = false }: Props) {
             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
               <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
             </svg>
+          </div>
+        ) : isUnreleased ? (
+          <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded text-[9px] font-black tracking-wider uppercase backdrop-blur-md bg-amber-500 text-black shadow-lg shadow-amber-500/40 border border-amber-400">
+            COMING SOON
           </div>
         ) : type === "series" ? (
           <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase backdrop-blur-md bg-black/70 text-zinc-200 border border-white/10">

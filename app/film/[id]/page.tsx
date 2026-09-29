@@ -1,4 +1,4 @@
-import { getMovieDetail, getMovieCredits, getMovieRecommendations, getMovieVideos, findBestTrailer, displayYear } from "@/lib/tmdb";
+import { getMovieDetail, getMovieCredits, getMovieRecommendations, getMovieVideos, findBestTrailer, isUnreleasedContent, displayYear } from "@/lib/tmdb";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import MovieGrid from "@/components/MovieGrid";
@@ -7,7 +7,7 @@ import DetailCard from "@/components/DetailCard";
 import FavoriteButton from "@/components/FavoriteButton";
 import type { Metadata } from "next";
 
-export const revalidate = 86400;
+export const dynamic = "force-dynamic";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -39,9 +39,7 @@ export default async function FilmDetailPage({ params }: Props) {
   if (!movie) notFound();
 
   const bestTrailer = findBestTrailer(videos);
-  const isUnreleased = Boolean(
-    movie.release_date && new Date(movie.release_date).getTime() > Date.now()
-  );
+  const isUnreleased = isUnreleasedContent(movie);
 
   let releaseDateText: string | null = null;
   if (movie.release_date) {
@@ -83,6 +81,7 @@ export default async function FilmDetailPage({ params }: Props) {
           <ServerSwitcher
             tmdbId={Number(id)}
             type="movie"
+            title={movie.title}
             trailerKey={bestTrailer?.key}
             isUnreleased={isUnreleased}
             releaseDateText={releaseDateText}
@@ -101,6 +100,8 @@ export default async function FilmDetailPage({ params }: Props) {
             overview={movie.overview}
             cast={mainCast}
             type="movie"
+            isUnreleased={isUnreleased}
+            releaseDateText={releaseDateText}
           />
         </div>
 

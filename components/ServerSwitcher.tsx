@@ -11,6 +11,7 @@ interface Server {
 interface Props {
   tmdbId: number | string;
   type: "movie" | "tv";
+  title?: string;
   season?: number;
   episode?: number;
   trailerKey?: string | null;
@@ -72,9 +73,10 @@ const SERVERS: Server[] = [
 ];
 
 export default function ServerSwitcher(props: Props) {
-  const { trailerKey, isUnreleased, releaseDateText } = props;
+  const { trailerKey, isUnreleased, releaseDateText, title } = props;
   const [activeServer, setActiveServer] = useState(0);
-  const [isTrailerActive, setIsTrailerActive] = useState(Boolean(isUnreleased && trailerKey));
+  // For unreleased content, Trailer is ALWAYS active by default
+  const [isTrailerActive, setIsTrailerActive] = useState(Boolean(isUnreleased));
   const [isLoading, setIsLoading] = useState(true);
   const [showHelp, setShowHelp] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -82,16 +84,25 @@ export default function ServerSwitcher(props: Props) {
   const playerContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (isUnreleased && trailerKey) {
+    if (isUnreleased) {
       setIsTrailerActive(true);
     }
-  }, [isUnreleased, trailerKey, props.tmdbId]);
+  }, [isUnreleased, props.tmdbId]);
 
   const currentServer = SERVERS[activeServer] || SERVERS[0];
   const trailerEmbedUrl = trailerKey
     ? `https://www.youtube-nocookie.com/embed/${trailerKey}?autoplay=1&rel=0`
+    : title
+    ? `https://www.youtube-nocookie.com/embed?listType=search&list=${encodeURIComponent(
+        title + " official trailer"
+      )}&autoplay=1`
     : null;
-  const src = isTrailerActive && trailerEmbedUrl ? trailerEmbedUrl : buildServerUrl(currentServer, props);
+
+  const src = isTrailerActive && trailerEmbedUrl
+    ? trailerEmbedUrl
+    : isUnreleased && !trailerEmbedUrl
+    ? ""
+    : buildServerUrl(currentServer, props);
 
   // Auto-dismiss loading after 2.5s so iframe controls are never blocked
   useEffect(() => {
@@ -160,25 +171,29 @@ export default function ServerSwitcher(props: Props) {
 
       {/* Coming Soon Notice Banner for unreleased content */}
       {isUnreleased && (
-        <div className="relative mb-3.5 px-4 py-3 sm:py-3.5 rounded-2xl bg-amber-500/[0.08] border border-amber-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xl backdrop-blur-sm">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center shrink-0 shadow-inner">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <div className="relative mb-3.5 p-4 sm:p-4.5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-amber-500/10 to-orange-500/10 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 shadow-2xl backdrop-blur-md">
+          <div className="flex items-start sm:items-center gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(245,158,11,0.25)]">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                 <rect width="18" height="18" x="3" y="3" rx="2" />
                 <path d="M7 3v18M17 3v18M3 7.5h4M3 12h18M3 16.5h4M17 7.5h4M17 16.5h4" />
               </svg>
             </div>
             <div>
-              <p className="text-xs sm:text-sm font-bold text-amber-200">
-                Film Ini Belum Rilis di Bioskop
-                {releaseDateText ? ` • Jadwal Rilis: ${releaseDateText}` : ""}
-              </p>
-              <p className="text-[11px] text-amber-300/80 leading-relaxed">
-                Server streaming online belum tersedia hingga film resmi rilis. Putar Official Trailer 4K di bawah ini.
+              <div className="flex flex-wrap items-center gap-2 mb-1">
+                <span className="px-2.5 py-0.5 rounded-md text-[11px] font-black uppercase tracking-widest bg-amber-500 text-black shadow-md shadow-amber-500/30">
+                  COMING SOON
+                </span>
+                <span className="text-xs sm:text-sm font-bold text-amber-200">
+                  {releaseDateText ? `Jadwal Rilis Bioskop: ${releaseDateText}` : "Segera Hadir di Bioskop"}
+                </span>
+              </div>
+              <p className="text-[11px] text-amber-300/85 leading-relaxed">
+                Film ini berstatus <strong>Coming Soon</strong> dan belum tayang di platform streaming. Video player di bawah otomatis memutar <strong>Official Trailer 4K</strong>.
               </p>
             </div>
           </div>
-          {trailerKey && !isTrailerActive && (
+          {trailerEmbedUrl && !isTrailerActive && (
             <button
               type="button"
               onClick={() => {
@@ -186,7 +201,7 @@ export default function ServerSwitcher(props: Props) {
                 setIsLoading(true);
                 setShowHelp(false);
               }}
-              className="px-3.5 py-1.5 rounded-xl text-xs font-bold text-black bg-amber-500 hover:bg-amber-400 transition-colors shadow-md cursor-pointer shrink-0"
+              className="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider text-black bg-amber-500 hover:bg-amber-400 transition-all shadow-lg shadow-amber-500/25 cursor-pointer shrink-0"
             >
               🎬 Putar Trailer
             </button>
@@ -202,7 +217,7 @@ export default function ServerSwitcher(props: Props) {
           <div className="flex items-center justify-between mb-3.5">
             <div className="flex items-center gap-2.5">
               <span className="text-[11px] font-bold tracking-[0.2em] text-zinc-500 uppercase">
-                {isTrailerActive ? "PLAYER" : "SERVERS"}
+                {isTrailerActive ? (isUnreleased ? "COMING SOON" : "TRAILER") : "SERVERS"}
               </span>
               <span className="text-sm font-bold text-white tracking-wide">
                 {isTrailerActive ? "Official Trailer (YouTube 4K)" : currentServer.name}
@@ -237,8 +252,8 @@ export default function ServerSwitcher(props: Props) {
 
           {/* Servers Pills Row */}
           <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Streaming server options">
-            {/* Official Trailer Button (Always available if trailerKey exists) */}
-            {trailerKey && (
+            {/* Official Trailer Button */}
+            {(trailerEmbedUrl || isUnreleased) && (
               <button
                 type="button"
                 onClick={() => {
@@ -248,16 +263,16 @@ export default function ServerSwitcher(props: Props) {
                 }}
                 aria-pressed={isTrailerActive}
                 aria-label="Putar Official Trailer"
-                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer ${
+                className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer ${
                   isTrailerActive
-                    ? "bg-amber-500 text-black font-bold shadow-[0_0_15px_rgba(245,158,11,0.35)] ring-1 ring-amber-400"
+                    ? "bg-amber-500 text-black shadow-[0_0_18px_rgba(245,158,11,0.5)] ring-2 ring-amber-400/50"
                     : "bg-[#181a22] text-amber-300 hover:text-white hover:bg-[#20232e] border border-amber-500/30"
                 }`}
               >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
                   <path d="M5 3l14 9-14 9V3z" />
                 </svg>
-                <span>Trailer</span>
+                <span>{isUnreleased ? "COMING SOON (Trailer)" : "Trailer"}</span>
                 <span className={`text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded ${
                   isTrailerActive ? "bg-black/30 text-black" : "bg-amber-500/20 text-amber-300"
                 }`}>
@@ -370,7 +385,7 @@ export default function ServerSwitcher(props: Props) {
           )}
 
           {/* Subtle non-blocking Loading Indicator */}
-          {isLoading && (
+          {isLoading && src && (
             <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 py-2.5 bg-black/75 backdrop-blur-sm pointer-events-none">
               <div className="flex items-center gap-2.5">
                 <div
@@ -387,7 +402,7 @@ export default function ServerSwitcher(props: Props) {
           )}
 
           {/* Error / Help overlay */}
-          {showHelp && (
+          {showHelp && !isTrailerActive && (
             <div className="absolute inset-0 flex items-center justify-center z-20 bg-black/95 backdrop-blur-md">
               <div className="text-center px-6 max-w-md">
                 <div className="w-14 h-14 rounded-full bg-red-600/15 border border-red-600/30 flex items-center justify-center mx-auto mb-3 text-red-500 text-2xl">
@@ -417,18 +432,46 @@ export default function ServerSwitcher(props: Props) {
             </div>
           )}
 
-          {/* High compatibility wildcard fullscreen iframe */}
-          <iframe
-            key={`${src}-${isTrailerActive ? "trailer" : activeServer}`}
-            src={src}
-            title={isTrailerActive ? "Official Trailer" : `Streaming Player - ${currentServer.name}`}
-            className="absolute inset-0 w-full h-full border-0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen *"
-            allowFullScreen={true}
-            referrerPolicy="no-referrer"
-            onLoad={handleLoad}
-            onError={handleIframeError}
-          />
+          {/* Custom Coming Soon Cinema Screen when no trailer video url is available */}
+          {!src && isUnreleased ? (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-[#10121a] to-[#07080c] p-6 text-center z-10">
+              <span className="px-3.5 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest bg-amber-500 text-black shadow-lg shadow-amber-500/30 mb-4">
+                COMING SOON
+              </span>
+              <h3 className="text-lg sm:text-2xl font-black text-white mb-2" style={{ fontFamily: "var(--font-fraunces)" }}>
+                {title || "Film Ini Belum Rilis"}
+              </h3>
+              <p className="text-xs sm:text-sm text-zinc-400 max-w-md mb-6 leading-relaxed">
+                Film ini berstatus Coming Soon dan belum tersedia di server streaming bioskop manapun.
+              </p>
+              {title && (
+                <a
+                  href={`https://www.youtube.com/results?search_query=${encodeURIComponent(title + " official trailer")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-red-600 hover:bg-red-500 text-white transition-colors shadow-lg shadow-red-600/30 flex items-center gap-2"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M10 15l5.19-3L10 9v6m11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25.9-.83 1.48-1.73 1.73-.47.13-1.33.22-2.65.28-1.3.07-2.49.1-3.59.1L12 22c-4.19 0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83-1.48 1.73-1.73.47-.13 1.33-.22 2.65-.28 1.3-.07 2.49-.1 3.59-.1L12 2c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73z"/>
+                  </svg>
+                  Tonton Trailer di YouTube
+                </a>
+              )}
+            </div>
+          ) : (
+            /* High compatibility wildcard fullscreen iframe */
+            <iframe
+              key={`${src}-${isTrailerActive ? "trailer" : activeServer}`}
+              src={src}
+              title={isTrailerActive ? "Official Trailer" : `Streaming Player - ${currentServer.name}`}
+              className="absolute inset-0 w-full h-full border-0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen *"
+              allowFullScreen={true}
+              referrerPolicy="no-referrer"
+              onLoad={handleLoad}
+              onError={handleIframeError}
+            />
+          )}
         </div>
       </div>
     </section>

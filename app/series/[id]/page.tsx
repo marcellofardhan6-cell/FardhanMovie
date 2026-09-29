@@ -1,4 +1,4 @@
-import { getTVDetail, getTVCredits, getTVRecommendations, getTVVideos, findBestTrailer, getSeasonEpisodes, displayYear } from "@/lib/tmdb";
+import { getTVDetail, getTVCredits, getTVRecommendations, getTVVideos, findBestTrailer, isUnreleasedContent, getSeasonEpisodes, displayYear } from "@/lib/tmdb";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import MovieGrid from "@/components/MovieGrid";
@@ -7,7 +7,7 @@ import DetailCard from "@/components/DetailCard";
 import FavoriteButton from "@/components/FavoriteButton";
 import type { Metadata } from "next";
 
-export const revalidate = 86400;
+export const dynamic = "force-dynamic";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -43,9 +43,7 @@ export default async function SeriesDetailPage({ params, searchParams }: Props) 
   if (!show) notFound();
 
   const bestTrailer = findBestTrailer(videos);
-  const isUnreleased = Boolean(
-    show.first_air_date && new Date(show.first_air_date).getTime() > Date.now()
-  );
+  const isUnreleased = isUnreleasedContent(show);
 
   let releaseDateText: string | null = null;
   if (show.first_air_date) {
@@ -99,6 +97,7 @@ export default async function SeriesDetailPage({ params, searchParams }: Props) 
               initialSeason={seasonToLoad}
               initialEpisode={initialEpisode}
               initialEpisodesMap={{ [seasonToLoad]: initialEpisodes }}
+              title={show.name}
               trailerKey={bestTrailer?.key}
               isUnreleased={isUnreleased}
               releaseDateText={releaseDateText}
@@ -118,6 +117,8 @@ export default async function SeriesDetailPage({ params, searchParams }: Props) 
             overview={show.overview}
             cast={mainCast}
             type="tv"
+            isUnreleased={isUnreleased}
+            releaseDateText={releaseDateText}
           />
         </div>
 

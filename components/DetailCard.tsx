@@ -21,6 +21,8 @@ interface Props {
   overview?: string | null;
   cast?: CastMember[];
   type?: "movie" | "tv";
+  isUnreleased?: boolean;
+  releaseDateText?: string | null;
 }
 
 export default function DetailCard({
@@ -33,6 +35,8 @@ export default function DetailCard({
   overview,
   cast = [],
   type = "movie",
+  isUnreleased = false,
+  releaseDateText,
 }: Props) {
   const [showMore, setShowMore] = useState(false);
 
@@ -53,10 +57,26 @@ export default function DetailCard({
             priority
             unoptimized={!posterPath}
           />
+          {isUnreleased && (
+            <div className="absolute top-2 left-2 z-10 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-amber-500 text-black shadow-lg shadow-amber-500/50">
+              COMING SOON
+            </div>
+          )}
         </div>
 
         {/* Title, Rating, Meta & Genre Badges */}
         <div className="flex-1 min-w-0 pt-0.5">
+          {/* Unreleased COMING SOON Banner Tag */}
+          {isUnreleased && (
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-bold mb-2.5 shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+              <span className="font-black uppercase tracking-wider text-amber-200">COMING SOON</span>
+              {releaseDateText && (
+                <span className="text-[11px] text-amber-300/80 font-normal">• Rilis: {releaseDateText}</span>
+              )}
+            </div>
+          )}
+
           {/* Film / Series Title */}
           <h1 className="text-xl sm:text-3xl md:text-4xl font-extrabold uppercase tracking-tight text-white mb-2 leading-tight">
             {title}
