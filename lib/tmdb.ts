@@ -246,12 +246,21 @@ export async function getTVVideos(id: string) {
 
 export function findBestTrailer(videos: VideoItem[]): VideoItem | null {
   if (!videos || videos.length === 0) return null;
+  // 1. Official YouTube Trailer
   const officialTrailer = videos.find((v) => v.site === "YouTube" && v.type === "Trailer" && v.official);
   if (officialTrailer) return officialTrailer;
+  // 2. Official YouTube Teaser (Official studio teasers almost never disable website embedding)
+  const officialTeaser = videos.find((v) => v.site === "YouTube" && v.type === "Teaser" && v.official);
+  if (officialTeaser) return officialTeaser;
+  // 3. Any official studio YouTube video
+  const officialAny = videos.find((v) => v.site === "YouTube" && v.official);
+  if (officialAny) return officialAny;
+  // 4. Any Trailer
   const anyTrailer = videos.find((v) => v.site === "YouTube" && v.type === "Trailer");
   if (anyTrailer) return anyTrailer;
-  const teaser = videos.find((v) => v.site === "YouTube" && v.type === "Teaser");
-  if (teaser) return teaser;
+  // 5. Any Teaser
+  const anyTeaser = videos.find((v) => v.site === "YouTube" && v.type === "Teaser");
+  if (anyTeaser) return anyTeaser;
   return videos.find((v) => v.site === "YouTube") ?? null;
 }
 
@@ -273,15 +282,17 @@ export function isUnreleasedContent(item?: {
     return true;
   }
 
-  // 2. Future release date
+  // 2. Release date check
   const dateStr = item.release_date || item.first_air_date;
   if (dateStr) {
     const releaseTime = new Date(dateStr).getTime();
     if (!isNaN(releaseTime)) {
+      // Future date = definitely unreleased
       if (releaseTime > Date.now()) return true;
-      // Theatrical release within last 25 days with zero/minimal votes (still in theaters only)
+
+      // Theatrical release within last 45 days (still exclusively in theaters, not available on digital streaming)
       const daysSinceRelease = (Date.now() - releaseTime) / (1000 * 60 * 60 * 24);
-      if (daysSinceRelease >= 0 && daysSinceRelease < 25 && (item.vote_count ?? 0) === 0) {
+      if (daysSinceRelease >= 0 && daysSinceRelease <= 45) {
         return true;
       }
     }

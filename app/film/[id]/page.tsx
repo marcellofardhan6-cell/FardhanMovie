@@ -45,11 +45,13 @@ export default async function FilmDetailPage({ params }: Props) {
   if (movie.release_date) {
     try {
       const d = new Date(movie.release_date);
-      releaseDateText = d.toLocaleDateString("id-ID", {
+      const isFuture = d.getTime() > Date.now();
+      const formatted = d.toLocaleDateString("id-ID", {
         day: "numeric",
         month: "long",
         year: "numeric",
       });
+      releaseDateText = isFuture ? formatted : `${formatted} (Sedang di Bioskop)`;
     } catch {
       releaseDateText = movie.release_date;
     }
@@ -83,6 +85,7 @@ export default async function FilmDetailPage({ params }: Props) {
             type="movie"
             title={movie.title}
             trailerKey={bestTrailer?.key}
+            videos={videos}
             isUnreleased={isUnreleased}
             releaseDateText={releaseDateText}
           />

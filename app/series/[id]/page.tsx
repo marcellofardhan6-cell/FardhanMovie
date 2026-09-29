@@ -49,11 +49,13 @@ export default async function SeriesDetailPage({ params, searchParams }: Props) 
   if (show.first_air_date) {
     try {
       const d = new Date(show.first_air_date);
-      releaseDateText = d.toLocaleDateString("id-ID", {
+      const isFuture = d.getTime() > Date.now();
+      const formatted = d.toLocaleDateString("id-ID", {
         day: "numeric",
         month: "long",
         year: "numeric",
       });
+      releaseDateText = isFuture ? formatted : `${formatted} (Baru Tayang)`;
     } catch {
       releaseDateText = show.first_air_date;
     }

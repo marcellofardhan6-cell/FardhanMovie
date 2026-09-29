@@ -15,6 +15,7 @@ interface Props {
   season?: number;
   episode?: number;
   trailerKey?: string | null;
+  videos?: { id?: string; key: string; name: string; type: string; site?: string; official?: boolean }[];
   isUnreleased?: boolean;
   releaseDateText?: string | null;
 }
@@ -73,8 +74,9 @@ const SERVERS: Server[] = [
 ];
 
 export default function ServerSwitcher(props: Props) {
-  const { trailerKey, isUnreleased, releaseDateText, title } = props;
+  const { trailerKey, videos = [], isUnreleased, releaseDateText, title } = props;
   const [activeServer, setActiveServer] = useState(0);
+  const [selectedTrailerKey, setSelectedTrailerKey] = useState<string | null>(trailerKey || null);
   // For unreleased content, Trailer is ALWAYS active by default
   const [isTrailerActive, setIsTrailerActive] = useState(Boolean(isUnreleased));
   const [isLoading, setIsLoading] = useState(true);
@@ -84,18 +86,19 @@ export default function ServerSwitcher(props: Props) {
   const playerContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    setSelectedTrailerKey(trailerKey || null);
+  }, [trailerKey]);
+
+  useEffect(() => {
     if (isUnreleased) {
       setIsTrailerActive(true);
     }
   }, [isUnreleased, props.tmdbId]);
 
+  const activeTrailerKey = selectedTrailerKey || trailerKey;
   const currentServer = SERVERS[activeServer] || SERVERS[0];
-  const trailerEmbedUrl = trailerKey
-    ? `https://www.youtube-nocookie.com/embed/${trailerKey}?autoplay=1&rel=0`
-    : title
-    ? `https://www.youtube-nocookie.com/embed?listType=search&list=${encodeURIComponent(
-        title + " official trailer"
-      )}&autoplay=1`
+  const trailerEmbedUrl = activeTrailerKey
+    ? `https://www.youtube.com/embed/${activeTrailerKey}?autoplay=1&rel=0`
     : null;
 
   const src = isTrailerActive && trailerEmbedUrl
@@ -224,36 +227,85 @@ export default function ServerSwitcher(props: Props) {
               </span>
             </div>
 
-            {/* Right: Fullscreen Toggle */}
-            <button
-              type="button"
-              onClick={toggleFullscreen}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold text-zinc-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] transition-colors cursor-pointer"
-              title={isFullscreen ? "Exit Fullscreen" : "Fullscreen Player"}
-              aria-label={isFullscreen ? "Exit Fullscreen" : "Fullscreen Player"}
-            >
-              {isFullscreen ? (
-                <>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                    <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
+            {/* Right: Fullscreen Toggle and Direct YouTube link */}
+            <div className="flex items-center gap-1.5">
+              {isTrailerActive && activeTrailerKey && (
+                <a
+                  href={`https://www.youtube.com/watch?v=${activeTrailerKey}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold text-red-400 hover:text-white bg-red-600/10 hover:bg-red-600 border border-red-500/20 transition-all cursor-pointer"
+                  title="Buka langsung di YouTube jika embed dibatasi"
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                    <path d="M10 15l5.19-3L10 9v6m11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25.9-.83 1.48-1.73 1.73-.47.13-1.33.22-2.65.28-1.3.07-2.49.1-3.59.1L12 22c-4.19 0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83-1.48 1.73-1.73.47-.13 1.33-.22 2.65-.28 1.3-.07 2.49-.1 3.59-.1L12 2c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73z"/>
                   </svg>
-                  <span className="hidden sm:inline text-[11px]">Exit</span>
-                </>
-              ) : (
-                <>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
-                  </svg>
-                  <span className="hidden sm:inline text-[11px]">Fullscreen</span>
-                </>
+                  <span className="hidden sm:inline text-[11px]">Buka YouTube</span>
+                </a>
               )}
-            </button>
+
+              <button
+                type="button"
+                onClick={toggleFullscreen}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold text-zinc-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] transition-colors cursor-pointer"
+                title={isFullscreen ? "Exit Fullscreen" : "Fullscreen Player"}
+                aria-label={isFullscreen ? "Exit Fullscreen" : "Fullscreen Player"}
+              >
+                {isFullscreen ? (
+                  <>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                      <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
+                    </svg>
+                    <span className="hidden sm:inline text-[11px]">Exit</span>
+                  </>
+                ) : (
+                  <>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                      <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                    </svg>
+                    <span className="hidden sm:inline text-[11px]">Fullscreen</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
 
           {/* Servers Pills Row */}
           <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Streaming server options">
-            {/* Official Trailer Button */}
-            {(trailerEmbedUrl || isUnreleased) && (
+            {/* Multiple Trailer / Teaser Pills */}
+            {videos && videos.length > 1 ? (
+              videos.slice(0, 3).map((v, i) => {
+                const isActive = isTrailerActive && activeTrailerKey === v.key;
+                return (
+                  <button
+                    key={v.key}
+                    type="button"
+                    onClick={() => {
+                      setSelectedTrailerKey(v.key);
+                      setIsTrailerActive(true);
+                      setIsLoading(true);
+                      setShowHelp(false);
+                    }}
+                    aria-pressed={isActive}
+                    className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer ${
+                      isActive
+                        ? "bg-amber-500 text-black shadow-[0_0_18px_rgba(245,158,11,0.5)] ring-2 ring-amber-400/50"
+                        : "bg-[#181a22] text-amber-300 hover:text-white hover:bg-[#20232e] border border-amber-500/30"
+                    }`}
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                      <path d="M5 3l14 9-14 9V3z" />
+                    </svg>
+                    <span>{v.type} {i + 1}</span>
+                    {isActive && (
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-black ml-0.5 shrink-0" aria-hidden>
+                        <path d="M20 6 9 17l-5-5" />
+                      </svg>
+                    )}
+                  </button>
+                );
+              })
+            ) : (trailerEmbedUrl || isUnreleased) ? (
               <button
                 type="button"
                 onClick={() => {
@@ -295,7 +347,7 @@ export default function ServerSwitcher(props: Props) {
                   </svg>
                 )}
               </button>
-            )}
+            ) : null}
 
             {/* Streaming Servers */}
             {displayedServers.map((server) => {
