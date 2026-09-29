@@ -69,7 +69,7 @@ export default function Navbar() {
           <Link
             href="/"
             className="group flex items-center gap-3 shrink-0"
-            aria-label="FardhanCine - Beranda"
+            aria-label="FardhanFlix - Beranda"
           >
             <div className="relative w-9 h-9 rounded-xl flex items-center justify-center bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 p-[1px] shadow-[0_0_20px_rgba(229,169,59,0.3)] transition-transform duration-300 group-hover:scale-105">
               <div className="w-full h-full bg-[#08090d] rounded-[11px] flex items-center justify-center">
@@ -88,7 +88,7 @@ export default function Navbar() {
                 className="text-xl font-black tracking-tight text-white transition-colors duration-300 group-hover:text-amber-300"
                 style={{ fontFamily: "var(--font-fraunces)" }}
               >
-                FARDHAN<span className="text-amber-400">CINE</span>
+                FARDHAN<span className="text-amber-400">FLIX</span>
               </span>
               <span className="text-[9px] tracking-[0.25em] uppercase text-zinc-400 -mt-1 font-medium">
                 Cinema Premiere

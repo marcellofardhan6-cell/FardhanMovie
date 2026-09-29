@@ -19,7 +19,7 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: { default: "FardhanCine", template: "%s | FardhanCine" },
+  title: { default: "FardhanFlix", template: "%s | FardhanFlix" },
   description: "Katalog film dan serial TV lengkap. Streaming gratis, tanpa iklan.",
   keywords: ["film", "streaming", "serial tv", "anime", "bioskop", "nonton online"],
 };

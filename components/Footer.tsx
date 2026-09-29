@@ -27,7 +27,7 @@ export default function Footer() {
                 className="text-lg font-black tracking-tight text-white"
                 style={{ fontFamily: "var(--font-fraunces)" }}
               >
-                FARDHAN<span className="text-amber-400">CINE</span>
+                FARDHAN<span className="text-amber-400">FLIX</span>
               </span>
               <p className="text-[11px] text-zinc-400">Koleksi sinematik terlengkap &amp; streaming gratis.</p>
             </div>
@@ -71,10 +71,10 @@ export default function Footer() {
               className="text-zinc-400 hover:text-amber-300 underline transition-colors"
             >
               The Movie Database (TMDB)
-            </a>. FardhanCine tidak menyimpan file video di server sendiri.
+            </a>. FardhanFlix tidak menyimpan file video di server sendiri.
           </p>
           <p className="text-zinc-400 text-[11px]">
-            &copy; {new Date().getFullYear()} FardhanCine. All rights reserved.
+            &copy; {new Date().getFullYear()} FardhanFlix. All rights reserved.
           </p>
         </div>
       </div>
