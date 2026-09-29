@@ -38,17 +38,8 @@ export default function Carousel({ title, items, seeAllHref, subtitle }: Props) 
       {/* Section Header */}
       <div className="flex items-end justify-between mb-5">
         <div>
-          {subtitle && (
-            <span className="block text-[11px] font-bold tracking-[0.2em] uppercase text-amber-400/90 mb-1">
-              {subtitle}
-            </span>
-          )}
-          <h2
-            className="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-3"
-            style={{ fontFamily: "var(--font-fraunces)" }}
-          >
+          <h2 className="text-lg sm:text-xl font-bold tracking-tight text-zinc-100">
             {title}
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
           </h2>
         </div>
 

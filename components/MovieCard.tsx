@@ -95,10 +95,7 @@ export default function MovieCard({ item, priority = false }: Props) {
 
       {/* Movie Information Footer */}
       <div className="p-3.5 bg-gradient-to-b from-[#0e1017] to-[#0a0b10] border-t border-white/[0.05]">
-        <h3
-          className="text-sm font-bold line-clamp-1 leading-snug mb-1 text-zinc-100 group-hover:text-amber-300 transition-colors duration-200"
-          style={{ fontFamily: "var(--font-fraunces)" }}
-        >
+        <h3 className="text-xs sm:text-sm font-semibold line-clamp-1 leading-snug mb-1 text-zinc-100 group-hover:text-amber-400 transition-colors duration-200">
           {title}
         </h3>
         <div className="flex items-center justify-between text-xs text-zinc-400">

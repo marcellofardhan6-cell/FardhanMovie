@@ -17,18 +17,11 @@ export default async function AnimePage({ searchParams }: Props) {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-20">
       <div className="mb-8">
-        <span className="text-[11px] font-bold tracking-[0.25em] uppercase text-amber-400 block mb-1">
-          JAPANESE ANIMATION
-        </span>
-        <h1
-          className="text-3xl sm:text-4xl font-black text-white tracking-tight flex items-center gap-3"
-          style={{ fontFamily: "var(--font-fraunces)" }}
-        >
+        <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
           Koleksi Anime
-          <span className="w-2 h-2 rounded-full bg-amber-400" />
         </h1>
-        <p className="text-xs text-zinc-400 mt-1">
-          Serial anime Jepang terpopuler, shonen, seinen, isekai, hingga masterpiece studio animasi.
+        <p className="text-xs sm:text-sm text-zinc-400 mt-1">
+          Serial animasi Jepang, shonen, seinen, dan film anime populer.
         </p>
       </div>
 

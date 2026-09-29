@@ -11,10 +11,7 @@ export default function MovieGrid({ items, title, emptyMessage = "Tidak ada kont
   return (
     <section aria-label={title}>
       {title && (
-        <h2
-          className="text-xl font-bold mb-5"
-          style={{ fontFamily: "var(--font-fraunces)", color: "var(--text)" }}
-        >
+        <h2 className="text-xl font-bold mb-5 tracking-tight text-white">
           {title}
         </h2>
       )}
