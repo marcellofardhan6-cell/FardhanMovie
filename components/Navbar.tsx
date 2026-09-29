@@ -132,10 +132,16 @@ export default function Navbar() {
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled || menuOpen || mobileSearchOpen
-          ? "bg-[#06070a]/88 backdrop-blur-2xl border-b border-white/[0.08] shadow-2xl"
+        menuOpen || mobileSearchOpen
+          ? "bg-[#06070a]/75 border-b border-white/[0.1] shadow-2xl"
+          : scrolled
+          ? "bg-[#06070a]/90 border-b border-white/[0.08]"
           : "bg-gradient-to-b from-[#06070a]/90 via-[#06070a]/40 to-transparent"
       }`}
+      style={{
+        backdropFilter: (scrolled || menuOpen || mobileSearchOpen) ? "blur(24px)" : "none",
+        WebkitBackdropFilter: (scrolled || menuOpen || mobileSearchOpen) ? "blur(24px)" : "none",
+      }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-18">
@@ -655,11 +661,11 @@ export default function Navbar() {
           </Link>
         </div>
 
-        {/* Mobile Dropdown Panel with Luxurious Frosted Dark Glass */}
+        {/* Mobile Dropdown Panel with Luxurious Frosted Glass */}
         {menuOpen && (
           <div
             id="mobile-menu"
-            className="md:hidden -mx-4 px-5 pt-3 pb-6 bg-[#080a10]/88 backdrop-blur-2xl border-t border-white/[0.08] border-b border-white/[0.08] shadow-[0_25px_50px_rgba(0,0,0,0.85)] max-h-[80vh] overflow-y-auto animate-fade-in"
+            className="md:hidden -mx-4 px-5 pt-3 pb-6 border-t border-white/[0.08] max-h-[80vh] overflow-y-auto animate-fade-in"
           >
             <nav className="flex flex-col space-y-1.5" aria-label="Navigasi mobile">
               {navLinks.map((link) => {
