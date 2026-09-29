@@ -1,5 +1,6 @@
 "use client";
 import { useState, useCallback, useEffect, useRef } from "react";
+import { useWatchHistory } from "@/context/WatchHistoryContext";
 
 interface Server {
   id: number;
@@ -16,6 +17,8 @@ interface Props {
   episode?: number;
   trailerKey?: string | null;
   videos?: { id?: string; key: string; name: string; type: string; site?: string; official?: boolean }[];
+  posterPath?: string | null;
+  backdropPath?: string | null;
 }
 
 function buildServerUrl(server: Server, props: Props): string {
@@ -79,7 +82,8 @@ const SERVERS: Server[] = [
 ];
 
 export default function ServerSwitcher(props: Props) {
-  const { trailerKey, title } = props;
+  const { trailerKey, title, tmdbId, type, season = 1, episode = 1, posterPath, backdropPath } = props;
+  const { addHistory } = useWatchHistory();
   const [activeServer, setActiveServer] = useState(0);
   const [isTrailerActive, setIsTrailerActive] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -87,6 +91,21 @@ export default function ServerSwitcher(props: Props) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showAllServers, setShowAllServers] = useState(true);
   const playerContainerRef = useRef<HTMLDivElement>(null);
+
+  // Automatically record watch history
+  useEffect(() => {
+    if (tmdbId && title) {
+      addHistory({
+        id: Number(tmdbId),
+        type,
+        title,
+        season: type === "tv" ? season : undefined,
+        episode: type === "tv" ? episode : undefined,
+        poster_path: posterPath,
+        backdrop_path: backdropPath,
+      });
+    }
+  }, [tmdbId, type, title, season, episode, posterPath, backdropPath, addHistory]);
 
   const currentServer = SERVERS[activeServer] || SERVERS[0];
   const trailerEmbedUrl = trailerKey

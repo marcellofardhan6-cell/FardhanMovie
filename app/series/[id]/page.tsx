@@ -83,6 +83,8 @@ export default async function SeriesDetailPage({ params, searchParams }: Props) 
               initialEpisodesMap={{ [seasonToLoad]: initialEpisodes }}
               title={show.name}
               trailerKey={bestTrailer?.key}
+              posterPath={show.poster_path}
+              backdropPath={show.backdrop_path}
             />
           </div>
         )}

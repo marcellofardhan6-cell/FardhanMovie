@@ -1,6 +1,7 @@
 import { getTrending, getPopularMovies, getPopularTV, getAnime, getTopRatedMovies, Movie } from "@/lib/tmdb";
 import Hero from "@/components/Hero";
 import Carousel from "@/components/Carousel";
+import ContinueWatching from "@/components/ContinueWatching";
 
 export const revalidate = 3600;
 
@@ -23,8 +24,10 @@ export default async function HomePage() {
       {/* Streaming Hero */}
       {hero && <Hero item={{ ...hero }} />}
 
-      {/* Movie & Series Rows (Clean streaming platform experience) */}
+      {/* Movie & Series Rows */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-7 sm:space-y-12">
+        <ContinueWatching />
+
         <Carousel
           title="Trending This Week"
           items={trendingItems}

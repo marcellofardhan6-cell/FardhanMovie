@@ -68,6 +68,8 @@ export default async function FilmDetailPage({ params }: Props) {
             title={movie.title}
             trailerKey={bestTrailer?.key}
             videos={videos}
+            posterPath={movie.poster_path}
+            backdropPath={movie.backdrop_path}
           />
         </div>
 

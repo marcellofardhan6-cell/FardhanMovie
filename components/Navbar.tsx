@@ -1,9 +1,20 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import { useFavorites } from "@/context/FavoritesContext";
-import { POPULAR_GENRES } from "@/lib/tmdb";
+import { POPULAR_GENRES, img } from "@/lib/tmdb";
+
+interface LiveSearchResult {
+  id: number;
+  title: string;
+  poster_path: string | null;
+  backdrop_path?: string | null;
+  media_type: "movie" | "tv";
+  release_date?: string;
+  vote_average?: number;
+}
 
 export default function Navbar() {
   const { favoritesCount } = useFavorites();
@@ -11,6 +22,12 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<LiveSearchResult[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchDropdownOpen, setSearchDropdownOpen] = useState(false);
+  const desktopSearchContainerRef = useRef<HTMLDivElement>(null);
+  const searchDebounceRef = useRef<NodeJS.Timeout | null>(null);
+
   const router = useRouter();
   const pathname = usePathname();
   const searchRef = useRef<HTMLInputElement>(null);
@@ -25,13 +42,62 @@ export default function Navbar() {
   useEffect(() => {
     setMenuOpen(false);
     setMobileSearchOpen(false);
+    setSearchDropdownOpen(false);
   }, [pathname]);
+
+  // Click outside listener to close search dropdown
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        desktopSearchContainerRef.current &&
+        !desktopSearchContainerRef.current.contains(e.target as Node)
+      ) {
+        setSearchDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Debounced live search autocomplete
+  useEffect(() => {
+    const query = searchQuery.trim();
+    if (query.length < 2) {
+      setSearchResults([]);
+      setSearchDropdownOpen(false);
+      setSearchLoading(false);
+      return;
+    }
+
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+
+    setSearchLoading(true);
+    searchDebounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+        if (res.ok) {
+          const data = await res.json();
+          setSearchResults(data.results || []);
+          setSearchDropdownOpen(true);
+        }
+      } catch (err) {
+        console.error("Live search failed:", err);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 250);
+
+    return () => {
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    };
+  }, [searchQuery]);
 
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
       if (e.key === "Escape") {
         setMenuOpen(false);
         setMobileSearchOpen(false);
+        setSearchDropdownOpen(false);
         searchRef.current?.blur();
         mobileSearchRef.current?.blur();
       }
@@ -235,38 +301,117 @@ export default function Navbar() {
 
           {/* Right: Search & Mobile Trigger */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Desktop Search Input (Hidden on mobile) */}
-            <form onSubmit={handleSearch} role="search" aria-label="Search movies or TV shows" className="hidden sm:block">
-              <div className="relative">
-                <label htmlFor="navbar-search" className="sr-only">Search movies or TV shows</label>
-                <input
-                  ref={searchRef}
-                  id="navbar-search"
-                  type="search"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search titles..."
-                  autoComplete="off"
-                  className="w-36 sm:w-56 text-xs text-white bg-white/[0.05] focus:bg-[#0c0e15] border border-white/[0.08] focus:border-white/30 rounded-lg py-2 pl-8 pr-3 outline-none transition-all placeholder:text-zinc-500"
-                  aria-label="Search movies or TV series"
-                />
-                <svg
-                  className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none"
-                  width="13"
-                  height="13"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden
-                >
-                  <circle cx="11" cy="11" r="8" />
-                  <path d="m21 21-4.35-4.35" />
-                </svg>
-              </div>
-            </form>
+            {/* Desktop Search Input with Live Autocomplete */}
+            <div ref={desktopSearchContainerRef} className="relative hidden sm:block">
+              <form onSubmit={handleSearch} role="search" aria-label="Search movies or TV shows">
+                <div className="relative">
+                  <label htmlFor="navbar-search" className="sr-only">Search movies or TV shows</label>
+                  <input
+                    ref={searchRef}
+                    id="navbar-search"
+                    type="search"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onFocus={() => {
+                      if (searchResults.length > 0) setSearchDropdownOpen(true);
+                    }}
+                    placeholder="Search titles..."
+                    autoComplete="off"
+                    className="w-36 sm:w-56 text-xs text-white bg-white/[0.05] focus:bg-[#0c0e15] border border-white/[0.08] focus:border-white/30 rounded-lg py-2 pl-8 pr-7 outline-none transition-all placeholder:text-zinc-500"
+                    aria-label="Search movies or TV series"
+                  />
+                  <svg
+                    className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none"
+                    width="13"
+                    height="13"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden
+                  >
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="m21 21-4.35-4.35" />
+                  </svg>
+                  {searchLoading && (
+                    <div className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
+                  )}
+                </div>
+              </form>
+
+              {/* Desktop Live Search Dropdown */}
+              {searchDropdownOpen && searchQuery.trim().length >= 2 && (
+                <div className="absolute top-full right-0 mt-2 w-80 rounded-2xl bg-[#0c0e15]/98 backdrop-blur-xl border border-white/[0.12] shadow-2xl p-2 z-50 animate-fade-in">
+                  <div className="flex items-center justify-between px-2.5 py-1 border-b border-white/[0.06] mb-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                      Hasil Pencarian
+                    </span>
+                    <span className="text-[10px] text-zinc-500">
+                      {searchResults.length} ditemukan
+                    </span>
+                  </div>
+
+                  {searchResults.length === 0 && !searchLoading ? (
+                    <div className="py-6 text-center text-xs text-zinc-400">
+                      Tidak ada film atau serial yang cocok.
+                    </div>
+                  ) : (
+                    <div className="max-h-80 overflow-y-auto space-y-1 pr-1">
+                      {searchResults.map((item) => (
+                        <button
+                          type="button"
+                          key={`desktop-${item.media_type}-${item.id}`}
+                          onClick={() => {
+                            setSearchDropdownOpen(false);
+                            setSearchQuery("");
+                            router.push(item.media_type === "tv" ? `/series/${item.id}` : `/film/${item.id}`);
+                          }}
+                          className="w-full flex items-center gap-2.5 p-2 rounded-xl hover:bg-white/[0.08] transition-colors text-left group cursor-pointer"
+                        >
+                          <div className="relative w-9 h-12 rounded-md overflow-hidden bg-zinc-800 shrink-0 border border-white/10">
+                            <Image
+                              src={img(item.poster_path, "w185")}
+                              alt={item.title}
+                              fill
+                              className="object-cover"
+                              unoptimized={!item.poster_path}
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-xs font-semibold text-white group-hover:text-red-400 transition-colors truncate">
+                              {item.title}
+                            </h4>
+                            <div className="flex items-center gap-2 mt-0.5 text-[10px] text-zinc-400">
+                              <span className="px-1 py-0.2 rounded text-[9px] font-bold uppercase bg-white/10 text-zinc-300">
+                                {item.media_type === "tv" ? "Serial" : "Film"}
+                              </span>
+                              {item.release_date && <span>{item.release_date.slice(0, 4)}</span>}
+                              {item.vote_average ? (
+                                <span className="flex items-center gap-0.5 text-amber-400 font-bold">
+                                  ★ {item.vote_average.toFixed(1)}
+                                </span>
+                              ) : null}
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  <Link
+                    href={`/search?q=${encodeURIComponent(searchQuery.trim())}`}
+                    onClick={() => {
+                      setSearchDropdownOpen(false);
+                    }}
+                    className="block text-center text-xs font-bold text-red-400 hover:text-red-300 transition-colors pt-2 pb-1 border-t border-white/[0.06] mt-1"
+                  >
+                    Lihat semua hasil pencarian &rarr;
+                  </Link>
+                </div>
+              )}
+            </div>
 
             {/* Mobile Search Toggle Icon Button */}
             <button
@@ -350,7 +495,7 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Mobile Expandable Search Bar */}
+        {/* Mobile Expandable Search Bar with Live Autocomplete */}
         {mobileSearchOpen && (
           <div className="sm:hidden pb-3 pt-1 border-t border-white/[0.06] animate-fade-in">
             <form onSubmit={handleSearch} role="search" aria-label="Search movies or TV shows">
@@ -360,10 +505,10 @@ export default function Navbar() {
                   type="search"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search movies, series, anime..."
+                  placeholder="Cari film, serial, anime..."
                   autoComplete="off"
                   autoFocus
-                  className="w-full text-xs text-white bg-white/[0.08] focus:bg-[#0c0e15] border border-white/20 focus:border-red-500 rounded-full py-2 pl-9 pr-3 outline-none transition-all placeholder:text-zinc-400 shadow-inner"
+                  className="w-full text-xs text-white bg-white/[0.08] focus:bg-[#0c0e15] border border-white/20 focus:border-red-500 rounded-full py-2.5 pl-9 pr-9 outline-none transition-all placeholder:text-zinc-400 shadow-inner"
                   aria-label="Search movies or TV series"
                 />
                 <svg
@@ -381,8 +526,93 @@ export default function Navbar() {
                   <circle cx="11" cy="11" r="8" />
                   <path d="m21 21-4.35-4.35" />
                 </svg>
+                {searchLoading ? (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
+                ) : searchQuery ? (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white p-0.5"
+                    aria-label="Clear search"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <path d="M18 6 6 18M6 6l12 12" />
+                    </svg>
+                  </button>
+                ) : null}
               </div>
             </form>
+
+            {/* Mobile Live Results Popover */}
+            {searchQuery.trim().length >= 2 && (
+              <div className="mt-2 rounded-2xl bg-[#0c0e15]/98 border border-white/[0.12] p-2 shadow-2xl max-h-72 overflow-y-auto">
+                <div className="flex items-center justify-between px-2.5 py-1 border-b border-white/[0.06] mb-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                    Hasil Cepat
+                  </span>
+                  <span className="text-[10px] text-zinc-500">
+                    {searchResults.length} ditemukan
+                  </span>
+                </div>
+
+                {searchResults.length === 0 && !searchLoading ? (
+                  <div className="py-4 text-center text-xs text-zinc-400">
+                    Tidak ada film yang cocok.
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    {searchResults.map((item) => (
+                      <button
+                        type="button"
+                        key={`mobile-${item.media_type}-${item.id}`}
+                        onClick={() => {
+                          setMobileSearchOpen(false);
+                          setSearchQuery("");
+                          router.push(item.media_type === "tv" ? `/series/${item.id}` : `/film/${item.id}`);
+                        }}
+                        className="w-full flex items-center gap-2.5 p-2 rounded-xl active:bg-white/[0.1] transition-colors text-left"
+                      >
+                        <div className="relative w-8 h-11 rounded-md overflow-hidden bg-zinc-800 shrink-0 border border-white/10">
+                          <Image
+                            src={img(item.poster_path, "w185")}
+                            alt={item.title}
+                            fill
+                            className="object-cover"
+                            unoptimized={!item.poster_path}
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-xs font-semibold text-white truncate">
+                            {item.title}
+                          </h4>
+                          <div className="flex items-center gap-1.5 mt-0.5 text-[10px] text-zinc-400">
+                            <span className="px-1 py-0.2 rounded text-[9px] font-bold uppercase bg-white/10 text-zinc-300">
+                              {item.media_type === "tv" ? "Serial" : "Film"}
+                            </span>
+                            {item.release_date && <span>{item.release_date.slice(0, 4)}</span>}
+                            {item.vote_average ? (
+                              <span className="text-amber-400 font-bold">
+                                ★ {item.vote_average.toFixed(1)}
+                              </span>
+                            ) : null}
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                <Link
+                  href={`/search?q=${encodeURIComponent(searchQuery.trim())}`}
+                  onClick={() => {
+                    setMobileSearchOpen(false);
+                  }}
+                  className="block text-center text-xs font-bold text-red-400 hover:text-red-300 pt-2 pb-1 border-t border-white/[0.06] mt-1"
+                >
+                  Lihat semua hasil pencarian &rarr;
+                </Link>
+              </div>
+            )}
           </div>
         )}
 
