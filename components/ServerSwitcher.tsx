@@ -20,14 +20,22 @@ function buildServerUrl(server: Server, props: Props): string {
   const id = String(tmdbId);
 
   switch (server.key) {
-    case "vidfast":
+    case "vidlink":
       return type === "movie"
-        ? `https://vidfast.pro/movie/${id}`
-        : `https://vidfast.pro/tv/${id}/${season}/${episode}`;
+        ? `https://vidlink.pro/movie/${id}?primaryColor=e50914`
+        : `https://vidlink.pro/tv/${id}/${season}/${episode}?primaryColor=e50914`;
+    case "multiembed":
+      return type === "movie"
+        ? `https://multiembed.mov/?video_id=${id}&tmdb=1`
+        : `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${episode}`;
     case "videasy":
       return type === "movie"
         ? `https://player.videasy.net/movie/${id}`
         : `https://player.videasy.net/tv/${id}/${season}/${episode}`;
+    case "vidfast":
+      return type === "movie"
+        ? `https://vidfast.pro/movie/${id}`
+        : `https://vidfast.pro/tv/${id}/${season}/${episode}`;
     case "adrock":
       return type === "movie"
         ? `https://adrock.to/embed/movie/${id}`
@@ -36,41 +44,33 @@ function buildServerUrl(server: Server, props: Props): string {
       return type === "movie"
         ? `https://vidsrc.to/embed/movie/${id}`
         : `https://vidsrc.to/embed/tv/${id}/${season}/${episode}`;
-    case "vidlink":
-      return type === "movie"
-        ? `https://vidlink.pro/movie/${id}?primaryColor=e50914`
-        : `https://vidlink.pro/tv/${id}/${season}/${episode}?primaryColor=e50914`;
     case "vidbolt":
       return type === "movie"
         ? `https://vidbolt.org/embed/movie/${id}`
         : `https://vidbolt.org/embed/tv/${id}/${season}/${episode}`;
-    case "vidnest":
+    case "autoembed":
       return type === "movie"
-        ? `https://vidnest.net/embed/movie/${id}`
-        : `https://vidnest.net/embed/tv/${id}/${season}/${episode}`;
-    case "vidzee":
-      return type === "movie"
-        ? `https://vidzee.org/embed/movie/${id}`
-        : `https://vidzee.org/embed/tv/${id}/${season}/${episode}`;
+        ? `https://player.autoembed.cc/embed/movie/${id}`
+        : `https://player.autoembed.cc/embed/tv/${id}/${season}/${episode}`;
     default:
-      return `https://player.videasy.net/movie/${id}`;
+      return `https://vidlink.pro/movie/${id}?primaryColor=e50914`;
   }
 }
 
 const SERVERS: Server[] = [
-  { id: 1, name: "VidFast", key: "vidfast", badge: "4K" },
-  { id: 2, name: "VidEasy", key: "videasy", badge: "4K" },
-  { id: 3, name: "AdRock", key: "adrock" },
-  { id: 4, name: "VidSrc", key: "vidsrc" },
-  { id: 5, name: "VidLink", key: "vidlink" },
-  { id: 6, name: "VidBolt", key: "vidbolt" },
-  { id: 7, name: "VidNest", key: "vidnest" },
-  { id: 8, name: "Vidzee", key: "vidzee" },
+  { id: 1, name: "VidLink", key: "vidlink", badge: "4K" },
+  { id: 2, name: "MultiEmbed", key: "multiembed", badge: "All-Movies" },
+  { id: 3, name: "VidEasy", key: "videasy", badge: "4K" },
+  { id: 4, name: "VidFast", key: "vidfast", badge: "4K" },
+  { id: 5, name: "AdRock", key: "adrock" },
+  { id: 6, name: "VidSrc", key: "vidsrc" },
+  { id: 7, name: "VidBolt", key: "vidbolt" },
+  { id: 8, name: "AutoEmbed", key: "autoembed" },
 ];
 
 export default function ServerSwitcher(props: Props) {
-  // VidEasy (4K) default as shown in reference screenshot
-  const [activeServer, setActiveServer] = useState(1);
+  // VidLink (4K) as ultra-fast primary default
+  const [activeServer, setActiveServer] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [showHelp, setShowHelp] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
