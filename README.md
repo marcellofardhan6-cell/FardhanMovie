@@ -1,4 +1,4 @@
-# FardhanFlix
+# FardTV
 
 Katalog film & streaming berbasis TMDB. Dark mode, tanpa iklan, multi-server player. Deploy-ready untuk Vercel.
 

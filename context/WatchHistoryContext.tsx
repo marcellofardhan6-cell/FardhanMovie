@@ -30,7 +30,8 @@ const WatchHistoryContext = createContext<WatchHistoryContextType>({
   isLoaded: false,
 });
 
-const STORAGE_KEY = "fardhanflix_watch_history_v1";
+const STORAGE_KEY = "fardtv_watch_history_v1";
+const LEGACY_STORAGE_KEY = "fardhanflix_watch_history_v1";
 const MAX_HISTORY_ITEMS = 24;
 
 export function WatchHistoryProvider({ children }: { children: React.ReactNode }) {
@@ -39,7 +40,7 @@ export function WatchHistoryProvider({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
+      const stored = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {

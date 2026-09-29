@@ -21,7 +21,7 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: { default: "FardhanFlix - Free Movies & TV Series Streaming", template: "%s | FardhanFlix" },
+  title: { default: "FardTV - Free Movies & TV Series Streaming", template: "%s | FardTV" },
   description: "Watch trending movies, popular TV series, and anime online. Free HD streaming without ads.",
   keywords: ["movies", "streaming", "tv series", "anime", "cinema", "watch online"],
 };

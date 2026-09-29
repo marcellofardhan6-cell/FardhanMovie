@@ -30,7 +30,8 @@ const FavoritesContext = createContext<FavoritesContextType>({
   favoritesCount: 0,
 });
 
-const STORAGE_KEY = "fardhanflix_favorites_v1";
+const STORAGE_KEY = "fardtv_favorites_v1";
+const LEGACY_STORAGE_KEY = "fardhanflix_favorites_v1";
 
 export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
@@ -39,7 +40,7 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   // Load from localStorage on mount
   useEffect(() => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
+      const stored = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {

@@ -49,10 +49,10 @@ export default function Logo({
       {showText && (
         <div className="flex items-center font-black tracking-tight leading-none">
           <span className={`text-white transition-opacity group-hover:opacity-90 ${textSize}`}>
-            FARDHAN
+            FARD
           </span>
           <span className={`text-[#E50914] ml-0.5 ${textSize}`}>
-            FLIX
+            TV
           </span>
         </div>
       )}
@@ -62,7 +62,7 @@ export default function Logo({
   if (!href) return content;
 
   return (
-    <Link href={href} aria-label="FardhanFlix - Beranda" className="inline-block focus:outline-none">
+    <Link href={href} aria-label="FardTV - Beranda" className="inline-block focus:outline-none">
       {content}
     </Link>
   );

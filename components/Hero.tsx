@@ -98,7 +98,7 @@ export default function Hero({ item }: Props) {
             />
           </div>
 
-          {/* Desktop Buttons (>= md): Classic Netflix / FardhanFlix Buttons */}
+          {/* Desktop Buttons (>= md): Classic Netflix / FardTV Buttons */}
           <div className="hidden md:flex items-center gap-3">
             <Link
               href={href}

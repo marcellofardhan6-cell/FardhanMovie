@@ -57,10 +57,10 @@ export default function Footer() {
               className="text-zinc-400 hover:text-zinc-200 underline transition-colors"
             >
               TMDB
-            </a>. FardhanFlix does not host or store any media files on its servers.
+            </a>. FardTV does not host or store any media files on its servers.
           </p>
           <p className="text-zinc-500 text-[11px]">
-            &copy; {new Date().getFullYear()} FardhanFlix. All rights reserved.
+            &copy; {new Date().getFullYear()} FardTV. All rights reserved.
           </p>
         </div>
       </div>
