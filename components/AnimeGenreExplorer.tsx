@@ -30,13 +30,12 @@ export default function AnimeGenreExplorer({ activeGenre = "", variant = "cards"
             <Link
               key={g.id}
               href={`/anime?genre=${g.id}`}
-              className={`px-4 py-2 rounded-xl text-xs font-bold tracking-wide transition-all whitespace-nowrap shrink-0 flex items-center gap-1.5 cursor-pointer ${
+              className={`px-4 py-2 rounded-xl text-xs font-bold tracking-wide transition-all whitespace-nowrap shrink-0 cursor-pointer ${
                 isActive
                   ? "bg-[#FF6400] text-black shadow-md shadow-[#FF6400]/25 font-black"
                   : "bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 hover:border-[#FF6400]/40"
               }`}
             >
-              <span>{g.icon}</span>
               <span>{g.name}</span>
             </Link>
           );
@@ -76,42 +75,42 @@ export default function AnimeGenreExplorer({ activeGenre = "", variant = "cards"
 
       {/* Grid of Anime Genre Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-3.5">
-        {genres.map((g) => {
+        {genres.map((g, index) => {
           const isActive = activeGenre === g.id;
           return (
             <Link
               key={`genre-${g.id}`}
               href={`/anime?genre=${g.id}`}
-              className={`group p-4 rounded-xl border transition-all duration-300 flex flex-col justify-between cursor-pointer ${
+              className={`group p-4 sm:p-5 rounded-2xl border transition-all duration-300 flex flex-col justify-between cursor-pointer ${
                 isActive
                   ? "bg-[#FF6400]/15 border-[#FF6400] shadow-md shadow-[#FF6400]/20"
                   : "bg-[#121520] border-white/[0.06] hover:border-[#FF6400]/50 hover:bg-[#161a29]"
               }`}
             >
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-2xl transform group-hover:scale-110 transition-transform">
-                    {g.icon}
-                  </span>
-                  <span className="text-[10px] font-bold text-zinc-500 font-mono tracking-wider">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[10px] font-black tracking-widest uppercase text-[#FF6400] bg-[#FF6400]/10 px-2 py-0.5 rounded border border-[#FF6400]/20 font-mono">
                     {g.jpName}
+                  </span>
+                  <span className="text-[11px] text-zinc-600 font-mono font-medium group-hover:text-zinc-400 transition-colors">
+                    #{String(index + 1).padStart(2, "0")}
                   </span>
                 </div>
                 <h3
-                  className={`text-sm font-bold transition-colors ${
+                  className={`text-sm sm:text-base font-bold transition-colors ${
                     isActive ? "text-[#FF6400]" : "text-white group-hover:text-[#FF6400]"
                   }`}
                 >
                   {g.name}
                 </h3>
-                <p className="text-[11px] text-zinc-400 mt-1 line-clamp-2 leading-relaxed">
+                <p className="text-xs text-zinc-400 mt-1 line-clamp-2 leading-relaxed">
                   {g.description}
                 </p>
               </div>
 
-              <div className="mt-3 pt-2 border-t border-white/[0.04] flex items-center justify-between text-[11px] text-zinc-500 group-hover:text-[#FF6400] transition-colors font-semibold">
-                <span>Eksplorasi</span>
-                <span>&rarr;</span>
+              <div className="mt-4 pt-3 border-t border-white/[0.04] flex items-center justify-between text-xs text-zinc-500 group-hover:text-[#FF6400] transition-colors font-medium">
+                <span>Jelajahi</span>
+                <span className="transition-transform group-hover:translate-x-1">&rarr;</span>
               </div>
             </Link>
           );

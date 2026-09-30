@@ -214,18 +214,15 @@ export default async function AnimePage({ searchParams }: Props) {
           <div className="space-y-8">
             {/* Filter Bar with Sort Selector */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-[#0c0e15] border border-white/[0.08]">
-              <div className="flex items-center gap-2.5">
-                <span className="text-2xl">{currentGenreInfo?.icon || "🎬"}</span>
+              <div className="flex items-center gap-3">
+                <span className="w-10 h-10 rounded-xl bg-[#FF6400]/15 border border-[#FF6400]/30 flex items-center justify-center text-[#FF6400] text-xs font-black font-mono shrink-0">
+                  {currentGenreInfo?.jpName || "ALL"}
+                </span>
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-bold text-white">
                       {currentGenreInfo?.name || "Koleksi Anime"}
                     </span>
-                    {currentGenreInfo?.jpName && (
-                      <span className="text-[10px] font-bold text-zinc-500 font-mono">
-                        {currentGenreInfo.jpName}
-                      </span>
-                    )}
                   </div>
                   <p className="text-xs text-zinc-400">
                     {catalog.total_results?.toLocaleString("id-ID") || 0} judul tersedia

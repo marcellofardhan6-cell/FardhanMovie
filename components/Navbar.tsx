@@ -220,10 +220,9 @@ export default function Navbar() {
                                   <Link
                                     key={g.id}
                                     href={`/anime?genre=${g.id}`}
-                                    className="px-2.5 py-1.5 rounded-lg text-xs text-zinc-300 hover:text-[#FF6400] hover:bg-white/[0.06] transition-colors truncate flex items-center gap-1.5"
+                                    className="px-2.5 py-1.5 rounded-lg text-xs text-zinc-300 hover:text-[#FF6400] hover:bg-white/[0.06] transition-colors truncate"
                                   >
-                                    <span className="text-xs">{g.icon}</span>
-                                    <span className="truncate">{g.name}</span>
+                                    {g.name}
                                   </Link>
                                 ))
                               : POPULAR_GENRES.map((g) => (

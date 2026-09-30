@@ -175,21 +175,20 @@ export interface AnimeGenreInfo {
   name: string;
   jpName: string;
   description: string;
-  icon: string;
 }
 
 export const ANIME_GENRE_LIST: AnimeGenreInfo[] = [
-  { id: "", name: "Semua", jpName: "すべて", description: "Seluruh koleksi anime terlengkap", icon: "✨" },
-  { id: "10759", name: "Action & Shonen", jpName: "アクション", description: "Pertarungan epik, shonen, dan petualangan seru", icon: "⚔️" },
-  { id: "10765", name: "Sci-Fi & Fantasi", jpName: "ファンタジー", description: "Isekai, sihir magis, dunia paralel, dan teknologi futuristik", icon: "🔮" },
-  { id: "35", name: "Komedi", jpName: "コメディ", description: "Lelucon kocak, parodi menghibur, dan humor santai", icon: "😂" },
-  { id: "18", name: "Drama & Romance", jpName: "ドラマ", description: "Kisah cinta menyentuh, romansa sekolah, dan dinamika kehidupan", icon: "🌸" },
-  { id: "9648", name: "Misteri & Detektif", jpName: "ミステリー", description: "Teka-teki kriminal, investigasi menegangkan, dan plot twist", icon: "🔍" },
-  { id: "10751", name: "Slice of Life", jpName: "日常", description: "Kehidupan sekolah santai, pertemanan hangat, dan klub sekolah", icon: "☕" },
-  { id: "80", name: "Psychological & Crime", jpName: "心理サスペンス", description: "Pertarungan kecerdasan, intrik kriminal gelap, dan psikologis", icon: "🧠" },
-  { id: "10768", name: "War & Militer", jpName: "ミリタリー", description: "Pertempuran skala besar, robot mecha, dan strategi perang", icon: "🛡️" },
-  { id: "10762", name: "Shonen & Kids", jpName: "少年", description: "Semangat pantang menyerah, turnamen beladiri, dan persahabatan", icon: "⚡" },
-  { id: "movie", name: "Film Layar Lebar", jpName: "劇場版", description: "Animasi bioskop Jepang dengan grafis kualitas sinematik", icon: "🎬" },
+  { id: "", name: "Semua", jpName: "ALL", description: "Seluruh koleksi anime terlengkap" },
+  { id: "10759", name: "Action & Shonen", jpName: "ACTION", description: "Pertarungan epik, shonen, dan petualangan seru" },
+  { id: "10765", name: "Sci-Fi & Fantasi", jpName: "FANTASY", description: "Isekai, sihir magis, dunia paralel, dan fiksi ilmiah" },
+  { id: "35", name: "Komedi", jpName: "COMEDY", description: "Lelucon kocak, parodi menghibur, dan humor santai" },
+  { id: "18", name: "Drama & Romance", jpName: "ROMANCE", description: "Kisah cinta menyentuh, romansa sekolah, dan drama emosional" },
+  { id: "9648", name: "Misteri & Detektif", jpName: "MYSTERY", description: "Teka-teki kriminal, investigasi menegangkan, dan plot twist" },
+  { id: "10751", name: "Slice of Life", jpName: "SLICE OF LIFE", description: "Kehidupan sekolah santai, pertemanan hangat, dan klub sekolah" },
+  { id: "80", name: "Psychological & Crime", jpName: "PSYCHOLOGICAL", description: "Pertarungan kecerdasan, intrik kriminal gelap, dan psikologis" },
+  { id: "10768", name: "War & Mecha", jpName: "MECHA", description: "Pertempuran skala besar, robot mecha, dan strategi militer" },
+  { id: "10762", name: "Kids & Shonen", jpName: "SHONEN", description: "Semangat pantang menyerah, turnamen beladiri, dan persahabatan" },
+  { id: "movie", name: "Film Layar Lebar", jpName: "THEATRICAL", description: "Animasi bioskop Jepang dengan grafis kualitas sinematik" },
 ];
 
 export async function getAnime(
