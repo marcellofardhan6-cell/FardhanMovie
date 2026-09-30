@@ -168,10 +168,48 @@ export async function getTopRatedTV(page = 1) {
   return tmdbFetch<TMDBResponse<Movie>>("/tv/top_rated", { page: String(page) });
 }
 
-export async function getAnime(page = 1) {
+export async function getAnime(page = 1, genre?: string) {
   // Anime: Japanese animation on TV category
+  const params: Record<string, string> = {
+    with_genres: genre ? `16,${genre}` : "16",
+    with_origin_country: "JP",
+    sort_by: "popularity.desc",
+    page: String(page),
+  };
+  return tmdbFetch<TMDBResponse<Movie>>("/discover/tv", params);
+}
+
+export async function getAnimeActionShonen(page = 1) {
+  return tmdbFetch<TMDBResponse<Movie>>("/discover/tv", {
+    with_genres: "16,10759",
+    with_origin_country: "JP",
+    sort_by: "popularity.desc",
+    page: String(page),
+  });
+}
+
+export async function getAnimeMovies(page = 1) {
+  return tmdbFetch<TMDBResponse<Movie>>("/discover/movie", {
+    with_genres: "16",
+    with_origin_country: "JP",
+    sort_by: "popularity.desc",
+    page: String(page),
+  });
+}
+
+export async function getAnimeTopRated(page = 1) {
   return tmdbFetch<TMDBResponse<Movie>>("/discover/tv", {
     with_genres: "16",
+    with_origin_country: "JP",
+    sort_by: "vote_average.desc",
+    "vote_count.gte": "250",
+    page: String(page),
+  });
+}
+
+export async function getAnimeFantasyIsekai(page = 1) {
+  return tmdbFetch<TMDBResponse<Movie>>("/discover/tv", {
+    with_genres: "16,10765",
     with_origin_country: "JP",
     sort_by: "popularity.desc",
     page: String(page),

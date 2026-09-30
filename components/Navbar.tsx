@@ -282,6 +282,26 @@ export default function Navbar() {
                     </div>
                   );
                 }
+                if (link.href === "/anime") {
+                  const isAnimeActive = pathname.startsWith("/anime");
+                  return (
+                    <Link
+                      key={link.href}
+                      href="/anime"
+                      className={`text-sm tracking-wide transition-all duration-300 flex items-center gap-1.5 ${
+                        isAnimeActive
+                          ? "text-pink-400 font-bold drop-shadow-[0_0_10px_rgba(255,46,147,0.6)]"
+                          : "text-zinc-400 hover:text-pink-300"
+                      }`}
+                      aria-current={isAnimeActive ? "page" : undefined}
+                    >
+                      <span>Anime</span>
+                      <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-pink-500/20 text-pink-300 border border-pink-500/40 tracking-wider">
+                        JP
+                      </span>
+                    </Link>
+                  );
+                }
                 return (
                   <Link
                     key={link.href}
@@ -617,11 +637,11 @@ export default function Navbar() {
           </div>
         )}
 
-        {/* Mobile Sub-Nav Tab Bar (Home, Movies, Series, My List) */}
-        <div className="md:hidden flex items-center justify-around py-2 border-t border-white/[0.06] -mx-4 px-4 bg-transparent">
+        {/* Mobile Sub-Nav Tab Bar (Home, Movies, Series, Anime, My List) */}
+        <div className="md:hidden flex items-center justify-between py-2 border-t border-white/[0.06] -mx-4 px-3 bg-transparent overflow-x-auto scrollbar-none">
           <Link
             href="/"
-            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
+            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 ${
               pathname === "/"
                 ? "bg-white/20 text-white shadow-sm ring-1 ring-white/30 backdrop-blur-sm"
                 : "text-zinc-300 hover:text-white drop-shadow-sm"
@@ -631,7 +651,7 @@ export default function Navbar() {
           </Link>
           <Link
             href="/films"
-            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
+            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 ${
               pathname === "/films" || pathname.startsWith("/film")
                 ? "bg-white/20 text-white shadow-sm ring-1 ring-white/30 backdrop-blur-sm"
                 : "text-zinc-300 hover:text-white drop-shadow-sm"
@@ -641,7 +661,7 @@ export default function Navbar() {
           </Link>
           <Link
             href="/series"
-            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
+            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 ${
               pathname.startsWith("/series")
                 ? "bg-white/20 text-white shadow-sm ring-1 ring-white/30 backdrop-blur-sm"
                 : "text-zinc-300 hover:text-white drop-shadow-sm"
@@ -650,8 +670,19 @@ export default function Navbar() {
             Series
           </Link>
           <Link
+            href="/anime"
+            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
+              pathname.startsWith("/anime")
+                ? "bg-gradient-to-r from-pink-600 via-rose-600 to-red-600 text-white shadow-[0_0_14px_rgba(255,46,147,0.5)] ring-1 ring-pink-400/50 backdrop-blur-sm"
+                : "text-pink-300/90 hover:text-pink-200 drop-shadow-sm"
+            }`}
+          >
+            <span>Anime</span>
+            <span className="text-[8px] bg-pink-900/60 px-1 py-0.2 rounded font-black text-pink-200">JP</span>
+          </Link>
+          <Link
             href="/favorites"
-            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
+            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 ${
               pathname === "/favorites"
                 ? "bg-white/20 text-white shadow-sm ring-1 ring-white/30 backdrop-blur-sm"
                 : "text-zinc-300 hover:text-white drop-shadow-sm"
