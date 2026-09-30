@@ -7,7 +7,7 @@ interface Props {
   emptyMessage?: string;
 }
 
-export default function MovieGrid({ items, title, emptyMessage = "Tidak ada konten." }: Props) {
+export default function MovieGrid({ items, title, emptyMessage = "No content found." }: Props) {
   return (
     <section aria-label={title}>
       {title && (

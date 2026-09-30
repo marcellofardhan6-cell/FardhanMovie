@@ -28,10 +28,10 @@ export default async function HomePage() {
 
         {/* 1. Top 10 Row (Netflix-Style Giant Architectural Rank Numbers) */}
         <Carousel
-          title="Top 10 Hari Ini"
+          title="Top 10 Today"
           items={trending.results}
           variant="top10"
-          subtitle="Film dan serial paling banyak ditonton minggu ini"
+          subtitle="Most watched movies and series this week"
         />
 
         {/* 2. Popular Movies (Standard 2:3 Poster Cards) */}
@@ -43,11 +43,11 @@ export default async function HomePage() {
 
         {/* 3. Top Anime (Cinematic Landscape 16:9 Backdrop Cards) */}
         <Carousel
-          title="Anime Pilihan"
+          title="Featured Anime"
           items={anime.results}
           seeAllHref="/anime"
           variant="backdrop"
-          subtitle="Animasi Jepang terpopuler dalam format sinematik"
+          subtitle="Top Japanese animation in cinematic format"
         />
 
         {/* 4. Popular TV Series (Standard 2:3 Poster Cards) */}

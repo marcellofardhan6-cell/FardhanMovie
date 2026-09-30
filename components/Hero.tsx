@@ -135,7 +135,7 @@ export default function Hero({ items, item, isAnime }: Props) {
               {year && <span>{year}</span>}
               <span className="text-zinc-500">•</span>
               <span className="px-2 py-0.5 rounded bg-white/10 text-[10px] text-zinc-300 border border-white/15">
-                {isAnimePage ? "Serial Anime" : type === "movie" ? "Film" : "Serial TV"}
+                {isAnimePage ? "Anime Series" : type === "movie" ? "Movie" : "TV Series"}
               </span>
               {isAnimePage ? (
                 <span className="px-1.5 py-0.5 rounded bg-[#FF6400]/20 text-[#FF6400] border border-[#FF6400]/40 text-[10px] font-bold">

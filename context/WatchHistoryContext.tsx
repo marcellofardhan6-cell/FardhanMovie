@@ -48,7 +48,7 @@ export function WatchHistoryProvider({ children }: { children: React.ReactNode }
         }
       }
     } catch (e) {
-      console.error("Gagal memuat riwayat tonton dari localStorage:", e);
+      console.error("Failed to load watch history from localStorage:", e);
     } finally {
       setIsLoaded(true);
     }
@@ -59,7 +59,7 @@ export function WatchHistoryProvider({ children }: { children: React.ReactNode }
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
     } catch (e) {
-      console.error("Gagal menyimpan riwayat tonton ke localStorage:", e);
+      console.error("Failed to save watch history to localStorage:", e);
     }
   }, [history, isLoaded]);
 

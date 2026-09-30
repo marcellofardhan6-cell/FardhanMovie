@@ -95,7 +95,7 @@ export default function Logo({
   return (
     <Link
       href={targetHref}
-      aria-label={isAnime ? "FardTV Anime - Beranda" : "FardTV - Beranda"}
+      aria-label={isAnime ? "FardTV Anime - Home" : "FardTV - Home"}
       className="inline-block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6400] rounded"
     >
       {content}

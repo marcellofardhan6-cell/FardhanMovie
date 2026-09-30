@@ -104,7 +104,7 @@ export default function TrailerModal({
           {loading ? (
             <div className="flex flex-col items-center gap-3">
               <div className="w-10 h-10 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
-              <p className="text-xs text-zinc-400 font-medium">Memuat trailer...</p>
+              <p className="text-xs text-zinc-400 font-medium">Loading trailer...</p>
             </div>
           ) : trailerKey ? (
             <iframe
@@ -117,9 +117,9 @@ export default function TrailerModal({
           ) : (
             <div className="text-center px-6 py-12">
               <p className="text-4xl mb-3">🎬</p>
-              <h4 className="text-base font-bold text-white mb-1">Trailer Tidak Tersedia</h4>
+              <h4 className="text-base font-bold text-white mb-1">Trailer Unavailable</h4>
               <p className="text-xs text-zinc-400 max-w-sm mx-auto">
-                Trailer resmi untuk {title} belum tersedia dari studio produksi di YouTube.
+                Official trailer for {title} is not available on YouTube.
               </p>
             </div>
           )}

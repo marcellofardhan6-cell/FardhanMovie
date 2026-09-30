@@ -128,7 +128,7 @@ export default function TVPlayer({
           payload === "ended" ||
           payload?.data?.event === "ended"
         ) {
-          setAutoNextToast(`Video selesai. Memutar Episode ${currentEpisode + 1}...`);
+          setAutoNextToast(`Episode ended. Playing Episode ${currentEpisode + 1}...`);
           const timer = setTimeout(() => {
             handleNextEpisode();
             setAutoNextToast(null);
@@ -176,7 +176,7 @@ export default function TVPlayer({
               isAnimeTheme ? "bg-black/20 hover:bg-black/35 text-black" : "bg-black/30 hover:bg-black/50 text-white"
             }`}
           >
-            Batal
+            Cancel
           </button>
         </div>
       )}
@@ -185,7 +185,7 @@ export default function TVPlayer({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 sm:p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/25 text-xs text-amber-200">
         <div className="flex items-center gap-2">
           <span className="text-amber-400 text-sm shrink-0">💡</span>
-          <span>Jika server menampilkan <em>&quot;Check back later&quot;</em>, silakan klik server <strong>SuperEmbed Cinema</strong>, <strong>VidSrc VIP</strong>, atau <strong>VidLink Pro</strong> di atas.</span>
+          <span>If the player shows <em>&quot;Check back later&quot;</em>, please click <strong>SuperEmbed Cinema</strong>, <strong>VidSrc VIP</strong>, or <strong>VidLink Pro</strong> above.</span>
         </div>
       </div>
 
@@ -196,13 +196,13 @@ export default function TVPlayer({
           onClick={handlePrevEpisode}
           disabled={!canPrev}
           className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs font-bold transition-all disabled:opacity-30 disabled:pointer-events-none bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 hover:text-white border border-white/[0.08] cursor-pointer"
-          aria-label="Episode Sebelumnya"
+          aria-label="Previous Episode"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
             <path d="m15 18-6-6 6-6" />
           </svg>
-          <span className="hidden xs:inline">Episode Sebelumnya</span>
-          <span className="xs:hidden">Sebelumnya</span>
+          <span className="hidden xs:inline">Previous Episode</span>
+          <span className="xs:hidden">Previous</span>
         </button>
 
         {/* Center: Current Episode Status & Auto-Next Toggle */}
@@ -229,7 +229,7 @@ export default function TVPlayer({
                 ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
                 : "bg-white/[0.05] text-zinc-500 border border-white/[0.08]"
             }`}
-            title={autoNextEnabled ? "Auto-Next Aktif: Otomatis memutar episode berikutnya" : "Auto-Next Nonaktif"}
+            title={autoNextEnabled ? "Auto-Next Active: Automatically plays next episode" : "Auto-Next Off"}
           >
             <span className={`w-1.5 h-1.5 rounded-full ${autoNextEnabled ? "bg-emerald-400 animate-pulse" : "bg-zinc-600"}`} />
             <span>Auto-Next: {autoNextEnabled ? "ON" : "OFF"}</span>
@@ -245,10 +245,10 @@ export default function TVPlayer({
               ? "bg-[#FF6400] hover:bg-[#ff7b1a] text-black font-black shadow-lg shadow-[#FF6400]/30"
               : "bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-600/30"
           }`}
-          aria-label="Episode Berikutnya"
+          aria-label="Next Episode"
         >
-          <span className="hidden xs:inline">Episode Berikutnya</span>
-          <span className="xs:hidden">Berikutnya</span>
+          <span className="hidden xs:inline">Next Episode</span>
+          <span className="xs:hidden">Next</span>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
             <path d="m9 18 6-6-6-6" />
           </svg>
@@ -267,9 +267,9 @@ export default function TVPlayer({
                 className="w-5 h-5 border-2 border-transparent rounded-full animate-spin"
                 style={{ borderTopColor: "var(--accent)" }}
                 role="status"
-                aria-label="Memuat daftar episode..."
+                aria-label="Loading episode list..."
               />
-              <p className="text-sm" style={{ color: "var(--text-muted)" }}>Memuat episode...</p>
+              <p className="text-sm" style={{ color: "var(--text-muted)" }}>Loading episodes...</p>
             </div>
           </div>
         ) : (

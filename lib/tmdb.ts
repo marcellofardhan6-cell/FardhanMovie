@@ -178,17 +178,17 @@ export interface AnimeGenreInfo {
 }
 
 export const ANIME_GENRE_LIST: AnimeGenreInfo[] = [
-  { id: "", name: "Semua", jpName: "ALL", description: "Seluruh koleksi anime terlengkap" },
-  { id: "10759", name: "Action & Shonen", jpName: "ACTION", description: "Pertarungan epik, shonen, dan petualangan seru" },
-  { id: "10765", name: "Sci-Fi & Fantasi", jpName: "FANTASY", description: "Isekai, sihir magis, dunia paralel, dan fiksi ilmiah" },
-  { id: "35", name: "Komedi", jpName: "COMEDY", description: "Lelucon kocak, parodi menghibur, dan humor santai" },
-  { id: "18", name: "Drama & Romance", jpName: "ROMANCE", description: "Kisah cinta menyentuh, romansa sekolah, dan drama emosional" },
-  { id: "9648", name: "Misteri & Detektif", jpName: "MYSTERY", description: "Teka-teki kriminal, investigasi menegangkan, dan plot twist" },
-  { id: "10751", name: "Slice of Life", jpName: "SLICE OF LIFE", description: "Kehidupan sekolah santai, pertemanan hangat, dan klub sekolah" },
-  { id: "80", name: "Psychological & Crime", jpName: "PSYCHOLOGICAL", description: "Pertarungan kecerdasan, intrik kriminal gelap, dan psikologis" },
-  { id: "10768", name: "War & Mecha", jpName: "MECHA", description: "Pertempuran skala besar, robot mecha, dan strategi militer" },
-  { id: "10762", name: "Kids & Shonen", jpName: "SHONEN", description: "Semangat pantang menyerah, turnamen beladiri, dan persahabatan" },
-  { id: "movie", name: "Film Layar Lebar", jpName: "THEATRICAL", description: "Animasi bioskop Jepang dengan grafis kualitas sinematik" },
+  { id: "", name: "All", jpName: "ALL", description: "Complete collection of Japanese anime" },
+  { id: "10759", name: "Action & Shonen", jpName: "ACTION", description: "Epic battles, shonen rivals, and thrilling adventures" },
+  { id: "10765", name: "Sci-Fi & Fantasy", jpName: "FANTASY", description: "Isekai, magic spells, parallel worlds, and futuristic sci-fi" },
+  { id: "35", name: "Comedy", jpName: "COMEDY", description: "Hilarious gags, witty parodies, and lighthearted laughs" },
+  { id: "18", name: "Drama & Romance", jpName: "ROMANCE", description: "Heartfelt love stories, school romance, and emotional journeys" },
+  { id: "9648", name: "Mystery & Detective", jpName: "MYSTERY", description: "Crime puzzles, gripping investigations, and deep plot twists" },
+  { id: "10751", name: "Slice of Life", jpName: "SLICE OF LIFE", description: "Cozy everyday life, school clubs, and warm friendships" },
+  { id: "80", name: "Psychological & Crime", jpName: "PSYCHOLOGICAL", description: "Mind games, psychological thrillers, and dark criminal intrigue" },
+  { id: "10768", name: "War & Mecha", jpName: "MECHA", description: "Large-scale wars, giant mecha robots, and tactical conflicts" },
+  { id: "10762", name: "Kids & Shonen", jpName: "SHONEN", description: "Never-give-up spirit, martial arts tournaments, and friendship" },
+  { id: "movie", name: "Theatrical Films", jpName: "THEATRICAL", description: "Acclaimed feature-length anime with cinematic animation" },
 ];
 
 export async function getAnime(

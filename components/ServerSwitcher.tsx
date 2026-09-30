@@ -214,12 +214,12 @@ export default function ServerSwitcher(props: Props) {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-lg text-xs font-semibold text-red-400 hover:text-white bg-red-600/10 hover:bg-red-600 border border-red-500/20 transition-all cursor-pointer"
-                  title="Buka langsung di YouTube"
+                  title="Open on YouTube"
                 >
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
                     <path d="M10 15l5.19-3L10 9v6m11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25.9-.83 1.48-1.73 1.73-.47.13-1.33.22-2.65.28-1.3.07-2.49.1-3.59.1L12 2c-4.19 0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83-1.48 1.73-1.73.47-.13 1.33-.22 2.65-.28 1.3-.07 2.49-.1 3.59-.1L12 2c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73z"/>
                   </svg>
-                  <span className="hidden sm:inline text-[11px]">Buka YouTube</span>
+                  <span className="hidden sm:inline text-[11px]">Open YouTube</span>
                 </a>
               )}
 
@@ -242,7 +242,7 @@ export default function ServerSwitcher(props: Props) {
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                       <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
                     </svg>
-                    <span className="text-[11px] font-bold">Layar Penuh</span>
+                    <span className="text-[11px] font-bold">Fullscreen</span>
                   </>
                 )}
               </button>
@@ -253,7 +253,7 @@ export default function ServerSwitcher(props: Props) {
           <div
             className="flex items-center gap-2 overflow-x-auto sm:overflow-visible sm:flex-wrap pb-2 sm:pb-0 scroll-snap-x scrollbar-none -mx-1 px-1 sm:mx-0 sm:px-0"
             role="group"
-            aria-label="Pilihan server streaming"
+            aria-label="Streaming server selection"
           >
             {/* Optional Trailer Button */}
             {trailerEmbedUrl && (
@@ -265,7 +265,7 @@ export default function ServerSwitcher(props: Props) {
                   setShowHelp(false);
                 }}
                 aria-pressed={isTrailerActive}
-                aria-label="Putar Trailer"
+                aria-label="Play Trailer"
                 className={`shrink-0 scroll-snap-item flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer ${
                   isTrailerActive
                     ? "bg-amber-500 text-black shadow-[0_0_18px_rgba(245,158,11,0.5)] ring-2 ring-amber-400/50"
@@ -452,14 +452,14 @@ export default function ServerSwitcher(props: Props) {
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-red-500">
               <path d="M12 5v14M5 12l7 7 7-7"/>
             </svg>
-            Geser di sini untuk info & sinopsis
+            Scroll down for info & synopsis
           </span>
           <button
             type="button"
             onClick={toggleFullscreen}
             className="flex items-center gap-1 text-zinc-300 hover:text-white font-semibold cursor-pointer"
           >
-            <span>Putar Fullscreen</span>
+            <span>Play Fullscreen</span>
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
             </svg>

@@ -11,7 +11,7 @@ export default function ContinueWatching() {
   if (!isLoaded || history.length === 0) return null;
 
   return (
-    <section aria-label="Lanjutkan Menonton" className="relative w-full">
+    <section aria-label="Continue Watching" className="relative w-full">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-red-600/15 border border-red-500/25 flex items-center justify-center text-red-500">
@@ -24,10 +24,10 @@ export default function ContinueWatching() {
               className="text-lg sm:text-xl font-bold text-white tracking-tight"
               style={{ fontFamily: "var(--font-fraunces)" }}
             >
-              Lanjutkan Menonton
+              Continue Watching
             </h2>
             <p className="text-[11px] text-zinc-400">
-              Lanjutkan dari bagian terakhir yang kamu buka
+              Pick up where you left off
             </p>
           </div>
         </div>
@@ -37,7 +37,7 @@ export default function ContinueWatching() {
       <div
         className="flex gap-4 overflow-x-auto pb-3 pt-1 scroll-snap-x scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0"
         role="list"
-        aria-label="Daftar tontonan terakhir"
+        aria-label="Recent watch history"
       >
         {history.map((item) => {
           const isSeries = item.type === "tv";
@@ -75,10 +75,10 @@ export default function ContinueWatching() {
                   </div>
                 </div>
 
-                {/* Badge: S1 : E2 or Film */}
+                {/* Badge: S1 : E2 or Movie */}
                 <div className="absolute bottom-2.5 left-2.5 flex items-center gap-1.5">
                   <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-red-600 text-white shadow-md">
-                    {isSeries ? `S${item.season || 1} : E${item.episode || 1}` : "FILM"}
+                    {isSeries ? `S${item.season || 1} : E${item.episode || 1}` : "MOVIE"}
                   </span>
                   {item.vote_average ? (
                     <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-black/70 text-amber-400 backdrop-blur-sm">
@@ -102,8 +102,8 @@ export default function ContinueWatching() {
                   removeHistory(item.id, item.type);
                 }}
                 className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/70 hover:bg-red-600 text-zinc-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer z-10 backdrop-blur-sm border border-white/10"
-                title="Hapus dari riwayat"
-                aria-label={`Hapus ${item.title} dari riwayat`}
+                title="Remove from history"
+                aria-label={`Remove ${item.title} from history`}
               >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M18 6 6 18M6 6l12 12" />
@@ -117,7 +117,7 @@ export default function ContinueWatching() {
                     {item.title}
                   </h3>
                   <p className="text-[11px] text-zinc-400 mt-0.5">
-                    {isSeries ? "Lanjutkan episode" : "Lanjutkan film"} &rarr;
+                    {isSeries ? "Continue episode" : "Continue movie"} &rarr;
                   </p>
                 </Link>
               </div>

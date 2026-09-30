@@ -15,7 +15,7 @@ export default function AnimeGenreExplorer({ activeGenre = "", className = "" }:
     <div
       className={`flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none ${className}`}
       role="navigation"
-      aria-label="Filter genre anime"
+      aria-label="Anime genre filters"
     >
       <Link
         href="/anime"
@@ -25,7 +25,7 @@ export default function AnimeGenreExplorer({ activeGenre = "", className = "" }:
             : "bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 hover:text-white border border-white/[0.08] hover:border-[#FF6400]/40"
         }`}
       >
-        Semua
+        All
       </Link>
       {genres.map((g) => {
         const isActive = activeGenre === g.id;

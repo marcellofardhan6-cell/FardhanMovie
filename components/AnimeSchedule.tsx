@@ -10,13 +10,13 @@ interface Props {
 }
 
 const DAYS = [
-  { key: "mon", label: "Senin", dayIndex: 1 },
-  { key: "tue", label: "Selasa", dayIndex: 2 },
-  { key: "wed", label: "Rabu", dayIndex: 3 },
-  { key: "thu", label: "Kamis", dayIndex: 4 },
-  { key: "fri", label: "Jumat", dayIndex: 5 },
-  { key: "sat", label: "Sabtu", dayIndex: 6 },
-  { key: "sun", label: "Minggu", dayIndex: 0 },
+  { key: "mon", label: "Mon", dayIndex: 1 },
+  { key: "tue", label: "Tue", dayIndex: 2 },
+  { key: "wed", label: "Wed", dayIndex: 3 },
+  { key: "thu", label: "Thu", dayIndex: 4 },
+  { key: "fri", label: "Fri", dayIndex: 5 },
+  { key: "sat", label: "Sat", dayIndex: 6 },
+  { key: "sun", label: "Sun", dayIndex: 0 },
 ];
 
 export default function AnimeSchedule({ items }: Props) {
@@ -69,10 +69,10 @@ export default function AnimeSchedule({ items }: Props) {
       <div className="flex items-center justify-between gap-3 mb-6 relative z-10">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-            Jadwal Rilis Anime
+            Anime Release Schedule
           </h2>
           <p className="text-xs text-zinc-400 mt-1">
-            Episode baru dirilis setiap minggunya
+            New episodes streaming weekly
           </p>
         </div>
       </div>
@@ -100,7 +100,7 @@ export default function AnimeSchedule({ items }: Props) {
                     isSelected ? "bg-black text-[#FF6400]" : "bg-[#FF6400]/20 text-[#FF6400]"
                   }`}
                 >
-                  Hari Ini
+                  Today
                 </span>
               )}
             </button>
@@ -137,7 +137,7 @@ export default function AnimeSchedule({ items }: Props) {
 
                 {/* Airing Time Pill */}
                 <div className="absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-black bg-black/80 text-white backdrop-blur-md border border-white/10">
-                  {airingHours} WIB
+                  {airingHours} JST
                 </div>
 
                 {/* Episode Badge in Crunchyroll Orange */}
@@ -156,7 +156,7 @@ export default function AnimeSchedule({ items }: Props) {
                   {title}
                 </h3>
                 <p className="text-[11px] text-zinc-400 mt-0.5 line-clamp-1">
-                  Ongoing • Musim Ini
+                  Ongoing • This Season
                 </p>
               </div>
             </Link>

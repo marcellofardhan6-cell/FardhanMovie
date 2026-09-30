@@ -124,9 +124,9 @@ export default function Navbar() {
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/films", label: "Movies" },
+    { href: "/anime", label: "Anime" },
     { href: "/series", label: "TV Series" },
     { href: "/genres", label: "Genres" },
-    { href: "/anime", label: "Anime" },
     { href: "/country", label: "Country" },
     { href: "/favorites", label: "Favorites" },
   ];
@@ -203,7 +203,7 @@ export default function Navbar() {
                         <div className="w-72 p-3 rounded-2xl bg-[#0c0e15]/95 backdrop-blur-xl border border-white/[0.1] shadow-2xl">
                           <div className="flex items-center justify-between px-2 pb-2 mb-2 border-b border-white/[0.06]">
                             <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
-                              {isAnimeMode ? "Genre Anime" : "Popular Genres"}
+                              {isAnimeMode ? "Anime Genres" : "Popular Genres"}
                             </span>
                             <Link
                               href={isAnimeMode ? "/anime" : "/genres"}
@@ -211,7 +211,7 @@ export default function Navbar() {
                                 isAnimeMode ? "text-[#FF6400] hover:text-[#ff7b1a]" : "text-red-400 hover:text-red-300"
                               }`}
                             >
-                              Semua &rarr;
+                              All &rarr;
                             </Link>
                           </div>
                           <div className="grid grid-cols-2 gap-1 max-h-72 overflow-y-auto pr-1">
@@ -399,16 +399,16 @@ export default function Navbar() {
                 <div className="absolute top-full right-0 mt-2 w-80 rounded-2xl bg-[#0c0e15]/98 backdrop-blur-xl border border-white/[0.12] shadow-2xl p-2 z-50 animate-fade-in">
                   <div className="flex items-center justify-between px-2.5 py-1 border-b border-white/[0.06] mb-1">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
-                      Hasil Pencarian
+                      Search Results
                     </span>
                     <span className="text-[10px] text-zinc-500">
-                      {searchResults.length} ditemukan
+                      {searchResults.length} found
                     </span>
                   </div>
 
                   {searchResults.length === 0 && !searchLoading ? (
                     <div className="py-6 text-center text-xs text-zinc-400">
-                      Tidak ada film atau serial yang cocok.
+                      No matching movies or series found.
                     </div>
                   ) : (
                     <div className="max-h-80 overflow-y-auto space-y-1 pr-1">
@@ -438,7 +438,7 @@ export default function Navbar() {
                             </h4>
                             <div className="flex items-center gap-2 mt-0.5 text-[10px] text-zinc-400">
                               <span className="px-1 py-0.2 rounded text-[9px] font-bold uppercase bg-white/10 text-zinc-300">
-                                {item.media_type === "tv" ? "Serial" : "Film"}
+                                {item.media_type === "tv" ? "Series" : "Movie"}
                               </span>
                               {item.release_date && <span>{item.release_date.slice(0, 4)}</span>}
                               {item.vote_average ? (
@@ -460,7 +460,7 @@ export default function Navbar() {
                     }}
                     className="block text-center text-xs font-bold text-red-400 hover:text-red-300 transition-colors pt-2 pb-1 border-t border-white/[0.06] mt-1"
                   >
-                    Lihat semua hasil pencarian &rarr;
+                    View all search results &rarr;
                   </Link>
                 </div>
               )}
@@ -558,7 +558,7 @@ export default function Navbar() {
                   type="search"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Cari film, serial, anime..."
+                  placeholder="Search movies, TV series, anime..."
                   autoComplete="off"
                   autoFocus
                   className="w-full text-xs text-white bg-white/[0.08] focus:bg-[#0c0e15] border border-white/20 focus:border-red-500 rounded-full py-2.5 pl-9 pr-9 outline-none transition-all placeholder:text-zinc-400 shadow-inner"
@@ -601,16 +601,16 @@ export default function Navbar() {
               <div className="mt-2 rounded-2xl bg-[#0c0e15]/98 border border-white/[0.12] p-2 shadow-2xl max-h-72 overflow-y-auto">
                 <div className="flex items-center justify-between px-2.5 py-1 border-b border-white/[0.06] mb-1">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
-                    Hasil Cepat
+                    Quick Results
                   </span>
                   <span className="text-[10px] text-zinc-500">
-                    {searchResults.length} ditemukan
+                    {searchResults.length} found
                   </span>
                 </div>
 
                 {searchResults.length === 0 && !searchLoading ? (
                   <div className="py-4 text-center text-xs text-zinc-400">
-                    Tidak ada film yang cocok.
+                    No matching titles found.
                   </div>
                 ) : (
                   <div className="space-y-1">
@@ -640,7 +640,7 @@ export default function Navbar() {
                           </h4>
                           <div className="flex items-center gap-1.5 mt-0.5 text-[10px] text-zinc-400">
                             <span className="px-1 py-0.2 rounded text-[9px] font-bold uppercase bg-white/10 text-zinc-300">
-                              {item.media_type === "tv" ? "Serial" : "Film"}
+                              {item.media_type === "tv" ? "Series" : "Movie"}
                             </span>
                             {item.release_date && <span>{item.release_date.slice(0, 4)}</span>}
                             {item.vote_average ? (
@@ -662,14 +662,14 @@ export default function Navbar() {
                   }}
                   className="block text-center text-xs font-bold text-red-400 hover:text-red-300 pt-2 pb-1 border-t border-white/[0.06] mt-1"
                 >
-                  Lihat semua hasil pencarian &rarr;
+                  View all search results &rarr;
                 </Link>
               </div>
             )}
           </div>
         )}
 
-        {/* Mobile Sub-Nav Tab Bar (Home, Movies, Series, Anime, My List) */}
+        {/* Mobile Sub-Nav Tab Bar (Home, Movies, Anime, Series, My List) */}
         <div className="md:hidden flex items-center justify-between py-2 border-t border-white/[0.06] -mx-4 px-3 bg-transparent overflow-x-auto scrollbar-none">
           <Link
             href="/"
@@ -692,16 +692,6 @@ export default function Navbar() {
             Movies
           </Link>
           <Link
-            href="/series"
-            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 ${
-              !isAnimeTheme && pathname.startsWith("/series")
-                ? "bg-white/20 text-white shadow-sm ring-1 ring-white/30 backdrop-blur-sm"
-                : "text-zinc-300 hover:text-white drop-shadow-sm"
-            }`}
-          >
-            Series
-          </Link>
-          <Link
             href="/anime"
             className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
               pathname.startsWith("/anime") || isAnimeTheme
@@ -721,6 +711,16 @@ export default function Navbar() {
             </span>
           </Link>
           <Link
+            href="/series"
+            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 ${
+              !isAnimeTheme && pathname.startsWith("/series")
+                ? "bg-white/20 text-white shadow-sm ring-1 ring-white/30 backdrop-blur-sm"
+                : "text-zinc-300 hover:text-white drop-shadow-sm"
+            }`}
+          >
+            Series
+          </Link>
+          <Link
             href="/favorites"
             className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 ${
               pathname === "/favorites"
@@ -738,7 +738,7 @@ export default function Navbar() {
             id="mobile-menu"
             className="md:hidden -mx-4 px-5 pt-3 pb-6 border-t border-white/[0.08] max-h-[80vh] overflow-y-auto animate-fade-in"
           >
-            <nav className="flex flex-col space-y-1.5" aria-label="Navigasi mobile">
+            <nav className="flex flex-col space-y-1.5" aria-label="Mobile navigation">
               {navLinks.map((link) => {
                 const isAnimeActive = link.href === "/anime" && (pathname.startsWith("/anime") || isAnimeTheme);
                 const isFilmActive = !isAnimeTheme && (link.href === "/films" && (pathname.startsWith("/film") || pathname === "/films"));
@@ -762,9 +762,9 @@ export default function Navbar() {
                         }`}
                         aria-current={isActive ? "page" : undefined}
                       >
-                        <span>{isAnimeMode ? "Genre Anime" : "Genres"}</span>
+                        <span>{isAnimeMode ? "Anime Genres" : "Genres"}</span>
                         <span className={`text-[10px] font-bold uppercase tracking-wider ${isAnimeMode ? "text-[#FF6400]" : "text-zinc-500"}`}>
-                          Semua &rarr;
+                          All &rarr;
                         </span>
                       </Link>
                       <div className="grid grid-cols-3 gap-1.5 px-1 pt-2">

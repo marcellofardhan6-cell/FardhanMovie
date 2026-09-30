@@ -19,11 +19,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
     const movie = await getMovieDetail(id);
     return {
-      title: movie.title ?? "Film",
+      title: movie.title ?? "Movie",
       description: movie.overview?.slice(0, 160),
     };
   } catch {
-    return { title: "Film" };
+    return { title: "Movie" };
   }
 }
 
