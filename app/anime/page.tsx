@@ -72,68 +72,63 @@ export default async function AnimePage({ searchParams }: Props) {
         <Hero items={heroItems} isAnime={true} />
       )}
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-12 sm:space-y-16">
-        {/* Header & Quick Genre Filter Chips */}
-        <div className={`${!isDefaultView ? "pt-24 sm:pt-28" : "pt-2"}`}>
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#FF6400]" />
-                <span className="text-xs font-black uppercase tracking-widest text-[#FF6400]">
-                  ANIME PORTAL
-                </span>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-10 sm:space-y-14">
+        {/* Quick Genre Filter Bar */}
+        {isDefaultView ? (
+          <div className="pt-1">
+            <AnimeGenreExplorer activeGenre={selectedGenre} />
+          </div>
+        ) : (
+          <div className="pt-24 sm:pt-28 space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-zinc-400 mb-1.5">
+                  <Link href="/" className="hover:text-white transition-colors">Home</Link>
+                  <span>/</span>
+                  <Link href="/anime" className="hover:text-white transition-colors">Anime</Link>
+                  {currentGenreInfo?.name && (
+                    <>
+                      <span>/</span>
+                      <span className="text-[#FF6400] font-bold">{currentGenreInfo.name}</span>
+                    </>
+                  )}
+                </nav>
+                <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+                  {currentGenreInfo?.name || "Katalog Anime"}
+                </h1>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                {currentGenreInfo?.id ? `Genre: ${currentGenreInfo.name}` : "Anime Hub"}
-              </h1>
-              <p className="text-xs sm:text-sm text-zinc-400 mt-1 max-w-xl">
-                {currentGenreInfo?.description ||
-                  "Koleksi serial animasi Jepang, jadwal rilis mingguan per hari, dan film box office bioskop."}
-              </p>
+
+              {selectedGenre && (
+                <Link
+                  href="/anime"
+                  className="self-start sm:self-auto px-4 py-2 rounded-full text-xs font-semibold bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 hover:text-white border border-white/10 transition-colors"
+                >
+                  &larr; Semua Anime
+                </Link>
+              )}
             </div>
 
-            {selectedGenre && (
-              <Link
-                href="/anime"
-                className="self-start sm:self-auto px-4 py-2 rounded-xl text-xs font-bold bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 hover:text-white border border-white/10 transition-colors flex items-center gap-1.5"
-              >
-                <span>&larr;</span>
-                <span>Kembali ke Beranda Anime</span>
-              </Link>
-            )}
+            <AnimeGenreExplorer activeGenre={selectedGenre} />
           </div>
-
-          {/* Quick Genre Pills Bar */}
-          <AnimeGenreExplorer activeGenre={selectedGenre} variant="pills" />
-        </div>
+        )}
 
         {/* Curated Anime Shelves & Interactive Schedule (Shown on default view) */}
         {isDefaultView ? (
           <>
-            {/* Signature Feature: Jadwal Tayang Mingguan (Senin - Minggu) */}
-            <div className="relative">
-              <AnimeSchedule items={trendingAnimeList} />
-            </div>
-
-            {/* Signature Feature: Jelajahi Berdasarkan Genre Anime (Visual Category Cards) */}
-            <div id="genres" className="relative">
-              <AnimeGenreExplorer activeGenre={selectedGenre} variant="cards" />
-            </div>
-
             {/* Shelf 1: Top 10 Anime Hari Ini */}
             <div className="relative">
               <Carousel
                 title="Top 10 Anime Hari Ini"
-                subtitle="Paling banyak ditonton minggu ini di komunitas"
+                subtitle="Paling banyak ditonton minggu ini"
                 items={trendingAnimeList}
                 variant="top10"
               />
             </div>
 
-            {/* Shelf 2: Action & Shonen Hits (16:9 Landscape Backdrops) */}
+            {/* Shelf 2: Action & Shonen Hits */}
             <div className="relative">
               <Carousel
-                title="Action & Shonen Terpopuler"
+                title="Action & Shonen"
                 subtitle="Pertarungan epik dan petualangan penuh aksi"
                 items={shonenAnimeList}
                 variant="backdrop"
@@ -150,6 +145,11 @@ export default async function AnimePage({ searchParams }: Props) {
               />
             </div>
 
+            {/* Shelf 4: Jadwal Rilis Mingguan */}
+            <div className="relative">
+              <AnimeSchedule items={trendingAnimeList} />
+            </div>
+
             {/* Shelf 4: Isekai & Fantasi (16:9 Landscape Backdrops) */}
             <div className="relative">
               <Carousel
@@ -163,8 +163,8 @@ export default async function AnimePage({ searchParams }: Props) {
             {/* Shelf 5: Rating Tertinggi */}
             <div className="relative">
               <Carousel
-                title="Rating Tertinggi Sepanjang Masa"
-                subtitle="Karya anime dengan skor ulasan tertinggi penggemar"
+                title="Rating Tertinggi"
+                subtitle="Skor ulasan tertinggi dari penonton"
                 items={topRatedAnimeList}
                 variant="standard"
               />
@@ -174,10 +174,10 @@ export default async function AnimePage({ searchParams }: Props) {
             <div className="pt-6 border-t border-zinc-800/80">
               <div className="mb-6">
                 <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-                  Semua Koleksi Anime
+                  Semua Anime
                 </h2>
                 <p className="text-xs text-zinc-400 mt-1">
-                  Eksplorasi ribuan judul anime dari berbagai genre dan musim rilis
+                  Katalog lengkap serial dan film animasi Jepang
                 </p>
               </div>
 

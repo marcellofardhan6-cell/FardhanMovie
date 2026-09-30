@@ -65,30 +65,15 @@ export default function AnimeSchedule({ items }: Props) {
 
   return (
     <section className="rounded-2xl bg-[#0d0f15] border border-white/[0.08] p-5 sm:p-7 relative overflow-hidden">
-      {/* Background Accent glow */}
-      <div className="absolute top-0 right-0 w-80 h-80 bg-[#FF6400]/5 rounded-full blur-3xl pointer-events-none" />
-
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 relative z-10">
+      <div className="flex items-center justify-between gap-3 mb-6 relative z-10">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="w-2 h-2 rounded-full bg-[#FF6400] animate-pulse" />
-            <span className="text-[11px] font-black uppercase tracking-wider text-[#FF6400]">
-              Jadwal Rilis Mingguan
-            </span>
-          </div>
-          <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-            Jadwal Tayang Anime
+          <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+            Jadwal Rilis Anime
           </h2>
-          <p className="text-xs text-zinc-400 mt-0.5">
-            Update episode terbaru setiap hari dengan takarir (subtitle) Indonesia
+          <p className="text-xs text-zinc-400 mt-1">
+            Episode baru dirilis setiap minggunya
           </p>
-        </div>
-
-        {/* Live Broadcast Badge */}
-        <div className="flex items-center gap-2 text-xs font-semibold text-zinc-300 bg-white/[0.04] border border-white/[0.08] px-3 py-1.5 rounded-xl self-start sm:self-auto">
-          <span className="text-[#FF6400] font-bold">WIB</span>
-          <span>Waktu Indonesia Barat</span>
         </div>
       </div>
 
