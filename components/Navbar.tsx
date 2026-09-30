@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import { useFavorites } from "@/context/FavoritesContext";
-import { POPULAR_GENRES, img } from "@/lib/tmdb";
+import { POPULAR_GENRES, ANIME_GENRE_LIST, img } from "@/lib/tmdb";
 import Logo from "@/components/Logo";
 
 interface LiveSearchResult {
@@ -159,18 +159,21 @@ export default function Navbar() {
                   (link.href === "/genres" && pathname.startsWith("/genres")) ||
                   (link.href === "/anime" && pathname.startsWith("/anime"));
                 if (link.href === "/genres") {
+                  const isAnimeMode = pathname.startsWith("/anime");
                   return (
                     <div key={link.href} className="relative group">
                       <Link
-                        href="/genres"
+                        href={isAnimeMode ? "/anime" : "/genres"}
                         className={`text-sm tracking-wide transition-colors flex items-center gap-1 ${
                           isActive
-                            ? "text-white font-medium"
+                            ? isAnimeMode
+                              ? "text-[#FF6400] font-bold"
+                              : "text-white font-medium"
                             : "text-zinc-400 hover:text-zinc-200"
                         }`}
                         aria-current={isActive ? "page" : undefined}
                       >
-                        Genres
+                        {isAnimeMode ? "Anime Genres" : "Genres"}
                         <svg
                           width="10"
                           height="10"
@@ -192,25 +195,38 @@ export default function Navbar() {
                         <div className="w-72 p-3 rounded-2xl bg-[#0c0e15]/95 backdrop-blur-xl border border-white/[0.1] shadow-2xl">
                           <div className="flex items-center justify-between px-2 pb-2 mb-2 border-b border-white/[0.06]">
                             <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
-                              Popular Genres
+                              {isAnimeMode ? "Genre Anime" : "Popular Genres"}
                             </span>
                             <Link
-                              href="/genres"
-                              className="text-[10px] font-bold text-red-400 hover:text-red-300 transition-colors"
+                              href={isAnimeMode ? "/anime" : "/genres"}
+                              className={`text-[10px] font-bold transition-colors ${
+                                isAnimeMode ? "text-[#FF6400] hover:text-[#ff7b1a]" : "text-red-400 hover:text-red-300"
+                              }`}
                             >
-                              All Genres &rarr;
+                              Semua &rarr;
                             </Link>
                           </div>
                           <div className="grid grid-cols-2 gap-1 max-h-72 overflow-y-auto pr-1">
-                            {POPULAR_GENRES.map((g) => (
-                              <Link
-                                key={g.id}
-                                href={`/films?genre=${g.id}`}
-                                className="px-2.5 py-1.5 rounded-lg text-xs text-zinc-300 hover:text-white hover:bg-white/[0.06] transition-colors truncate"
-                              >
-                                {g.name}
-                              </Link>
-                            ))}
+                            {isAnimeMode
+                              ? ANIME_GENRE_LIST.filter((g) => g.id !== "").map((g) => (
+                                  <Link
+                                    key={g.id}
+                                    href={`/anime?genre=${g.id}`}
+                                    className="px-2.5 py-1.5 rounded-lg text-xs text-zinc-300 hover:text-[#FF6400] hover:bg-white/[0.06] transition-colors truncate flex items-center gap-1.5"
+                                  >
+                                    <span className="text-xs">{g.icon}</span>
+                                    <span className="truncate">{g.name}</span>
+                                  </Link>
+                                ))
+                              : POPULAR_GENRES.map((g) => (
+                                  <Link
+                                    key={g.id}
+                                    href={`/films?genre=${g.id}`}
+                                    className="px-2.5 py-1.5 rounded-lg text-xs text-zinc-300 hover:text-white hover:bg-white/[0.06] transition-colors truncate"
+                                  >
+                                    {g.name}
+                                  </Link>
+                                ))}
                           </div>
                         </div>
                       </div>
@@ -719,10 +735,11 @@ export default function Navbar() {
               {navLinks.map((link) => {
                 const isActive = pathname === link.href;
                 if (link.href === "/genres") {
+                  const isAnimeMode = pathname.startsWith("/anime");
                   return (
                     <div key={link.href} className="pt-1 pb-2">
                       <Link
-                        href="/genres"
+                        href={isAnimeMode ? "/anime" : "/genres"}
                         onClick={() => setMenuOpen(false)}
                         className={`px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors flex items-center justify-between ${
                           isActive
@@ -731,20 +748,33 @@ export default function Navbar() {
                         }`}
                         aria-current={isActive ? "page" : undefined}
                       >
-                        <span>Genres</span>
-                        <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Browse All &rarr;</span>
+                        <span>{isAnimeMode ? "Genre Anime" : "Genres"}</span>
+                        <span className={`text-[10px] font-bold uppercase tracking-wider ${isAnimeMode ? "text-[#FF6400]" : "text-zinc-500"}`}>
+                          Semua &rarr;
+                        </span>
                       </Link>
                       <div className="grid grid-cols-3 gap-1.5 px-1 pt-2">
-                        {POPULAR_GENRES.slice(0, 9).map((g) => (
-                          <Link
-                            key={g.id}
-                            href={`/films?genre=${g.id}`}
-                            onClick={() => setMenuOpen(false)}
-                            className="text-xs text-center py-2 px-1 rounded-lg bg-white/[0.04] hover:bg-red-600/20 text-zinc-300 hover:text-white border border-white/[0.08] truncate font-medium transition-colors"
-                          >
-                            {g.name}
-                          </Link>
-                        ))}
+                        {isAnimeMode
+                          ? ANIME_GENRE_LIST.filter((g) => g.id !== "").slice(0, 9).map((g) => (
+                              <Link
+                                key={g.id}
+                                href={`/anime?genre=${g.id}`}
+                                onClick={() => setMenuOpen(false)}
+                                className="text-xs text-center py-2 px-1 rounded-lg bg-white/[0.04] hover:bg-[#FF6400]/20 text-zinc-300 hover:text-[#FF6400] border border-white/[0.08] truncate font-medium transition-colors"
+                              >
+                                {g.name}
+                              </Link>
+                            ))
+                          : POPULAR_GENRES.slice(0, 9).map((g) => (
+                              <Link
+                                key={g.id}
+                                href={`/films?genre=${g.id}`}
+                                onClick={() => setMenuOpen(false)}
+                                className="text-xs text-center py-2 px-1 rounded-lg bg-white/[0.04] hover:bg-red-600/20 text-zinc-300 hover:text-white border border-white/[0.08] truncate font-medium transition-colors"
+                              >
+                                {g.name}
+                              </Link>
+                            ))}
                       </div>
                     </div>
                   );

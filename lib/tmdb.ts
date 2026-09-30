@@ -168,12 +168,46 @@ export async function getTopRatedTV(page = 1) {
   return tmdbFetch<TMDBResponse<Movie>>("/tv/top_rated", { page: String(page) });
 }
 
-export async function getAnime(page = 1, genre?: string) {
-  // Anime: Japanese animation on TV category
+export interface AnimeGenreInfo {
+  id: string;
+  name: string;
+  jpName: string;
+  description: string;
+  icon: string;
+}
+
+export const ANIME_GENRE_LIST: AnimeGenreInfo[] = [
+  { id: "", name: "Semua", jpName: "すべて", description: "Seluruh koleksi anime terlengkap", icon: "✨" },
+  { id: "10759", name: "Action & Shonen", jpName: "アクション", description: "Pertarungan epik, shonen, dan petualangan seru", icon: "⚔️" },
+  { id: "10765", name: "Sci-Fi & Fantasi", jpName: "ファンタジー", description: "Isekai, sihir magis, dunia paralel, dan teknologi futuristik", icon: "🔮" },
+  { id: "35", name: "Komedi", jpName: "コメディ", description: "Lelucon kocak, parodi menghibur, dan humor santai", icon: "😂" },
+  { id: "18", name: "Drama & Romance", jpName: "ドラマ", description: "Kisah cinta menyentuh, romansa sekolah, dan dinamika kehidupan", icon: "🌸" },
+  { id: "9648", name: "Misteri & Detektif", jpName: "ミステリー", description: "Teka-teki kriminal, investigasi menegangkan, dan plot twist", icon: "🔍" },
+  { id: "10751", name: "Slice of Life", jpName: "日常", description: "Kehidupan sekolah santai, pertemanan hangat, dan klub sekolah", icon: "☕" },
+  { id: "80", name: "Psychological & Crime", jpName: "心理サスペンス", description: "Pertarungan kecerdasan, intrik kriminal gelap, dan psikologis", icon: "🧠" },
+  { id: "10768", name: "War & Militer", jpName: "ミリタリー", description: "Pertempuran skala besar, robot mecha, dan strategi perang", icon: "🛡️" },
+  { id: "10762", name: "Shonen & Kids", jpName: "少年", description: "Semangat pantang menyerah, turnamen beladiri, dan persahabatan", icon: "⚡" },
+  { id: "movie", name: "Film Layar Lebar", jpName: "劇場版", description: "Animasi bioskop Jepang dengan grafis kualitas sinematik", icon: "🎬" },
+];
+
+export async function getAnime(
+  page = 1,
+  genre?: string,
+  sortBy: string = "popularity.desc"
+) {
+  if (genre === "movie") {
+    return tmdbFetch<TMDBResponse<Movie>>("/discover/movie", {
+      with_genres: "16",
+      with_origin_country: "JP",
+      sort_by: sortBy,
+      page: String(page),
+    });
+  }
+
   const params: Record<string, string> = {
     with_genres: genre ? `16,${genre}` : "16",
     with_origin_country: "JP",
-    sort_by: "popularity.desc",
+    sort_by: sortBy,
     page: String(page),
   };
   return tmdbFetch<TMDBResponse<Movie>>("/discover/tv", params);
