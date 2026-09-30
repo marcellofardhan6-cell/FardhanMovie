@@ -6,6 +6,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useFavorites } from "@/context/FavoritesContext";
 import { POPULAR_GENRES, ANIME_GENRE_LIST, img } from "@/lib/tmdb";
 import Logo from "@/components/Logo";
+import { useAnimeTheme } from "@/context/AnimeThemeContext";
 
 interface LiveSearchResult {
   id: number;
@@ -19,6 +20,7 @@ interface LiveSearchResult {
 
 export default function Navbar() {
   const { favoritesCount } = useFavorites();
+  const { isAnimeTheme } = useAnimeTheme();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
@@ -153,13 +155,19 @@ export default function Navbar() {
             {/* Desktop Nav Links */}
             <nav className="hidden md:flex items-center gap-6" aria-label="Main navigation">
               {navLinks.map((link) => {
+                const isAnimeActive = link.href === "/anime" && (pathname.startsWith("/anime") || isAnimeTheme);
+                const isFilmActive = !isAnimeTheme && (link.href === "/films" && (pathname.startsWith("/film") || pathname === "/films"));
+                const isSeriesActive = !isAnimeTheme && (link.href === "/series" && pathname.startsWith("/series"));
                 const isActive =
-                  pathname === link.href ||
+                  isAnimeActive ||
+                  isFilmActive ||
+                  isSeriesActive ||
+                  (link.href === "/" && pathname === "/") ||
                   (link.href === "/country" && pathname.startsWith("/country")) ||
                   (link.href === "/genres" && pathname.startsWith("/genres")) ||
-                  (link.href === "/anime" && pathname.startsWith("/anime"));
+                  (link.href === "/favorites" && pathname.startsWith("/favorites"));
                 if (link.href === "/genres") {
-                  const isAnimeMode = pathname.startsWith("/anime");
+                  const isAnimeMode = pathname.startsWith("/anime") || isAnimeTheme;
                   return (
                     <div key={link.href} className="relative group">
                       <Link
@@ -677,7 +685,7 @@ export default function Navbar() {
           <Link
             href="/films"
             className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 ${
-              pathname === "/films" || pathname.startsWith("/film")
+              !isAnimeTheme && (pathname === "/films" || pathname.startsWith("/film"))
                 ? "bg-white/20 text-white shadow-sm ring-1 ring-white/30 backdrop-blur-sm"
                 : "text-zinc-300 hover:text-white drop-shadow-sm"
             }`}
@@ -687,7 +695,7 @@ export default function Navbar() {
           <Link
             href="/series"
             className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 ${
-              pathname.startsWith("/series")
+              !isAnimeTheme && pathname.startsWith("/series")
                 ? "bg-white/20 text-white shadow-sm ring-1 ring-white/30 backdrop-blur-sm"
                 : "text-zinc-300 hover:text-white drop-shadow-sm"
             }`}
@@ -697,7 +705,7 @@ export default function Navbar() {
           <Link
             href="/anime"
             className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
-              pathname.startsWith("/anime")
+              pathname.startsWith("/anime") || isAnimeTheme
                 ? "bg-[#FF6400] text-black font-black shadow-md shadow-[#FF6400]/25 ring-1 ring-[#FF6400]/50"
                 : "text-zinc-300 hover:text-white drop-shadow-sm"
             }`}
@@ -705,7 +713,7 @@ export default function Navbar() {
             <span>Anime</span>
             <span
               className={`text-[8px] px-1 py-0.2 rounded font-black ${
-                pathname.startsWith("/anime")
+                pathname.startsWith("/anime") || isAnimeTheme
                   ? "bg-black text-[#FF6400]"
                   : "bg-white/10 text-zinc-400"
               }`}
@@ -733,9 +741,16 @@ export default function Navbar() {
           >
             <nav className="flex flex-col space-y-1.5" aria-label="Navigasi mobile">
               {navLinks.map((link) => {
-                const isActive = pathname === link.href;
+                const isAnimeActive = link.href === "/anime" && (pathname.startsWith("/anime") || isAnimeTheme);
+                const isFilmActive = !isAnimeTheme && (link.href === "/films" && (pathname.startsWith("/film") || pathname === "/films"));
+                const isSeriesActive = !isAnimeTheme && (link.href === "/series" && pathname.startsWith("/series"));
+                const isActive =
+                  isAnimeActive ||
+                  isFilmActive ||
+                  isSeriesActive ||
+                  pathname === link.href;
                 if (link.href === "/genres") {
-                  const isAnimeMode = pathname.startsWith("/anime");
+                  const isAnimeMode = pathname.startsWith("/anime") || isAnimeTheme;
                   return (
                     <div key={link.href} className="pt-1 pb-2">
                       <Link

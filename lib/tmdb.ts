@@ -80,6 +80,8 @@ export interface Movie {
   number_of_seasons?: number;
   media_type?: string;
   imdb_id?: string;
+  origin_country?: string[];
+  original_language?: string;
 }
 
 export interface Genre {

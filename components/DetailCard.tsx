@@ -21,6 +21,7 @@ interface Props {
   overview?: string | null;
   cast?: CastMember[];
   type?: "movie" | "tv";
+  isAnime?: boolean;
 }
 
 export default function DetailCard({
@@ -33,6 +34,7 @@ export default function DetailCard({
   overview,
   cast = [],
   type = "movie",
+  isAnime = false,
 }: Props) {
   const [showMore, setShowMore] = useState(false);
 
@@ -57,10 +59,17 @@ export default function DetailCard({
 
         {/* Title, Rating, Meta & Genre Badges */}
         <div className="flex-1 min-w-0 pt-0.5">
-          {/* Film / Series Title */}
-          <h1 className="text-xl sm:text-3xl md:text-4xl font-extrabold uppercase tracking-tight text-white mb-2 leading-tight">
-            {title}
-          </h1>
+          {/* Film / Series Title + Anime Badge */}
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+            <h1 className="text-xl sm:text-3xl md:text-4xl font-extrabold uppercase tracking-tight text-white leading-tight">
+              {title}
+            </h1>
+            {isAnime && (
+              <span className="px-2.5 py-0.5 rounded text-[10px] sm:text-xs font-black tracking-wider bg-[#FF6400] text-black uppercase shadow-md shadow-[#FF6400]/25 shrink-0">
+                ANIME
+              </span>
+            )}
+          </div>
 
           {/* Metadata Row: Rating · Runtime · Year */}
           <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 text-xs sm:text-sm text-zinc-400 mb-3.5">
@@ -107,15 +116,23 @@ export default function DetailCard({
           {/* Genre Pill Badges */}
           {genres.length > 0 && (
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-              {genres.map((g) => (
-                <Link
-                  key={g.id}
-                  href={`${targetRoute}?genre=${g.id}`}
-                  className="px-3 py-1 rounded-full text-xs font-medium text-zinc-300 bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 hover:border-white/20 hover:text-white transition-colors cursor-pointer"
-                >
-                  {g.name}
-                </Link>
-              ))}
+              {genres.map((g) => {
+                const genreHref = isAnime ? `/anime?genre=${g.id}` : `${targetRoute}?genre=${g.id}`;
+                const isHighlight = isAnime && g.id === 16;
+                return (
+                  <Link
+                    key={g.id}
+                    href={genreHref}
+                    className={`px-3 py-1 rounded-full text-xs font-medium transition-colors cursor-pointer ${
+                      isHighlight
+                        ? "bg-[#FF6400]/15 text-[#FF6400] border border-[#FF6400]/40 font-bold shadow-sm hover:bg-[#FF6400]/25"
+                        : "text-zinc-300 bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 hover:border-white/20 hover:text-white"
+                    }`}
+                  >
+                    {g.name}
+                  </Link>
+                );
+              })}
             </div>
           )}
         </div>

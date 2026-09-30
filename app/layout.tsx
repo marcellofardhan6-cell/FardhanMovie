@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { FavoritesProvider } from "@/context/FavoritesContext";
 import { WatchHistoryProvider } from "@/context/WatchHistoryContext";
+import { AnimeThemeProvider } from "@/context/AnimeThemeContext";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -30,13 +31,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${inter.variable} ${fraunces.variable}`}>
       <body>
-        <FavoritesProvider>
-          <WatchHistoryProvider>
-            <Navbar />
-            <main className="min-h-screen">{children}</main>
-            <Footer />
-          </WatchHistoryProvider>
-        </FavoritesProvider>
+        <AnimeThemeProvider>
+          <FavoritesProvider>
+            <WatchHistoryProvider>
+              <Navbar />
+              <main className="min-h-screen">{children}</main>
+              <Footer />
+            </WatchHistoryProvider>
+          </FavoritesProvider>
+        </AnimeThemeProvider>
       </body>
     </html>
   );

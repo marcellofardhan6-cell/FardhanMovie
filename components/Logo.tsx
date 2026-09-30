@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAnimeTheme } from "@/context/AnimeThemeContext";
 
 interface LogoProps {
   size?: "sm" | "md" | "lg";
@@ -15,11 +16,13 @@ export default function Logo({
   size = "md",
   showText = true,
   className = "",
-  href = "/",
+  href,
   forceAnime = false,
 }: LogoProps) {
   const pathname = usePathname();
-  const isAnime = forceAnime || pathname === "/anime" || pathname?.startsWith("/anime");
+  const { isAnimeTheme } = useAnimeTheme();
+  const isAnime = forceAnime || pathname === "/anime" || pathname?.startsWith("/anime") || isAnimeTheme;
+  const targetHref = href !== undefined ? href : (isAnime ? "/anime" : "/");
 
   const iconDimensions = {
     sm: { box: 24 },
@@ -87,11 +90,11 @@ export default function Logo({
     </div>
   );
 
-  if (!href) return content;
+  if (!targetHref) return content;
 
   return (
     <Link
-      href={href}
+      href={targetHref}
       aria-label={isAnime ? "FardTV Anime - Beranda" : "FardTV - Beranda"}
       className="inline-block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6400] rounded"
     >

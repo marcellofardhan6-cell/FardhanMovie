@@ -5,6 +5,7 @@ import MovieGrid from "@/components/MovieGrid";
 import TVPlayer from "@/components/TVPlayer";
 import DetailCard from "@/components/DetailCard";
 import FavoriteButton from "@/components/FavoriteButton";
+import AnimeThemeSync from "@/components/AnimeThemeSync";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -42,6 +43,14 @@ export default async function SeriesDetailPage({ params, searchParams }: Props) 
 
   if (!show) notFound();
 
+  const isAnime =
+    Boolean(show.genres?.some((g: any) => g.id === 16)) &&
+    Boolean(
+      show.origin_country?.includes("JP") ||
+      show.original_language === "ja" ||
+      show.production_countries?.some((c) => c.iso_3166_1 === "JP")
+    );
+
   const bestTrailer = findBestTrailer(videos);
   const validSeasons = (show.seasons ?? []).filter((s) => s.season_number > 0);
   const firstSeason = validSeasons[0]?.season_number ?? 1;
@@ -59,13 +68,19 @@ export default async function SeriesDetailPage({ params, searchParams }: Props) 
 
   return (
     <article className="min-h-screen bg-[#06070a] text-zinc-100">
+      <AnimeThemeSync isAnime={isAnime} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-24 pb-20">
         {/* Breadcrumb & Action Row */}
         <div className="flex items-center justify-between gap-4 mb-4">
           <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs text-zinc-400">
             <Link href="/" className="hover:text-white transition-colors">Home</Link>
             <span>/</span>
-            <Link href="/series" className="hover:text-white transition-colors">TV Series</Link>
+            <Link
+              href={isAnime ? "/anime" : "/series"}
+              className={`transition-colors ${isAnime ? "text-[#FF6400] font-bold hover:text-[#ff7b1a]" : "hover:text-white"}`}
+            >
+              {isAnime ? "Anime" : "TV Series"}
+            </Link>
             <span>/</span>
             <span className="text-zinc-200 truncate max-w-xs sm:max-w-md">{show.name}</span>
           </nav>
@@ -101,6 +116,7 @@ export default async function SeriesDetailPage({ params, searchParams }: Props) 
             overview={show.overview}
             cast={mainCast}
             type="tv"
+            isAnime={isAnime}
           />
         </div>
 
@@ -108,9 +124,9 @@ export default async function SeriesDetailPage({ params, searchParams }: Props) 
         {recommendations.results.length > 0 && (
           <section aria-label="Recommendations" className="mb-16">
             <div className="flex items-center gap-2 mb-6">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-600" />
+              <span className={`w-1.5 h-1.5 rounded-full ${isAnime ? "bg-[#FF6400]" : "bg-red-600"}`} />
               <h2 className="text-xl font-bold text-white tracking-tight" style={{ fontFamily: "var(--font-fraunces)" }}>
-                More Like This
+                {isAnime ? "More Anime Like This" : "More Like This"}
               </h2>
             </div>
             <MovieGrid items={recommendations.results.slice(0, 10)} />

@@ -1,6 +1,7 @@
 "use client";
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useWatchHistory } from "@/context/WatchHistoryContext";
+import { useAnimeTheme } from "@/context/AnimeThemeContext";
 
 interface Server {
   id: number;
@@ -21,9 +22,10 @@ interface Props {
   backdropPath?: string | null;
 }
 
-function buildServerUrl(server: Server, props: Props): string {
+function buildServerUrl(server: Server, props: Props, isAnimeTheme?: boolean): string {
   const { tmdbId, type, season = 1, episode = 1 } = props;
   const id = String(tmdbId);
+  const primaryColor = isAnimeTheme ? "ff6400" : "e50914";
 
   switch (server.key) {
     case "vidsrcwiki":
@@ -40,8 +42,8 @@ function buildServerUrl(server: Server, props: Props): string {
         : `https://vidsrc.me/embed/tv?tmdb=${id}&season=${season}&episode=${episode}`;
     case "vidlink":
       return type === "movie"
-        ? `https://vidlink.pro/movie/${id}?primaryColor=e50914`
-        : `https://vidlink.pro/tv/${id}/${season}/${episode}?primaryColor=e50914`;
+        ? `https://vidlink.pro/movie/${id}?primaryColor=${primaryColor}`
+        : `https://vidlink.pro/tv/${id}/${season}/${episode}?primaryColor=${primaryColor}`;
     case "twoembed":
       return type === "movie"
         ? `https://www.2embed.cc/embed/${id}`
@@ -84,6 +86,7 @@ const SERVERS: Server[] = [
 export default function ServerSwitcher(props: Props) {
   const { trailerKey, title, tmdbId, type, season = 1, episode = 1, posterPath, backdropPath } = props;
   const { addHistory } = useWatchHistory();
+  const { isAnimeTheme } = useAnimeTheme();
   const [activeServer, setActiveServer] = useState(0);
   const [isTrailerActive, setIsTrailerActive] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -114,7 +117,7 @@ export default function ServerSwitcher(props: Props) {
 
   const src = isTrailerActive && trailerEmbedUrl
     ? trailerEmbedUrl
-    : buildServerUrl(currentServer, props);
+    : buildServerUrl(currentServer, props, isAnimeTheme);
 
   // Auto-dismiss loading after 2.5s so iframe controls are never blocked
   useEffect(() => {
@@ -180,7 +183,13 @@ export default function ServerSwitcher(props: Props) {
   return (
     <section aria-label="Video player" className="relative w-full">
       {/* Ambient Cinema Theater Glow behind the player */}
-      <div className="absolute -inset-3 bg-gradient-to-r from-red-600/10 via-red-500/5 to-red-700/10 rounded-3xl blur-2xl opacity-50 pointer-events-none" />
+      <div
+        className={`absolute -inset-3 rounded-3xl blur-2xl opacity-50 pointer-events-none transition-all duration-500 ${
+          isAnimeTheme
+            ? "bg-gradient-to-r from-[#FF6400]/25 via-[#FF8C00]/15 to-[#FF4500]/20"
+            : "bg-gradient-to-r from-red-600/10 via-red-500/5 to-red-700/10"
+        }`}
+      />
 
       {/* Main Player Container */}
       <div className="relative rounded-2xl overflow-hidden border border-white/[0.08] bg-[#0c0e15] shadow-2xl">
