@@ -141,19 +141,19 @@ export default function FilterBar({
           <label htmlFor="filter-sort" className="sr-only">Sort by</label>
           <select
             id="filter-sort"
-            value={activeSort ?? ""}
+            value={activeSort || "latest"}
             onChange={(e) => updateFilter("sort", e.target.value)}
             className="text-xs font-semibold rounded-xl px-3.5 py-2.5 bg-white/[0.04] border border-white/[0.1] hover:border-red-500/40 text-zinc-200 outline-none cursor-pointer transition-colors"
             disabled={isPending}
           >
-            <option value="" className="bg-[#0e1018]">Most Popular</option>
             <option value="latest" className="bg-[#0e1018]">Latest Release</option>
+            <option value="popular" className="bg-[#0e1018]">Most Popular</option>
             <option value="top_rated" className="bg-[#0e1018]">Top Rated</option>
           </select>
         </div>
       )}
 
-      {(activeGenre || activeYear || activeType || activeCountry || activeSort) && (
+      {(activeGenre || activeYear || activeType || activeCountry || (activeSort && activeSort !== "latest")) && (
         <button
           onClick={() => {
             startTransition(() => router.push(basePath));

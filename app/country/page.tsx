@@ -23,19 +23,19 @@ export default async function CountryPage({ searchParams }: Props) {
   const type = params.type || "all";
   const genre = params.genre;
   const year = params.year;
-  const sortParam = params.sort;
+  const sortParam = params.sort || "latest";
   const movieSort =
-    sortParam === "latest"
-      ? "primary_release_date.desc"
+    sortParam === "popular"
+      ? "popularity.desc"
       : sortParam === "top_rated"
       ? "vote_average.desc"
-      : "popularity.desc";
+      : "primary_release_date.desc";
   const tvSort =
-    sortParam === "latest"
-      ? "first_air_date.desc"
+    sortParam === "popular"
+      ? "popularity.desc"
       : sortParam === "top_rated"
       ? "vote_average.desc"
-      : "popularity.desc";
+      : "first_air_date.desc";
   const page = Number(params.page ?? 1);
 
   const selectedCountry = isAll
@@ -70,7 +70,7 @@ export default async function CountryPage({ searchParams }: Props) {
   ]);
 
   // Combine or select results
-  let items = [];
+  let items: any[] = [];
   let totalPages = 1;
 
   if (type === "movie") {
@@ -80,15 +80,23 @@ export default async function CountryPage({ searchParams }: Props) {
     items = tvData.results.map((t) => ({ ...t, media_type: "tv" }));
     totalPages = tvData.total_pages;
   } else {
-    // Interleave movie and tv results for 'all'
     const mResults = moviesData.results.map((m) => ({ ...m, media_type: "movie" }));
     const tResults = tvData.results.map((t) => ({ ...t, media_type: "tv" }));
-    const maxLength = Math.max(mResults.length, tResults.length);
-    for (let i = 0; i < maxLength; i++) {
-      if (mResults[i]) items.push(mResults[i]);
-      if (tResults[i]) items.push(tResults[i]);
-    }
+    items = [...mResults, ...tResults];
     totalPages = Math.max(moviesData.total_pages, tvData.total_pages);
+  }
+
+  // Strictly sort all items chronologically from newest to oldest when 'latest' (the default) is active
+  if (sortParam === "latest") {
+    items.sort((a, b) => {
+      const dateA = new Date(a.release_date || a.first_air_date || "1970-01-01").getTime();
+      const dateB = new Date(b.release_date || b.first_air_date || "1970-01-01").getTime();
+      return dateB - dateA;
+    });
+  } else if (sortParam === "top_rated") {
+    items.sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
+  } else if (sortParam === "popular") {
+    items.sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
   }
 
   // Deduplicate genres list for filter
@@ -105,7 +113,7 @@ export default async function CountryPage({ searchParams }: Props) {
     if (type !== "all") q.set("type", type);
     if (genre) q.set("genre", genre);
     if (year) q.set("year", year);
-    if (sortParam) q.set("sort", sortParam);
+    if (sortParam && sortParam !== "latest") q.set("sort", sortParam);
     return `/country?${q.toString()}`;
   };
 
@@ -196,7 +204,7 @@ export default async function CountryPage({ searchParams }: Props) {
                 ...(type !== "all" ? { type } : {}),
                 ...(genre ? { genre } : {}),
                 ...(year ? { year } : {}),
-                ...(sortParam ? { sort: sortParam } : {}),
+                ...(sortParam && sortParam !== "latest" ? { sort: sortParam } : {}),
                 page: String(page - 1),
               }).toString()}`}
               className="px-5 py-2.5 rounded-full text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 border border-white/[0.08] hover:border-red-500/40 transition-all cursor-pointer"
@@ -214,7 +222,7 @@ export default async function CountryPage({ searchParams }: Props) {
                 ...(type !== "all" ? { type } : {}),
                 ...(genre ? { genre } : {}),
                 ...(year ? { year } : {}),
-                ...(sortParam ? { sort: sortParam } : {}),
+                ...(sortParam && sortParam !== "latest" ? { sort: sortParam } : {}),
                 page: String(page + 1),
               }).toString()}`}
               className="px-5 py-2.5 rounded-full text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 border border-white/[0.08] hover:border-red-500/40 transition-all cursor-pointer"

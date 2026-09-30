@@ -16,19 +16,28 @@ export default async function FilmsPage({ searchParams }: Props) {
   const genre = params.genre;
   const year = params.year;
   const country = params.country;
-  const sortParam = params.sort;
+  const sortParam = params.sort || "latest";
   const sort =
-    sortParam === "latest"
-      ? "primary_release_date.desc"
+    sortParam === "popular"
+      ? "popularity.desc"
       : sortParam === "top_rated"
       ? "vote_average.desc"
-      : "popularity.desc";
+      : "primary_release_date.desc";
   const page = Number(params.page ?? 1);
 
   const [data, genres] = await Promise.all([
     discoverMovies({ genre, year, country, sort_by: sort, page }).catch(() => ({ results: [], total_pages: 0, total_results: 0, page: 1 })),
     getMovieGenres().catch(() => []),
   ]);
+
+  let items = data.results;
+  if (sortParam === "latest") {
+    items = [...items].sort((a, b) => {
+      const dateA = new Date(a.release_date || "1970-01-01").getTime();
+      const dateB = new Date(b.release_date || "1970-01-01").getTime();
+      return dateB - dateA;
+    });
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-20">
@@ -52,7 +61,7 @@ export default async function FilmsPage({ searchParams }: Props) {
         />
       </Suspense>
 
-      {data.results.length === 0 ? (
+      {items.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 rounded-2xl bg-[#0c0e17] border border-white/[0.08]">
           <p className="text-lg font-bold text-white mb-2">
             No movies found
@@ -60,7 +69,7 @@ export default async function FilmsPage({ searchParams }: Props) {
           <p className="text-xs text-zinc-400">Try adjusting your genre, country, or release year filters.</p>
         </div>
       ) : (
-        <MovieGrid items={data.results} />
+        <MovieGrid items={items} />
       )}
 
       {/* Luxury Pagination */}
@@ -68,7 +77,7 @@ export default async function FilmsPage({ searchParams }: Props) {
         <div className="flex items-center justify-center gap-3 mt-12">
           {page > 1 && (
             <a
-              href={`/films?${new URLSearchParams({ ...(genre ? { genre } : {}), ...(year ? { year } : {}), ...(country ? { country } : {}), ...(sortParam ? { sort: sortParam } : {}), page: String(page - 1) }).toString()}`}
+              href={`/films?${new URLSearchParams({ ...(genre ? { genre } : {}), ...(year ? { year } : {}), ...(country ? { country } : {}), ...(sortParam && sortParam !== "latest" ? { sort: sortParam } : {}), page: String(page - 1) }).toString()}`}
               className="px-5 py-2.5 rounded-full text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 border border-white/[0.08] hover:border-red-500/40 transition-all cursor-pointer"
             >
               &larr; Previous
@@ -79,7 +88,7 @@ export default async function FilmsPage({ searchParams }: Props) {
           </span>
           {page < data.total_pages && page < 500 && (
             <a
-              href={`/films?${new URLSearchParams({ ...(genre ? { genre } : {}), ...(year ? { year } : {}), ...(country ? { country } : {}), ...(sortParam ? { sort: sortParam } : {}), page: String(page + 1) }).toString()}`}
+              href={`/films?${new URLSearchParams({ ...(genre ? { genre } : {}), ...(year ? { year } : {}), ...(country ? { country } : {}), ...(sortParam && sortParam !== "latest" ? { sort: sortParam } : {}), page: String(page + 1) }).toString()}`}
               className="px-5 py-2.5 rounded-full text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 border border-white/[0.08] hover:border-red-500/40 transition-all cursor-pointer"
             >
               Next &rarr;
