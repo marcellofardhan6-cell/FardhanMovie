@@ -107,6 +107,7 @@ export default async function SeriesDetailPage({ params, searchParams }: Props) 
         {/* Clean Detail & Cast Card */}
         <div className="mb-14">
           <DetailCard
+            tmdbId={id}
             title={show.name}
             posterPath={show.poster_path}
             rating={show.vote_average}

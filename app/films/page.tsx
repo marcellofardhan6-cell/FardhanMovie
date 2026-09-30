@@ -16,7 +16,13 @@ export default async function FilmsPage({ searchParams }: Props) {
   const genre = params.genre;
   const year = params.year;
   const country = params.country;
-  const sort = params.sort === "top_rated" ? "vote_average.desc" : "popularity.desc";
+  const sortParam = params.sort;
+  const sort =
+    sortParam === "latest"
+      ? "primary_release_date.desc"
+      : sortParam === "top_rated"
+      ? "vote_average.desc"
+      : "popularity.desc";
   const page = Number(params.page ?? 1);
 
   const [data, genres] = await Promise.all([
@@ -41,6 +47,7 @@ export default async function FilmsPage({ searchParams }: Props) {
           activeGenre={genre}
           activeYear={year}
           activeCountry={country}
+          activeSort={sortParam}
           basePath="/films"
         />
       </Suspense>
@@ -61,7 +68,7 @@ export default async function FilmsPage({ searchParams }: Props) {
         <div className="flex items-center justify-center gap-3 mt-12">
           {page > 1 && (
             <a
-              href={`/films?${new URLSearchParams({ ...(genre ? { genre } : {}), ...(year ? { year } : {}), ...(country ? { country } : {}), page: String(page - 1) }).toString()}`}
+              href={`/films?${new URLSearchParams({ ...(genre ? { genre } : {}), ...(year ? { year } : {}), ...(country ? { country } : {}), ...(sortParam ? { sort: sortParam } : {}), page: String(page - 1) }).toString()}`}
               className="px-5 py-2.5 rounded-full text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 border border-white/[0.08] hover:border-red-500/40 transition-all cursor-pointer"
             >
               &larr; Previous
@@ -72,7 +79,7 @@ export default async function FilmsPage({ searchParams }: Props) {
           </span>
           {page < data.total_pages && page < 500 && (
             <a
-              href={`/films?${new URLSearchParams({ ...(genre ? { genre } : {}), ...(year ? { year } : {}), ...(country ? { country } : {}), page: String(page + 1) }).toString()}`}
+              href={`/films?${new URLSearchParams({ ...(genre ? { genre } : {}), ...(year ? { year } : {}), ...(country ? { country } : {}), ...(sortParam ? { sort: sortParam } : {}), page: String(page + 1) }).toString()}`}
               className="px-5 py-2.5 rounded-full text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 border border-white/[0.08] hover:border-red-500/40 transition-all cursor-pointer"
             >
               Next &rarr;

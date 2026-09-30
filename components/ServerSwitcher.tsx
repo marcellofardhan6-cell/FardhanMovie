@@ -2,6 +2,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useWatchHistory } from "@/context/WatchHistoryContext";
 import { useAnimeTheme } from "@/context/AnimeThemeContext";
+import DownloadModal from "@/components/DownloadModal";
 
 interface Server {
   id: number;
@@ -93,6 +94,7 @@ export default function ServerSwitcher(props: Props) {
   const [showHelp, setShowHelp] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showAllServers, setShowAllServers] = useState(true);
+  const [downloadOpen, setDownloadOpen] = useState(false);
   const playerContainerRef = useRef<HTMLDivElement>(null);
 
   // Automatically record watch history
@@ -222,6 +224,21 @@ export default function ServerSwitcher(props: Props) {
                   <span className="hidden sm:inline text-[11px]">Open YouTube</span>
                 </a>
               )}
+
+              <button
+                type="button"
+                onClick={() => setDownloadOpen(true)}
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold text-zinc-300 hover:text-white bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.1] transition-colors cursor-pointer"
+                title="Download & Subtitles"
+                aria-label="Download & Subtitles"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                <span className="text-[11px] font-bold">Download</span>
+              </button>
 
               <button
                 type="button"
@@ -405,8 +422,12 @@ export default function ServerSwitcher(props: Props) {
           {showHelp && !isTrailerActive && (
             <div className="absolute inset-0 flex items-center justify-center z-20 bg-black/95 backdrop-blur-md">
               <div className="text-center px-6 max-w-md">
-                <div className="w-14 h-14 rounded-full bg-red-600/15 border border-red-600/30 flex items-center justify-center mx-auto mb-3 text-red-500 text-2xl">
-                  ⚠️
+                <div className="w-14 h-14 rounded-full bg-red-600/15 border border-red-600/30 flex items-center justify-center mx-auto mb-3 text-red-500">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+                    <line x1="12" y1="9" x2="12" y2="13" />
+                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                  </svg>
                 </div>
                 <h3 className="font-bold text-lg text-white mb-2">
                   Server Busy or Unavailable
@@ -454,18 +475,43 @@ export default function ServerSwitcher(props: Props) {
             </svg>
             Scroll down for info & synopsis
           </span>
-          <button
-            type="button"
-            onClick={toggleFullscreen}
-            className="flex items-center gap-1 text-zinc-300 hover:text-white font-semibold cursor-pointer"
-          >
-            <span>Play Fullscreen</span>
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
-            </svg>
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setDownloadOpen(true)}
+              className="flex items-center gap-1 text-zinc-300 hover:text-white font-semibold cursor-pointer"
+            >
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              <span>Download</span>
+            </button>
+            <button
+              type="button"
+              onClick={toggleFullscreen}
+              className="flex items-center gap-1 text-zinc-300 hover:text-white font-semibold cursor-pointer"
+            >
+              <span>Play Fullscreen</span>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
+
+      <DownloadModal
+        isOpen={downloadOpen}
+        onClose={() => setDownloadOpen(false)}
+        tmdbId={tmdbId}
+        type={type}
+        title={title ?? "Video"}
+        season={season}
+        episode={episode}
+        posterPath={posterPath}
+      />
     </section>
   );
 }

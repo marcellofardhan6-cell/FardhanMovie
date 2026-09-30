@@ -9,8 +9,10 @@ interface Props {
   activeYear?: string;
   activeType?: string;
   activeCountry?: string;
+  activeSort?: string;
   showTypeFilter?: boolean;
   showCountryFilter?: boolean;
+  showSortFilter?: boolean;
   basePath: string;
 }
 
@@ -22,8 +24,10 @@ export default function FilterBar({
   activeYear,
   activeType,
   activeCountry,
+  activeSort,
   showTypeFilter = false,
   showCountryFilter = true,
+  showSortFilter = true,
   basePath,
 }: Props) {
   const router = useRouter();
@@ -132,7 +136,24 @@ export default function FilterBar({
         </div>
       )}
 
-      {(activeGenre || activeYear || activeType || activeCountry) && (
+      {showSortFilter && (
+        <div className="relative">
+          <label htmlFor="filter-sort" className="sr-only">Sort by</label>
+          <select
+            id="filter-sort"
+            value={activeSort ?? ""}
+            onChange={(e) => updateFilter("sort", e.target.value)}
+            className="text-xs font-semibold rounded-xl px-3.5 py-2.5 bg-white/[0.04] border border-white/[0.1] hover:border-red-500/40 text-zinc-200 outline-none cursor-pointer transition-colors"
+            disabled={isPending}
+          >
+            <option value="" className="bg-[#0e1018]">Most Popular</option>
+            <option value="latest" className="bg-[#0e1018]">Latest Release</option>
+            <option value="top_rated" className="bg-[#0e1018]">Top Rated</option>
+          </select>
+        </div>
+      )}
+
+      {(activeGenre || activeYear || activeType || activeCountry || activeSort) && (
         <button
           onClick={() => {
             startTransition(() => router.push(basePath));

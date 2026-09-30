@@ -116,7 +116,12 @@ export default function TrailerModal({
             />
           ) : (
             <div className="text-center px-6 py-12">
-              <p className="text-4xl mb-3">🎬</p>
+              <div className="w-12 h-12 rounded-full bg-white/[0.05] border border-white/10 flex items-center justify-center mx-auto mb-3 text-zinc-400">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <rect width="18" height="18" x="3" y="3" rx="2" />
+                  <path d="M7 3v18M17 3v18M3 8h18M3 16h18" />
+                </svg>
+              </div>
               <h4 className="text-base font-bold text-white mb-1">Trailer Unavailable</h4>
               <p className="text-xs text-zinc-400 max-w-sm mx-auto">
                 Official trailer for {title} is not available on YouTube.

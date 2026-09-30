@@ -184,7 +184,11 @@ export default function TVPlayer({
       {/* Helpful fallback hint when VidSrcWiki is unavailable for a specific episode */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 sm:p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/25 text-xs text-amber-200">
         <div className="flex items-center gap-2">
-          <span className="text-amber-400 text-sm shrink-0">💡</span>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-400 shrink-0" aria-hidden>
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="16" x2="12" y2="12" />
+            <line x1="12" y1="8" x2="12.01" y2="8" />
+          </svg>
           <span>If the player shows <em>&quot;Check back later&quot;</em>, please click <strong>SuperEmbed Cinema</strong>, <strong>VidSrc VIP</strong>, or <strong>VidLink Pro</strong> above.</span>
         </div>
       </div>

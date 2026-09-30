@@ -91,6 +91,7 @@ export default async function FilmDetailPage({ params }: Props) {
         {/* Clean Detail & Cast Card */}
         <div className="mb-14">
           <DetailCard
+            tmdbId={id}
             title={movie.title}
             posterPath={movie.poster_path}
             rating={movie.vote_average}

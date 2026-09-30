@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export const revalidate = 3600;
 
 interface Props {
-  searchParams: Promise<{ code?: string; type?: string; genre?: string; year?: string; page?: string }>;
+  searchParams: Promise<{ code?: string; type?: string; genre?: string; year?: string; sort?: string; page?: string }>;
 }
 
 export default async function CountryPage({ searchParams }: Props) {
@@ -23,6 +23,19 @@ export default async function CountryPage({ searchParams }: Props) {
   const type = params.type || "all";
   const genre = params.genre;
   const year = params.year;
+  const sortParam = params.sort;
+  const movieSort =
+    sortParam === "latest"
+      ? "primary_release_date.desc"
+      : sortParam === "top_rated"
+      ? "vote_average.desc"
+      : "popularity.desc";
+  const tvSort =
+    sortParam === "latest"
+      ? "first_air_date.desc"
+      : sortParam === "top_rated"
+      ? "vote_average.desc"
+      : "popularity.desc";
   const page = Number(params.page ?? 1);
 
   const selectedCountry = isAll
@@ -40,7 +53,7 @@ export default async function CountryPage({ searchParams }: Props) {
     getTVGenres().catch(() => []),
     type === "tv"
       ? Promise.resolve({ results: [], total_pages: 0, total_results: 0, page: 1 })
-      : discoverMovies({ genre, year, country: countryParam, page }).catch(() => ({
+      : discoverMovies({ genre, year, country: countryParam, sort_by: movieSort, page }).catch(() => ({
           results: [],
           total_pages: 0,
           total_results: 0,
@@ -48,7 +61,7 @@ export default async function CountryPage({ searchParams }: Props) {
         })),
     type === "movie"
       ? Promise.resolve({ results: [], total_pages: 0, total_results: 0, page: 1 })
-      : discoverTV({ genre, year, country: countryParam, page }).catch(() => ({
+      : discoverTV({ genre, year, country: countryParam, sort_by: tvSort, page }).catch(() => ({
           results: [],
           total_pages: 0,
           total_results: 0,
@@ -92,6 +105,7 @@ export default async function CountryPage({ searchParams }: Props) {
     if (type !== "all") q.set("type", type);
     if (genre) q.set("genre", genre);
     if (year) q.set("year", year);
+    if (sortParam) q.set("sort", sortParam);
     return `/country?${q.toString()}`;
   };
 
@@ -144,7 +158,7 @@ export default async function CountryPage({ searchParams }: Props) {
         </div>
       </div>
 
-      {/* Filter Bar with Type, Genre, Year */}
+      {/* Filter Bar with Type, Genre, Year, and Sort */}
       <Suspense>
         <FilterBar
           genres={combinedGenres}
@@ -152,8 +166,10 @@ export default async function CountryPage({ searchParams }: Props) {
           activeYear={year}
           activeType={type === "all" ? "" : type}
           activeCountry={isAll ? "" : activeCode}
+          activeSort={sortParam}
           showTypeFilter={true}
           showCountryFilter={false}
+          showSortFilter={true}
           basePath="/country"
         />
       </Suspense>
@@ -180,6 +196,7 @@ export default async function CountryPage({ searchParams }: Props) {
                 ...(type !== "all" ? { type } : {}),
                 ...(genre ? { genre } : {}),
                 ...(year ? { year } : {}),
+                ...(sortParam ? { sort: sortParam } : {}),
                 page: String(page - 1),
               }).toString()}`}
               className="px-5 py-2.5 rounded-full text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 border border-white/[0.08] hover:border-red-500/40 transition-all cursor-pointer"
@@ -197,6 +214,7 @@ export default async function CountryPage({ searchParams }: Props) {
                 ...(type !== "all" ? { type } : {}),
                 ...(genre ? { genre } : {}),
                 ...(year ? { year } : {}),
+                ...(sortParam ? { sort: sortParam } : {}),
                 page: String(page + 1),
               }).toString()}`}
               className="px-5 py-2.5 rounded-full text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 border border-white/[0.08] hover:border-red-500/40 transition-all cursor-pointer"

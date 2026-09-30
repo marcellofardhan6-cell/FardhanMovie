@@ -3,6 +3,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { img } from "@/lib/tmdb";
+import DownloadModal from "@/components/DownloadModal";
 
 export interface CastMember {
   id: number;
@@ -12,6 +13,7 @@ export interface CastMember {
 }
 
 interface Props {
+  tmdbId?: number | string;
   title?: string;
   posterPath?: string | null;
   rating?: number;
@@ -25,6 +27,7 @@ interface Props {
 }
 
 export default function DetailCard({
+  tmdbId,
   title = "Untitled",
   posterPath = null,
   rating = 0,
@@ -37,6 +40,7 @@ export default function DetailCard({
   isAnime = false,
 }: Props) {
   const [showMore, setShowMore] = useState(false);
+  const [downloadOpen, setDownloadOpen] = useState(false);
 
   const displayRating = rating > 0 ? rating.toFixed(1) : null;
   const targetRoute = type === "tv" ? "/series" : "/films";
@@ -135,6 +139,25 @@ export default function DetailCard({
               })}
             </div>
           )}
+
+          {/* Download & Subtitles Trigger */}
+          {tmdbId && (
+            <div className="mt-3.5">
+              <button
+                type="button"
+                onClick={() => setDownloadOpen(true)}
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold text-zinc-200 hover:text-white bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.1] transition-all cursor-pointer"
+                title="Download & Subtitles"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                <span>Download & Subtitles</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -215,6 +238,17 @@ export default function DetailCard({
             ))}
           </div>
         </div>
+      )}
+
+      {tmdbId && (
+        <DownloadModal
+          isOpen={downloadOpen}
+          onClose={() => setDownloadOpen(false)}
+          tmdbId={tmdbId}
+          type={type}
+          title={title}
+          posterPath={posterPath}
+        />
       )}
     </div>
   );

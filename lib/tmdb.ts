@@ -423,13 +423,22 @@ export async function discoverMovies(params: {
   sort_by?: string;
   page?: number;
 }) {
+  const today = new Date().toISOString().split("T")[0];
   const p: Record<string, string> = {
     sort_by: params.sort_by ?? "popularity.desc",
     page: String(params.page ?? 1),
     include_adult: "false",
   };
   if (params.genre) p.with_genres = params.genre;
-  if (params.year) p.primary_release_year = params.year;
+  if (params.year) {
+    p.primary_release_year = params.year;
+  } else {
+    // Prevent unreleased future placeholder movies (e.g. late 2026/2027) from polluting results
+    p["primary_release_date.lte"] = today;
+  }
+  if (params.sort_by === "primary_release_date.desc") {
+    p["primary_release_date.lte"] = today;
+  }
   if (params.country) p.with_origin_country = params.country;
   return tmdbFetch<TMDBResponse<Movie>>("/discover/movie", p);
 }
@@ -441,12 +450,20 @@ export async function discoverTV(params: {
   sort_by?: string;
   page?: number;
 }) {
+  const today = new Date().toISOString().split("T")[0];
   const p: Record<string, string> = {
     sort_by: params.sort_by ?? "popularity.desc",
     page: String(params.page ?? 1),
   };
   if (params.genre) p.with_genres = params.genre;
-  if (params.year) p.first_air_date_year = params.year;
+  if (params.year) {
+    p.first_air_date_year = params.year;
+  } else {
+    p["first_air_date.lte"] = today;
+  }
+  if (params.sort_by === "first_air_date.desc") {
+    p["first_air_date.lte"] = today;
+  }
   if (params.country) p.with_origin_country = params.country;
   return tmdbFetch<TMDBResponse<Movie>>("/discover/tv", p);
 }
