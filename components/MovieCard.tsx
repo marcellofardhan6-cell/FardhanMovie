@@ -14,20 +14,6 @@ export default function MovieCard({ item, priority = false }: Props) {
   const fav = isFavorite(item.id);
   const title = displayTitle(item);
   const year = displayYear(item);
-  const releaseDateStr = item.release_date || item.first_air_date;
-  let formattedDate = year;
-  if (releaseDateStr && releaseDateStr.length >= 10) {
-    try {
-      const d = new Date(releaseDateStr);
-      if (!isNaN(d.getTime())) {
-        formattedDate = d.toLocaleDateString("en-US", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        });
-      }
-    } catch {}
-  }
   const type = item.media_type === "tv" || isTV(item) ? "series" : "movie";
   const href = `/${type === "movie" ? "film" : "series"}/${item.id}`;
   const posterUrl = img(item.poster_path, "w342");
@@ -141,7 +127,7 @@ export default function MovieCard({ item, priority = false }: Props) {
           {title}
         </h3>
         <div className="flex items-center justify-between text-xs text-zinc-400">
-          <span className="text-[11px] font-medium text-zinc-300">{formattedDate || year}</span>
+          {year ? <span>{year}</span> : <span />}
           <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-medium group-hover:text-red-400/80 transition-colors">
             {type === "movie" ? "Movie" : "TV"}
           </span>

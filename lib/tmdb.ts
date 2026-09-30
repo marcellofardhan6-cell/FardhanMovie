@@ -425,7 +425,7 @@ export async function discoverMovies(params: {
 }) {
   const today = new Date().toISOString().split("T")[0];
   const p: Record<string, string> = {
-    sort_by: params.sort_by ?? "primary_release_date.desc",
+    sort_by: params.sort_by ?? "popularity.desc",
     page: String(params.page ?? 1),
     include_adult: "false",
   };
@@ -436,7 +436,7 @@ export async function discoverMovies(params: {
     // Prevent unreleased future placeholder movies (e.g. late 2026/2027) from polluting results
     p["primary_release_date.lte"] = today;
   }
-  if (!params.sort_by || params.sort_by === "primary_release_date.desc") {
+  if (params.sort_by === "primary_release_date.desc") {
     p["primary_release_date.lte"] = today;
   }
   if (params.country) p.with_origin_country = params.country;
@@ -452,7 +452,7 @@ export async function discoverTV(params: {
 }) {
   const today = new Date().toISOString().split("T")[0];
   const p: Record<string, string> = {
-    sort_by: params.sort_by ?? "first_air_date.desc",
+    sort_by: params.sort_by ?? "popularity.desc",
     page: String(params.page ?? 1),
   };
   if (params.genre) p.with_genres = params.genre;
@@ -461,7 +461,7 @@ export async function discoverTV(params: {
   } else {
     p["first_air_date.lte"] = today;
   }
-  if (!params.sort_by || params.sort_by === "first_air_date.desc") {
+  if (params.sort_by === "first_air_date.desc") {
     p["first_air_date.lte"] = today;
   }
   if (params.country) p.with_origin_country = params.country;
