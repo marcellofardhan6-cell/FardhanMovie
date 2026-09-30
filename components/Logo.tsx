@@ -33,9 +33,11 @@ export default function Logo({
     lg: "text-2xl sm:text-3xl",
   }[size];
 
+  const accentColor = isAnime ? "#FF6400" : "#E50914";
+
   const content = (
     <div className={`inline-flex items-center gap-2 group select-none transition-all duration-300 ${className}`}>
-      {/* Precision Stencil Cinema Monogram */}
+      {/* Dynamic Stencil Monogram F */}
       <svg
         width={iconDimensions.box}
         height={iconDimensions.box}
@@ -49,7 +51,8 @@ export default function Logo({
           fillRule="evenodd"
           clipRule="evenodd"
           d="M4 3H31V10.5H14.5V16H24.5V23.5H14.5V33H4V3ZM8 14.5L18.5 20L8 25.5V14.5Z"
-          fill="#E50914"
+          fill={accentColor}
+          className="transition-colors duration-300"
         />
       </svg>
 
@@ -60,18 +63,21 @@ export default function Logo({
             <span className={`text-white transition-opacity group-hover:opacity-90 ${textSize}`}>
               FARD
             </span>
-            <span className={`ml-0.5 text-[#E50914] ${textSize}`}>
+            <span
+              className={`ml-0.5 transition-colors duration-300 ${textSize}`}
+              style={{ color: accentColor }}
+            >
               TV
             </span>
           </div>
 
-          {/* Clean Sub-Brand Lockup for Anime Mode */}
+          {/* Crunchyroll Style Anime Badge */}
           {isAnime && (
-            <div className="flex items-center ml-2.5 pl-2.5 border-l border-zinc-700/80 animate-fade-in">
-              <span className="text-[11px] sm:text-xs font-bold tracking-[0.18em] text-zinc-300 uppercase">
+            <div className="flex items-center ml-2.5 gap-1.5 animate-fade-in">
+              <span className="px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-black tracking-wider bg-[#FF6400] text-black uppercase shadow-sm">
                 ANIME
               </span>
-              <span className="hidden sm:inline-block ml-1.5 text-[9px] text-zinc-500 font-medium tracking-normal">
+              <span className="hidden sm:inline-block text-[11px] font-bold text-[#FF6400]">
                 アニメ
               </span>
             </div>
@@ -87,7 +93,7 @@ export default function Logo({
     <Link
       href={href}
       aria-label={isAnime ? "FardTV Anime - Beranda" : "FardTV - Beranda"}
-      className="inline-block focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 rounded"
+      className="inline-block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6400] rounded"
     >
       {content}
     </Link>

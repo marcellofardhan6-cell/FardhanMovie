@@ -2,6 +2,7 @@
 
 import { useRef, useState, useCallback } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import MovieCard from "./MovieCard";
 import Top10Card from "./Top10Card";
 import LandscapeCard from "./LandscapeCard";
@@ -22,6 +23,8 @@ export default function Carousel({
   subtitle,
   variant = "standard",
 }: Props) {
+  const pathname = usePathname();
+  const isAnime = pathname?.startsWith("/anime");
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -59,7 +62,7 @@ export default function Carousel({
         <div>
           <div className="flex items-center gap-2">
             {variant === "top10" && (
-              <span className="w-1.5 h-5 bg-red-600 rounded-full" />
+              <span className={`w-1.5 h-5 rounded-full ${isAnime ? "bg-[#FF6400]" : "bg-red-600"}`} />
             )}
             <h2 className="text-lg sm:text-xl font-bold tracking-tight text-white flex items-center gap-2">
               {title}
@@ -75,7 +78,9 @@ export default function Carousel({
           {seeAllHref && (
             <Link
               href={seeAllHref}
-              className="text-xs font-semibold tracking-wide text-zinc-400 hover:text-white transition-colors mr-2 sm:mr-3 flex items-center gap-1 group/link"
+              className={`text-xs font-semibold tracking-wide transition-colors mr-2 sm:mr-3 flex items-center gap-1 group/link ${
+                isAnime ? "text-zinc-400 hover:text-[#FF6400]" : "text-zinc-400 hover:text-white"
+              }`}
             >
               <span>See All</span>
               <svg
@@ -99,7 +104,11 @@ export default function Carousel({
               onClick={() => scrollBy("left")}
               disabled={!canScrollLeft}
               aria-label="Scroll left"
-              className="w-8 h-8 rounded-full flex items-center justify-center bg-white/[0.05] hover:bg-white/[0.12] disabled:opacity-20 border border-white/[0.08] hover:border-white/30 text-zinc-300 hover:text-white transition-all duration-200 cursor-pointer disabled:cursor-not-allowed"
+              className={`w-8 h-8 rounded-full flex items-center justify-center bg-white/[0.05] disabled:opacity-20 border border-white/[0.08] text-zinc-300 transition-all duration-200 cursor-pointer disabled:cursor-not-allowed ${
+                isAnime
+                  ? "hover:bg-[#FF6400] hover:text-black hover:border-[#FF6400]"
+                  : "hover:bg-white/[0.12] hover:border-white/30 hover:text-white"
+              }`}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                 <path d="m15 18-6-6 6-6" />
@@ -109,7 +118,11 @@ export default function Carousel({
               onClick={() => scrollBy("right")}
               disabled={!canScrollRight}
               aria-label="Scroll right"
-              className="w-8 h-8 rounded-full flex items-center justify-center bg-white/[0.05] hover:bg-white/[0.12] disabled:opacity-20 border border-white/[0.08] hover:border-white/30 text-zinc-300 hover:text-white transition-all duration-200 cursor-pointer disabled:cursor-not-allowed"
+              className={`w-8 h-8 rounded-full flex items-center justify-center bg-white/[0.05] disabled:opacity-20 border border-white/[0.08] text-zinc-300 transition-all duration-200 cursor-pointer disabled:cursor-not-allowed ${
+                isAnime
+                  ? "hover:bg-[#FF6400] hover:text-black hover:border-[#FF6400]"
+                  : "hover:bg-white/[0.12] hover:border-white/30 hover:text-white"
+              }`}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                 <path d="m9 18 6-6-6-6" />

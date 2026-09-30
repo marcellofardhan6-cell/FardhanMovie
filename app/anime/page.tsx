@@ -8,12 +8,13 @@ import {
 import Hero from "@/components/Hero";
 import Carousel from "@/components/Carousel";
 import MovieGrid from "@/components/MovieGrid";
+import AnimeSchedule from "@/components/AnimeSchedule";
 import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Anime - FardTV",
-  description: "Nonton serial anime terpopuler, film animasi bioskop Jepang, dan episode musim terbaru dengan subtitle Indonesia di FardTV.",
+  description: "Nonton serial anime terpopuler, film animasi bioskop Jepang, dan jadwal rilis mingguan dengan subtitle Indonesia di FardTV.",
 };
 
 export const revalidate = 3600;
@@ -62,7 +63,7 @@ export default async function AnimePage({ searchParams }: Props) {
   const heroItems = trendingAnimeList.filter((a) => a.backdrop_path).slice(0, 5);
 
   return (
-    <div className="min-h-screen bg-[#06070a] text-white">
+    <div className="min-h-screen bg-[#08090d] text-white">
       {/* Anime Spotlight Hero Carousel (Only on default page 1) */}
       {isDefaultView && heroItems.length > 0 && (
         <Hero items={heroItems} isAnime={true} />
@@ -73,16 +74,22 @@ export default async function AnimePage({ searchParams }: Props) {
         <div className={`${!isDefaultView ? "pt-24 sm:pt-28" : "pt-2"}`}>
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-                Anime
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#FF6400]" />
+                <span className="text-xs font-black uppercase tracking-widest text-[#FF6400]">
+                  ANIME PORTAL
+                </span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                Anime Hub
               </h1>
               <p className="text-xs sm:text-sm text-zinc-400 mt-1 max-w-xl">
-                Koleksi animasi Jepang terlengkap: serial mingguan, film layar lebar, dan rilis musim terbaru.
+                Koleksi serial animasi Jepang, jadwal rilis mingguan per hari, dan film box office bioskop.
               </p>
             </div>
           </div>
 
-          {/* Clean Genre Filter Pills */}
+          {/* Crunchyroll-Style Filter Pills */}
           <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
             {ANIME_GENRES.map((g) => {
               const isActive = selectedGenre === g.id;
@@ -91,10 +98,10 @@ export default async function AnimePage({ searchParams }: Props) {
                 <Link
                   key={g.id || "all"}
                   href={href}
-                  className={`px-4 py-2 rounded-full text-xs font-semibold tracking-wide transition-all whitespace-nowrap shrink-0 cursor-pointer ${
+                  className={`px-4 py-2 rounded-xl text-xs font-bold tracking-wide transition-all whitespace-nowrap shrink-0 cursor-pointer ${
                     isActive
-                      ? "bg-white text-black shadow-sm"
-                      : "bg-zinc-900/80 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800"
+                      ? "bg-[#FF6400] text-black shadow-md shadow-[#FF6400]/25 font-black"
+                      : "bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 hover:border-[#FF6400]/40"
                   }`}
                 >
                   {g.label}
@@ -104,14 +111,19 @@ export default async function AnimePage({ searchParams }: Props) {
           </div>
         </div>
 
-        {/* Curated Anime Shelves (Shown on default view) */}
+        {/* Curated Anime Shelves & Interactive Schedule (Shown on default view) */}
         {isDefaultView ? (
           <>
+            {/* Signature Feature: Jadwal Tayang Mingguan (Senin - Minggu) */}
+            <div className="relative">
+              <AnimeSchedule items={trendingAnimeList} />
+            </div>
+
             {/* Shelf 1: Top 10 Anime Hari Ini */}
             <div className="relative">
               <Carousel
                 title="Top 10 Anime Hari Ini"
-                subtitle="Paling banyak ditonton minggu ini"
+                subtitle="Paling banyak ditonton minggu ini di komunitas"
                 items={trendingAnimeList}
                 variant="top10"
               />
@@ -131,7 +143,7 @@ export default async function AnimePage({ searchParams }: Props) {
             <div className="relative">
               <Carousel
                 title="Film Layar Lebar Anime"
-                subtitle="Animasi terbaik bioskop Jepang"
+                subtitle="Animasi terbaik dari bioskop Jepang"
                 items={movieAnimeList}
                 variant="standard"
               />
@@ -164,7 +176,7 @@ export default async function AnimePage({ searchParams }: Props) {
                   Semua Koleksi Anime
                 </h2>
                 <p className="text-xs text-zinc-400 mt-1">
-                  Eksplorasi ribuan judul anime dari berbagai genre
+                  Eksplorasi ribuan judul anime dari berbagai genre dan musim rilis
                 </p>
               </div>
 
@@ -176,18 +188,18 @@ export default async function AnimePage({ searchParams }: Props) {
                   {page > 1 && (
                     <Link
                       href={`/anime?page=${page - 1}`}
-                      className="px-5 py-2.5 rounded-full text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 border border-white/[0.08] transition-all cursor-pointer"
+                      className="px-5 py-2.5 rounded-full text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 border border-white/[0.08] hover:border-[#FF6400]/40 transition-all cursor-pointer"
                     >
                       &larr; Halaman Sebelumnya
                     </Link>
                   )}
-                  <span className="px-4 py-2 text-xs font-medium text-zinc-400 bg-black/40 rounded-full border border-white/[0.05]">
+                  <span className="px-4 py-2 text-xs font-bold text-[#FF6400] bg-[#FF6400]/10 rounded-full border border-[#FF6400]/25">
                     Hal. {page} dari {Math.min(catalog.total_pages, 500)}
                   </span>
                   {page < catalog.total_pages && page < 500 && (
                     <Link
                       href={`/anime?page=${page + 1}`}
-                      className="px-5 py-2.5 rounded-full text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 border border-white/[0.08] transition-all cursor-pointer"
+                      className="px-5 py-2.5 rounded-full text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 border border-white/[0.08] hover:border-[#FF6400]/40 transition-all cursor-pointer"
                     >
                       Halaman Berikutnya &rarr;
                     </Link>
@@ -211,7 +223,7 @@ export default async function AnimePage({ searchParams }: Props) {
               {selectedGenre && (
                 <Link
                   href="/anime"
-                  className="text-xs font-semibold text-zinc-400 hover:text-white transition-colors"
+                  className="text-xs font-bold text-[#FF6400] hover:underline transition-colors"
                 >
                   Reset Filter &rarr;
                 </Link>
@@ -229,12 +241,12 @@ export default async function AnimePage({ searchParams }: Props) {
                       ...(selectedGenre ? { genre: selectedGenre } : {}),
                       page: String(page - 1),
                     }).toString()}`}
-                    className="px-5 py-2.5 rounded-full text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 border border-white/[0.08] transition-all cursor-pointer"
+                    className="px-5 py-2.5 rounded-full text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 border border-white/[0.08] hover:border-[#FF6400]/40 transition-all cursor-pointer"
                   >
                     &larr; Halaman Sebelumnya
                   </Link>
                 )}
-                <span className="px-4 py-2 text-xs font-medium text-zinc-400 bg-black/40 rounded-full border border-white/[0.05]">
+                <span className="px-4 py-2 text-xs font-bold text-[#FF6400] bg-[#FF6400]/10 rounded-full border border-[#FF6400]/25">
                   Hal. {page} dari {Math.min(catalog.total_pages, 500)}
                 </span>
                 {page < catalog.total_pages && page < 500 && (
@@ -243,7 +255,7 @@ export default async function AnimePage({ searchParams }: Props) {
                       ...(selectedGenre ? { genre: selectedGenre } : {}),
                       page: String(page + 1),
                     }).toString()}`}
-                    className="px-5 py-2.5 rounded-full text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 border border-white/[0.08] transition-all cursor-pointer"
+                    className="px-5 py-2.5 rounded-full text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 border border-white/[0.08] hover:border-[#FF6400]/40 transition-all cursor-pointer"
                   >
                     Halaman Berikutnya &rarr;
                   </Link>

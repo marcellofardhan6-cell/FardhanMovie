@@ -286,6 +286,31 @@ export default function Navbar() {
                     </div>
                   );
                 }
+                if (link.href === "/anime") {
+                  return (
+                    <Link
+                      key={link.href}
+                      href="/anime"
+                      className={`text-sm tracking-wide transition-all duration-200 flex items-center gap-1.5 ${
+                        isActive
+                          ? "text-[#FF6400] font-black"
+                          : "text-zinc-400 hover:text-[#FF6400]"
+                      }`}
+                      aria-current={isActive ? "page" : undefined}
+                    >
+                      <span>Anime</span>
+                      <span
+                        className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded transition-colors ${
+                          isActive
+                            ? "bg-[#FF6400] text-black"
+                            : "bg-white/[0.08] text-zinc-400 group-hover:text-white"
+                        }`}
+                      >
+                        JP
+                      </span>
+                    </Link>
+                  );
+                }
                 return (
                   <Link
                     key={link.href}
@@ -655,13 +680,22 @@ export default function Navbar() {
           </Link>
           <Link
             href="/anime"
-            className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 ${
+            className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
               pathname.startsWith("/anime")
-                ? "bg-white/20 text-white shadow-sm ring-1 ring-white/30 backdrop-blur-sm"
+                ? "bg-[#FF6400] text-black font-black shadow-md shadow-[#FF6400]/25 ring-1 ring-[#FF6400]/50"
                 : "text-zinc-300 hover:text-white drop-shadow-sm"
             }`}
           >
-            Anime
+            <span>Anime</span>
+            <span
+              className={`text-[8px] px-1 py-0.2 rounded font-black ${
+                pathname.startsWith("/anime")
+                  ? "bg-black text-[#FF6400]"
+                  : "bg-white/10 text-zinc-400"
+              }`}
+            >
+              JP
+            </span>
           </Link>
           <Link
             href="/favorites"
