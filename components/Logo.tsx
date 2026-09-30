@@ -34,8 +34,8 @@ export default function Logo({
   }[size];
 
   const content = (
-    <div className={`inline-flex items-center gap-2 sm:gap-2.5 group select-none transition-all duration-500 ${className}`}>
-      {/* Dynamic Stencil Monogram F with Smooth Anime Shift */}
+    <div className={`inline-flex items-center gap-2 group select-none transition-all duration-300 ${className}`}>
+      {/* Precision Stencil Cinema Monogram */}
       <svg
         width={iconDimensions.box}
         height={iconDimensions.box}
@@ -45,44 +45,36 @@ export default function Logo({
         className="shrink-0 transition-transform duration-300 group-hover:scale-105"
         aria-hidden="true"
       >
-        <defs>
-          <linearGradient id="fard-anime-gradient" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#FF2E93" />
-            <stop offset="60%" stopColor="#FF0055" />
-            <stop offset="100%" stopColor="#8A0033" />
-          </linearGradient>
-        </defs>
         <path
           fillRule="evenodd"
           clipRule="evenodd"
           d="M4 3H31V10.5H14.5V16H24.5V23.5H14.5V33H4V3ZM8 14.5L18.5 20L8 25.5V14.5Z"
-          fill={isAnime ? "url(#fard-anime-gradient)" : "#E50914"}
-          className="transition-colors duration-500"
+          fill="#E50914"
         />
       </svg>
 
-      {/* Pure Bold Cinema & Anime Typography */}
+      {/* Typography Lockup */}
       {showText && (
-        <div className="flex items-center font-black tracking-tight leading-none">
-          <span className={`text-white transition-opacity group-hover:opacity-90 ${textSize}`}>
-            FARD
-          </span>
-          <span
-            className={`ml-0.5 transition-colors duration-500 ${textSize} ${
-              isAnime ? "text-[#FF2E93] drop-shadow-[0_0_8px_rgba(255,46,147,0.6)]" : "text-[#E50914]"
-            }`}
-          >
-            TV
-          </span>
-
-          {/* Anime Edition Katakana Badge */}
-          {isAnime && (
-            <span
-              className="ml-1.5 px-1.5 py-0.5 rounded text-[9px] sm:text-[10px] font-black tracking-widest bg-gradient-to-r from-pink-500 via-rose-500 to-red-600 text-white shadow-[0_0_12px_rgba(255,46,147,0.5)] border border-pink-400/40 uppercase transition-all duration-500 transform scale-100 animate-fadeIn"
-              title="Anime Edition"
-            >
-              アニメ
+        <div className="flex items-center tracking-tight leading-none">
+          <div className="flex items-center font-black">
+            <span className={`text-white transition-opacity group-hover:opacity-90 ${textSize}`}>
+              FARD
             </span>
+            <span className={`ml-0.5 text-[#E50914] ${textSize}`}>
+              TV
+            </span>
+          </div>
+
+          {/* Clean Sub-Brand Lockup for Anime Mode */}
+          {isAnime && (
+            <div className="flex items-center ml-2.5 pl-2.5 border-l border-zinc-700/80 animate-fade-in">
+              <span className="text-[11px] sm:text-xs font-bold tracking-[0.18em] text-zinc-300 uppercase">
+                ANIME
+              </span>
+              <span className="hidden sm:inline-block ml-1.5 text-[9px] text-zinc-500 font-medium tracking-normal">
+                アニメ
+              </span>
+            </div>
           )}
         </div>
       )}
@@ -92,7 +84,11 @@ export default function Logo({
   if (!href) return content;
 
   return (
-    <Link href={href} aria-label={isAnime ? "FardTV Anime - Beranda" : "FardTV - Beranda"} className="inline-block focus:outline-none">
+    <Link
+      href={href}
+      aria-label={isAnime ? "FardTV Anime - Beranda" : "FardTV - Beranda"}
+      className="inline-block focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600 rounded"
+    >
       {content}
     </Link>
   );

@@ -153,7 +153,11 @@ export default function Navbar() {
             {/* Desktop Nav Links */}
             <nav className="hidden md:flex items-center gap-6" aria-label="Main navigation">
               {navLinks.map((link) => {
-                const isActive = pathname === link.href || (link.href === "/country" && pathname.startsWith("/country")) || (link.href === "/genres" && pathname.startsWith("/genres"));
+                const isActive =
+                  pathname === link.href ||
+                  (link.href === "/country" && pathname.startsWith("/country")) ||
+                  (link.href === "/genres" && pathname.startsWith("/genres")) ||
+                  (link.href === "/anime" && pathname.startsWith("/anime"));
                 if (link.href === "/genres") {
                   return (
                     <div key={link.href} className="relative group">
@@ -280,26 +284,6 @@ export default function Navbar() {
                         </div>
                       </div>
                     </div>
-                  );
-                }
-                if (link.href === "/anime") {
-                  const isAnimeActive = pathname.startsWith("/anime");
-                  return (
-                    <Link
-                      key={link.href}
-                      href="/anime"
-                      className={`text-sm tracking-wide transition-all duration-300 flex items-center gap-1.5 ${
-                        isAnimeActive
-                          ? "text-pink-400 font-bold drop-shadow-[0_0_10px_rgba(255,46,147,0.6)]"
-                          : "text-zinc-400 hover:text-pink-300"
-                      }`}
-                      aria-current={isAnimeActive ? "page" : undefined}
-                    >
-                      <span>Anime</span>
-                      <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-pink-500/20 text-pink-300 border border-pink-500/40 tracking-wider">
-                        JP
-                      </span>
-                    </Link>
                   );
                 }
                 return (
@@ -671,14 +655,13 @@ export default function Navbar() {
           </Link>
           <Link
             href="/anime"
-            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
+            className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 ${
               pathname.startsWith("/anime")
-                ? "bg-gradient-to-r from-pink-600 via-rose-600 to-red-600 text-white shadow-[0_0_14px_rgba(255,46,147,0.5)] ring-1 ring-pink-400/50 backdrop-blur-sm"
-                : "text-pink-300/90 hover:text-pink-200 drop-shadow-sm"
+                ? "bg-white/20 text-white shadow-sm ring-1 ring-white/30 backdrop-blur-sm"
+                : "text-zinc-300 hover:text-white drop-shadow-sm"
             }`}
           >
-            <span>Anime</span>
-            <span className="text-[8px] bg-pink-900/60 px-1 py-0.2 rounded font-black text-pink-200">JP</span>
+            Anime
           </Link>
           <Link
             href="/favorites"
