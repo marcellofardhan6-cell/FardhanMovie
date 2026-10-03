@@ -142,20 +142,35 @@ export default function DetailCard({
 
           {/* Download & Subtitles Trigger */}
           {tmdbId && (
-            <div className="mt-3.5">
+            <div className="mt-3.5 flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => setDownloadOpen(true)}
                 className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold text-zinc-200 hover:text-white bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.1] transition-all cursor-pointer"
-                title="Download & Subtitles"
+                title="Download Video & Subtitle"
               >
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                   <polyline points="7 10 12 15 17 10" />
                   <line x1="12" y1="15" x2="12" y2="3" />
                 </svg>
-                <span>Download & Subtitles</span>
+                <span>Download</span>
               </button>
+
+              <a
+                href={`https://subdl.com/search/${encodeURIComponent(title)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-400 hover:text-white bg-red-600/15 hover:bg-red-600 border border-red-500/30 transition-all cursor-pointer"
+                title="Unduh Subtitle Indonesia (.SRT) Langsung"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <rect width="20" height="15" x="2" y="4.5" rx="2" />
+                  <line x1="7" y1="12" x2="17" y2="12" />
+                  <line x1="7" y1="15" x2="13" y2="15" />
+                </svg>
+                <span>Unduh Sub Indo</span>
+              </a>
             </div>
           )}
         </div>

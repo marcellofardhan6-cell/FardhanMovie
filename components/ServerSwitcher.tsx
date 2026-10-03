@@ -240,6 +240,24 @@ export default function ServerSwitcher(props: Props) {
                 <span className="text-[11px] font-bold">Download</span>
               </button>
 
+              {title && (
+                <a
+                  href={`https://subdl.com/search/${encodeURIComponent(type === "tv" ? `${title} S${String(season).padStart(2, "0")}E${String(episode).padStart(2, "0")}` : title)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold text-red-400 hover:text-white bg-red-600/15 hover:bg-red-600 border border-red-500/30 transition-all cursor-pointer"
+                  title="Unduh Subtitle Indonesia (.SRT) Langsung"
+                  aria-label="Unduh Subtitle Indonesia Langsung"
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <rect width="20" height="15" x="2" y="4.5" rx="2" />
+                    <line x1="7" y1="12" x2="17" y2="12" />
+                    <line x1="7" y1="15" x2="13" y2="15" />
+                  </svg>
+                  <span className="text-[11px] font-bold">Sub Indo</span>
+                </a>
+              )}
+
               <button
                 type="button"
                 onClick={toggleFullscreen}
