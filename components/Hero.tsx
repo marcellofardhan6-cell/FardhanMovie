@@ -92,17 +92,14 @@ export default function Hero({ items, item, isAnime }: Props) {
                 sizes="100vw"
               />
             )}
-            {/* Overall premium cinema tint for deep contrast */}
-            <div className="absolute inset-0 bg-black/25 pointer-events-none" />
+            {/* Subtle top shade for navbar legibility */}
+            <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-black/40 to-transparent pointer-events-none" />
 
-            {/* Top shade for navbar legibility */}
-            <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-[#06070a]/85 via-[#06070a]/35 to-transparent pointer-events-none" />
+            {/* Thin bottom transition into page content */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#06070a] via-[#06070a]/30 to-transparent pointer-events-none" />
 
-            {/* Seamless bottom transition into page content */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#06070a] via-[#06070a]/55 to-transparent pointer-events-none" />
-
-            {/* Left-side cinematic vignette for strong text contrast */}
-            <div className="hidden md:block absolute inset-0 bg-gradient-to-r from-[#06070a]/95 via-[#06070a]/55 to-transparent max-w-3xl pointer-events-none" />
+            {/* Thin, focused side vignette just for the text area */}
+            <div className="hidden md:block absolute inset-0 bg-gradient-to-r from-[#06070a]/85 via-[#06070a]/25 to-transparent max-w-xl pointer-events-none" />
           </div>
         ))}
 
