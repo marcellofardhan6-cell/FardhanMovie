@@ -37,6 +37,10 @@ function buildServerUrl(server: Server, props: Props, isAnimeTheme?: boolean): s
       return type === "movie"
         ? `https://vidsrc.pm/embed/movie/${id}`
         : `https://vidsrc.pm/embed/tv/${id}/${season}/${episode}`;
+    case "vidsrcwiki":
+      return type === "movie"
+        ? `https://vidsrc.wiki/embed/movie/${id}`
+        : `https://vidsrc.wiki/embed/tv/${id}/${season}/${episode}`;
     case "superembed":
       return type === "movie"
         ? `https://multiembed.mov/?video_id=${id}&tmdb=1`
@@ -75,13 +79,14 @@ function buildServerUrl(server: Server, props: Props, isAnimeTheme?: boolean): s
 const SERVERS: Server[] = [
   { id: 1, name: "VidLink Pro (CC)", key: "vidlink", badge: "Primary" },
   { id: 2, name: "VidSrc PM", key: "vidsrcpm", badge: "Fast" },
-  { id: 3, name: "SuperEmbed Cinema", key: "superembed", badge: "All-Movies" },
-  { id: 4, name: "VSEmbed (VidSrc)", key: "vsembed", badge: "HD" },
-  { id: 5, name: "VidEasy 4K", key: "videasy", badge: "4K" },
-  { id: 6, name: "VidSrc VIP", key: "vidsrcvip", badge: "VIP" },
-  { id: 7, name: "2Embed Mirror", key: "twoembed" },
-  { id: 8, name: "AutoEmbed Ultra HD", key: "autoembed", badge: "UHD" },
-  { id: 9, name: "AdRock Fast", key: "adrock" },
+  { id: 3, name: "VidSrc Wiki", key: "vidsrcwiki", badge: "Wiki" },
+  { id: 4, name: "SuperEmbed Cinema", key: "superembed", badge: "All-Movies" },
+  { id: 5, name: "VSEmbed (VidSrc)", key: "vsembed", badge: "HD" },
+  { id: 6, name: "VidEasy 4K", key: "videasy", badge: "4K" },
+  { id: 7, name: "VidSrc VIP", key: "vidsrcvip", badge: "VIP" },
+  { id: 8, name: "2Embed Mirror", key: "twoembed" },
+  { id: 9, name: "AutoEmbed Ultra HD", key: "autoembed", badge: "UHD" },
+  { id: 10, name: "AdRock Fast", key: "adrock" },
 ];
 
 export default function ServerSwitcher(props: Props) {
