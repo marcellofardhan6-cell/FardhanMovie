@@ -92,10 +92,14 @@ export default function Hero({ items, item, isAnime }: Props) {
                 sizes="100vw"
               />
             )}
-            {/* Smooth bottom-to-top vignette overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#06070a] via-[#06070a]/65 to-black/30" />
-            {/* Side gradient for widescreen desktop only */}
-            <div className="hidden md:block absolute inset-0 bg-gradient-to-r from-[#06070a] via-[#06070a]/85 to-transparent sm:w-2/3" />
+            {/* Subtle top shade for navbar text legibility only */}
+            <div className="absolute top-0 left-0 right-0 h-28 bg-gradient-to-b from-[#06070a]/70 via-[#06070a]/20 to-transparent pointer-events-none" />
+
+            {/* Seamless bottom transition into page content (leaves upper 70% clear) */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#06070a] via-[#06070a]/40 to-transparent pointer-events-none" />
+
+            {/* Cinematic left-side vignette: protects text legibility while keeping center & right visuals bright and vivid */}
+            <div className="hidden md:block absolute inset-0 bg-gradient-to-r from-[#06070a]/90 via-[#06070a]/35 to-transparent max-w-2xl pointer-events-none" />
           </div>
         ))}
 
