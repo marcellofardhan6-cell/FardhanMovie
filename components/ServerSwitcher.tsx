@@ -71,15 +71,15 @@ function buildServerUrl(server: Server, props: Props, isAnimeTheme?: boolean): s
         : `https://adrock.to/embed/tv/${id}/${season}/${episode}`;
     default:
       return type === "movie"
-        ? `https://vidlink.pro/movie/${id}?primaryColor=${primaryColor}`
-        : `https://vidlink.pro/tv/${id}/${season}/${episode}?primaryColor=${primaryColor}`;
+        ? `https://vidsrc.wiki/embed/movie/${id}`
+        : `https://vidsrc.wiki/embed/tv/${id}/${season}/${episode}`;
   }
 }
 
 const SERVERS: Server[] = [
-  { id: 1, name: "VidLink Pro (CC)", key: "vidlink", badge: "Primary" },
-  { id: 2, name: "VidSrc PM", key: "vidsrcpm", badge: "Fast" },
-  { id: 3, name: "VidSrc Wiki", key: "vidsrcwiki", badge: "Wiki" },
+  { id: 1, name: "VidSrc Wiki", key: "vidsrcwiki", badge: "Primary" },
+  { id: 2, name: "VidLink Pro (CC)", key: "vidlink", badge: "Subtitles" },
+  { id: 3, name: "VidSrc PM", key: "vidsrcpm", badge: "Fast" },
   { id: 4, name: "SuperEmbed Cinema", key: "superembed", badge: "All-Movies" },
   { id: 5, name: "VSEmbed (VidSrc)", key: "vsembed", badge: "HD" },
   { id: 6, name: "VidEasy 4K", key: "videasy", badge: "4K" },
