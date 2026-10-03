@@ -158,7 +158,7 @@ export default function DetailCard({
               </button>
 
               <a
-                href={`https://subdl.com/search/${encodeURIComponent(title)}`}
+                href={`https://www.google.com/search?q=${encodeURIComponent(title.replace(/[:\/\\#?&]/g, " ").replace(/\s+/g, " ").trim() + " subtitle indonesia srt download")}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-400 hover:text-white bg-red-600/15 hover:bg-red-600 border border-red-500/30 transition-all cursor-pointer"

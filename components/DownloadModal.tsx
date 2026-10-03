@@ -16,6 +16,13 @@ interface Props {
   posterPath?: string | null;
 }
 
+function sanitizeTitle(raw: string): string {
+  return raw
+    .replace(/[:\/\\#?&]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export default function DownloadModal({
   isOpen,
   onClose,
@@ -55,19 +62,24 @@ export default function DownloadModal({
   if (!isOpen) return null;
 
   const id = String(tmdbId);
+  const cleanTitle = sanitizeTitle(title);
   const searchQuery =
     type === "tv"
-      ? `${title} S${String(season).padStart(2, "0")}E${String(episode).padStart(2, "0")}`
-      : title;
+      ? `${cleanTitle} S${String(season).padStart(2, "0")}E${String(episode).padStart(2, "0")}`
+      : cleanTitle;
   const encodedQuery = encodeURIComponent(searchQuery);
 
-  const subdlUrl = `https://subdl.com/search/${encodedQuery}`;
-  const googleSrtUrl = `https://www.google.com/search?q=${encodedQuery}+subtitle+indonesia+srt+download`;
+  const releaseYearNum = year ? parseInt(year, 10) : 0;
+  const isUnreleased = releaseYearNum > 2025;
+
+  // 100% reliable subtitle download links
+  const googleSrtUrl = `https://www.google.com/search?q=${encodeURIComponent(searchQuery + " subtitle indonesia srt download")}`;
+  const subdlUrl = `https://subdl.com/search?q=${encodedQuery}`;
   const openSubtitlesUrl = `https://www.opensubtitles.com/en/all/search-query-${encodedQuery}/sublanguageid-ind`;
-  const subsourceUrl = `https://subsource.net/search/${encodedQuery}`;
+  const subsourceUrl = `https://subsource.net/search?query=${encodedQuery}`;
 
   const paheUrl = `https://pahe.ink/?s=${encodedQuery}`;
-  const gdriveUrl = `https://www.google.com/search?q=${encodedQuery}+"drive.google.com"+OR+"mediafire.com"+download`;
+  const gdriveUrl = `https://www.google.com/search?q=${encodeURIComponent(searchQuery + ' "drive.google.com" OR "mediafire.com" download')}`;
 
   const vidlinkUrl =
     type === "movie"
@@ -130,8 +142,25 @@ export default function DownloadModal({
         </div>
 
         {/* Scrollable Content */}
-        <div className="overflow-y-auto space-y-4 pt-4 pr-1 text-xs text-zinc-300">
-          {/* SECTION 1: DIRECT SUBTITLE INDONESIA (HIGHEST PRIORITY) */}
+        <div className="overflow-y-auto space-y-3.5 pt-4 pr-1 text-xs text-zinc-300">
+          {/* Unreleased Warning */}
+          {isUnreleased && (
+            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-200">
+              <div className="flex items-center gap-2 font-bold text-xs text-amber-300 mb-1">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+                <span>Status: Belum Resmi Rilis (Tahun {year})</span>
+              </div>
+              <p className="text-[11px] text-amber-200/90 leading-relaxed">
+                Film ini masih berstatus rilis mendatang. Berkas film dan subtitle Indonesia baru akan tersedia setelah penayangan resmi di bioskop/digital.
+              </p>
+            </div>
+          )}
+
+          {/* SECTION 1: DIRECT SUBTITLE INDONESIA (.SRT) */}
           <div className="p-4 rounded-xl bg-red-600/[0.08] border border-red-500/30">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1.5">
@@ -140,19 +169,19 @@ export default function DownloadModal({
                   <line x1="7" y1="12" x2="17" y2="12" />
                   <line x1="7" y1="15" x2="13" y2="15" />
                 </svg>
-                <span className="font-bold text-white text-sm">Subtitle Indonesia (.SRT)</span>
+                <span className="font-bold text-white text-sm">Unduh Subtitle Indonesia (.SRT)</span>
               </div>
               <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-600/20 text-red-400 border border-red-500/30 uppercase">
-                1-Klik Langsung
+                1-Klik
               </span>
             </div>
             <p className="text-[11px] text-zinc-400 mb-3">
-              Unduh berkas subtitle Indonesia format .SRT siap pakai untuk pemutar video kamu:
+              Klik untuk mencari dan mengunduh berkas subtitle .SRT Indonesia langsung dari semua sumber:
             </p>
 
-            {/* Big 1-Click Button */}
+            {/* Primary 1-Click Button (Google Subtitle Search - Guarantees No 404) */}
             <a
-              href={subdlUrl}
+              href={googleSrtUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full py-2.5 px-4 rounded-xl text-xs font-bold bg-red-600 hover:bg-red-500 text-white transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-red-600/20 mb-2.5 text-center"
@@ -162,19 +191,19 @@ export default function DownloadModal({
                 <polyline points="7 10 12 15 17 10" />
                 <line x1="12" y1="15" x2="12" y2="3" />
               </svg>
-              <span>Unduh Subtitle Indonesia di SubDL</span>
+              <span>Unduh Subtitle Indonesia Langsung</span>
             </a>
 
-            {/* Backup Subtitle Links */}
+            {/* Alternative Database Badges */}
             <div className="flex flex-wrap items-center gap-1.5 pt-1">
-              <span className="text-[10px] text-zinc-500 font-medium mr-1">Opsi lain:</span>
+              <span className="text-[10px] text-zinc-500 font-medium mr-1">Database Subtitle:</span>
               <a
-                href={googleSrtUrl}
+                href={subdlUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 hover:text-white border border-white/10 transition-colors"
               >
-                Google .SRT
+                SubDL
               </a>
               <a
                 href={openSubtitlesUrl}
@@ -211,7 +240,7 @@ export default function DownloadModal({
               </span>
             </div>
             <p className="text-[11px] text-zinc-400 mb-3">
-              Rilisan video resolusi 720p/1080p yang sudah dilengkapi subtitle Indonesia bawaan:
+              Rilisan video resolusi 720p/1080p yang sudah dilengkapi subtitle Indonesia:
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">

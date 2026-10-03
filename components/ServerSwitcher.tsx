@@ -242,7 +242,15 @@ export default function ServerSwitcher(props: Props) {
 
               {title && (
                 <a
-                  href={`https://subdl.com/search/${encodeURIComponent(type === "tv" ? `${title} S${String(season).padStart(2, "0")}E${String(episode).padStart(2, "0")}` : title)}`}
+                  href={`https://www.google.com/search?q=${encodeURIComponent(
+                    (type === "tv"
+                      ? `${title} S${String(season).padStart(2, "0")}E${String(episode).padStart(2, "0")}`
+                      : title
+                    )
+                      .replace(/[:\/\\#?&]/g, " ")
+                      .replace(/\s+/g, " ")
+                      .trim() + " subtitle indonesia srt download"
+                  )}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold text-red-400 hover:text-white bg-red-600/15 hover:bg-red-600 border border-red-500/30 transition-all cursor-pointer"
