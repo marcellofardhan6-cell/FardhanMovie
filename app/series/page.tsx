@@ -30,7 +30,7 @@ export default async function SeriesPage({ searchParams }: Props) {
     getTVGenres().catch(() => []),
   ]);
 
-  let items = data.results;
+  let items = data.results.filter((m) => Boolean(m.poster_path));
   if (sortParam === "latest") {
     items = [...items].sort((a, b) => {
       const dateA = new Date(a.first_air_date || "1970-01-01").getTime();

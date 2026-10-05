@@ -438,6 +438,7 @@ export async function discoverMovies(params: {
   }
   if (params.sort_by === "primary_release_date.desc") {
     p["primary_release_date.lte"] = today;
+    p["vote_count.gte"] = "1";
   }
   if (params.country) p.with_origin_country = params.country;
   return tmdbFetch<TMDBResponse<Movie>>("/discover/movie", p);
@@ -463,6 +464,7 @@ export async function discoverTV(params: {
   }
   if (params.sort_by === "first_air_date.desc") {
     p["first_air_date.lte"] = today;
+    p["vote_count.gte"] = "1";
   }
   if (params.country) p.with_origin_country = params.country;
   return tmdbFetch<TMDBResponse<Movie>>("/discover/tv", p);

@@ -52,12 +52,12 @@ export default async function AnimePage({ searchParams }: Props) {
   ]);
 
   // Ensure media_type is tv for anime series and movie for anime movies
-  const trendingAnimeList = trending.results.map((item) => ({ ...item, media_type: "tv" as const }));
-  const shonenAnimeList = shonen.results.map((item) => ({ ...item, media_type: "tv" as const }));
-  const movieAnimeList = movies.results.map((item) => ({ ...item, media_type: "movie" as const }));
-  const topRatedAnimeList = topRated.results.map((item) => ({ ...item, media_type: "tv" as const }));
-  const fantasyAnimeList = fantasy.results.map((item) => ({ ...item, media_type: "tv" as const }));
-  const catalogList = catalog.results.map((item) => ({
+  const trendingAnimeList = trending.results.filter((a) => Boolean(a.poster_path)).map((item) => ({ ...item, media_type: "tv" as const }));
+  const shonenAnimeList = shonen.results.filter((a) => Boolean(a.poster_path)).map((item) => ({ ...item, media_type: "tv" as const }));
+  const movieAnimeList = movies.results.filter((a) => Boolean(a.poster_path)).map((item) => ({ ...item, media_type: "movie" as const }));
+  const topRatedAnimeList = topRated.results.filter((a) => Boolean(a.poster_path)).map((item) => ({ ...item, media_type: "tv" as const }));
+  const fantasyAnimeList = fantasy.results.filter((a) => Boolean(a.poster_path)).map((item) => ({ ...item, media_type: "tv" as const }));
+  const catalogList = catalog.results.filter((a) => Boolean(a.poster_path)).map((item) => ({
     ...item,
     media_type: (selectedGenre === "movie" ? "movie" : "tv") as "movie" | "tv",
   }));

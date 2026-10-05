@@ -41,6 +41,7 @@ export default function DetailCard({
 }: Props) {
   const [showMore, setShowMore] = useState(false);
   const [downloadOpen, setDownloadOpen] = useState(false);
+  const [posterSrc, setPosterSrc] = useState(img(posterPath, "w500"));
 
   const displayRating = rating > 0 ? rating.toFixed(1) : null;
   const targetRoute = type === "tv" ? "/series" : "/films";
@@ -52,12 +53,12 @@ export default function DetailCard({
         {/* Poster Thumbnail */}
         <div className="relative w-24 sm:w-32 md:w-36 aspect-[2/3] shrink-0 rounded-xl overflow-hidden shadow-2xl border border-white/10 bg-[#161922]">
           <Image
-            src={img(posterPath, "w500")}
+            src={posterSrc}
             alt={`Poster ${title}`}
             fill
             className="object-cover"
             priority
-            unoptimized={!posterPath}
+            onError={() => setPosterSrc("/poster-placeholder.svg")}
           />
         </div>
 

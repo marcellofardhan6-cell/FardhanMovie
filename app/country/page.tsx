@@ -74,15 +74,15 @@ export default async function CountryPage({ searchParams }: Props) {
   let totalPages = 1;
 
   if (type === "movie") {
-    items = moviesData.results.map((m) => ({ ...m, media_type: "movie" }));
+    items = moviesData.results.filter((m) => Boolean(m.poster_path)).map((m) => ({ ...m, media_type: "movie" }));
     totalPages = moviesData.total_pages;
   } else if (type === "tv") {
-    items = tvData.results.map((t) => ({ ...t, media_type: "tv" }));
+    items = tvData.results.filter((t) => Boolean(t.poster_path)).map((t) => ({ ...t, media_type: "tv" }));
     totalPages = tvData.total_pages;
   } else {
     // Interleave movie and tv results for 'all'
-    const mResults = moviesData.results.map((m) => ({ ...m, media_type: "movie" }));
-    const tResults = tvData.results.map((t) => ({ ...t, media_type: "tv" }));
+    const mResults = moviesData.results.filter((m) => Boolean(m.poster_path)).map((m) => ({ ...m, media_type: "movie" }));
+    const tResults = tvData.results.filter((t) => Boolean(t.poster_path)).map((t) => ({ ...t, media_type: "tv" }));
     const maxLength = Math.max(mResults.length, tResults.length);
     for (let i = 0; i < maxLength; i++) {
       if (mResults[i]) items.push(mResults[i]);

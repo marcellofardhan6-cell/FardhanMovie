@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Movie, backdrop, img, displayTitle, displayYear, isTV } from "@/lib/tmdb";
@@ -20,6 +21,7 @@ export default function LandscapeCard({ item, priority = false }: Props) {
   const imageUrl = item.backdrop_path
     ? backdrop(item.backdrop_path)
     : img(item.poster_path, "w500");
+  const [imgSrc, setImgSrc] = useState(imageUrl);
   const rating = item.vote_average ? item.vote_average.toFixed(1) : null;
 
   return (
@@ -31,13 +33,13 @@ export default function LandscapeCard({ item, priority = false }: Props) {
       {/* 16:9 Backdrop Container */}
       <div className="relative aspect-video w-full overflow-hidden bg-[#11141e]">
         <Image
-          src={imageUrl}
+          src={imgSrc}
           alt={`Backdrop ${title}`}
           fill
           sizes="(max-width: 640px) 70vw, (max-width: 1024px) 35vw, 320px"
           className="object-cover transition-transform duration-500 ease-out group-hover:scale-106"
           priority={priority}
-          unoptimized={imageUrl.startsWith("/")}
+          onError={() => setImgSrc("/backdrop-placeholder.svg")}
         />
 
         {/* Ambient Dark Gradient Base */}

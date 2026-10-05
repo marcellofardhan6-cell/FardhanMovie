@@ -16,10 +16,16 @@ export default async function HomePage() {
     getTopRatedMovies().catch(() => ({ results: EMPTY, total_pages: 0, total_results: 0, page: 1 })),
   ]);
 
+  const trendingList = trending.results.filter((m) => Boolean(m.poster_path));
+  const popularMoviesList = popularMovies.results.filter((m) => Boolean(m.poster_path));
+  const popularTVList = popularTV.results.filter((m) => Boolean(m.poster_path));
+  const animeList = anime.results.filter((m) => Boolean(m.poster_path || m.backdrop_path));
+  const topRatedList = topRated.results.filter((m) => Boolean(m.poster_path));
+
   return (
     <>
       {/* Dynamic Multi-Slide Hero (Top 5 Spotlight) */}
-      <Hero items={trending.results} />
+      <Hero items={trendingList} />
 
       {/* Content Rows with Rich Visual Rhythm */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-8 sm:space-y-14">
@@ -29,7 +35,7 @@ export default async function HomePage() {
         {/* 1. Top 10 Row (Netflix-Style Giant Architectural Rank Numbers) */}
         <Carousel
           title="Top 10 Today"
-          items={trending.results}
+          items={trendingList}
           variant="top10"
           subtitle="Most watched movies and series this week"
         />
@@ -37,14 +43,14 @@ export default async function HomePage() {
         {/* 2. Popular Movies (Standard 2:3 Poster Cards) */}
         <Carousel
           title="Popular Movies"
-          items={popularMovies.results}
+          items={popularMoviesList}
           seeAllHref="/films"
         />
 
         {/* 3. Top Anime (Cinematic Landscape 16:9 Backdrop Cards) */}
         <Carousel
           title="Featured Anime"
-          items={anime.results}
+          items={animeList}
           seeAllHref="/anime"
           variant="backdrop"
           subtitle="Top Japanese animation in cinematic format"
@@ -53,14 +59,14 @@ export default async function HomePage() {
         {/* 4. Popular TV Series (Standard 2:3 Poster Cards) */}
         <Carousel
           title="Popular TV Series"
-          items={popularTV.results}
+          items={popularTVList}
           seeAllHref="/series"
         />
 
         {/* 5. Top Rated Movies (Standard 2:3 Poster Cards) */}
         <Carousel
           title="Top Rated Movies"
-          items={topRated.results}
+          items={topRatedList}
           seeAllHref="/films?sort=top_rated"
         />
       </div>

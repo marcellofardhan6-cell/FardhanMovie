@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Movie, img, displayTitle, displayYear, isTV } from "@/lib/tmdb";
@@ -19,6 +20,7 @@ export default function Top10Card({ item, rank, priority = false }: Props) {
   const type = item.media_type === "tv" || isTV(item) ? "series" : "movie";
   const href = `/${type === "movie" ? "film" : "series"}/${item.id}`;
   const posterUrl = img(item.poster_path, "w342");
+  const [imgSrc, setImgSrc] = useState(posterUrl);
   const rating = item.vote_average ? item.vote_average.toFixed(1) : null;
 
   return (
@@ -59,13 +61,13 @@ export default function Top10Card({ item, rank, priority = false }: Props) {
         className="relative z-10 -ml-4 sm:-ml-6 md:-ml-7 w-[115px] sm:w-[140px] md:w-[160px] aspect-[2/3] rounded-xl overflow-hidden bg-[#0d0f15] border border-white/10 shadow-2xl transition-all duration-300 group-hover:border-red-500/50 group-hover:shadow-[0_8px_25px_rgba(229,9,20,0.25)]"
       >
         <Image
-          src={posterUrl}
+          src={imgSrc}
           alt={`Poster ${title}`}
           fill
           sizes="(max-width: 640px) 35vw, (max-width: 1024px) 20vw, 170px"
           className="object-cover transition-transform duration-500 ease-out group-hover:scale-108"
           priority={priority}
-          unoptimized={posterUrl.startsWith("/")}
+          onError={() => setImgSrc("/poster-placeholder.svg")}
         />
 
         {/* Ambient Dark Gradient Base */}

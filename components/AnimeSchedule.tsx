@@ -38,9 +38,10 @@ export default function AnimeSchedule({ items }: Props) {
       sun: [],
     };
 
-    if (!items || items.length === 0) return map;
+    const validItems = (items || []).filter((item) => Boolean(item.poster_path));
+    if (validItems.length === 0) return map;
 
-    items.forEach((item, index) => {
+    validItems.forEach((item, index) => {
       const dayKeys = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
       const targetDay = dayKeys[(item.id + index) % 7];
       map[targetDay].push(item);
@@ -49,7 +50,7 @@ export default function AnimeSchedule({ items }: Props) {
     // Ensure every day has at least 3-4 items by fallback
     dayKeysLoop: for (const key of Object.keys(map)) {
       if (map[key].length < 3) {
-        for (const item of items) {
+        for (const item of validItems) {
           if (!map[key].some((m) => m.id === item.id)) {
             map[key].push(item);
             if (map[key].length >= 4) break;
@@ -110,59 +111,63 @@ export default function AnimeSchedule({ items }: Props) {
 
       {/* Anime Schedule Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4 relative z-10">
-        {activeAnimeList.map((item, idx) => {
-          const title = displayTitle(item);
-          const posterUrl = img(item.poster_path, "w342");
-          const episodeNumber = ((item.id % 24) || 12) + (idx % 2);
-          const airingHours = ["17:30", "18:00", "19:30", "20:00", "21:30", "22:00"][
-            (item.id + idx) % 6
-          ];
-
-          return (
-            <Link
-              key={`schedule-${item.id}-${idx}`}
-              href={`/series/${item.id}`}
-              className="group block rounded-xl overflow-hidden bg-[#131620] border border-white/[0.08] hover:border-[#FF6400]/60 transition-all duration-300 hover:-translate-y-1"
-            >
-              {/* Poster with Airing Badge */}
-              <div className="relative aspect-[3/4] w-full overflow-hidden bg-black/40">
-                <Image
-                  src={posterUrl}
-                  alt={title}
-                  fill
-                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 200px"
-                  className="object-cover transition-transform duration-300 group-hover:scale-105"
-                  unoptimized={posterUrl.startsWith("/")}
-                />
-
-                {/* Airing Time Pill */}
-                <div className="absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-black bg-black/80 text-white backdrop-blur-md border border-white/10">
-                  {airingHours} JST
-                </div>
-
-                {/* Episode Badge in Crunchyroll Orange */}
-                <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md text-[10px] font-black bg-[#FF6400] text-black shadow-sm">
-                  EP {episodeNumber}
-                </div>
-
-                <div className="absolute bottom-2 left-2 px-1.5 py-0.5 rounded text-[9px] font-bold bg-black/70 text-zinc-300 backdrop-blur-sm">
-                  SUB
-                </div>
-              </div>
-
-              {/* Info */}
-              <div className="p-3">
-                <h3 className="text-xs sm:text-sm font-bold text-white line-clamp-1 group-hover:text-[#FF6400] transition-colors">
-                  {title}
-                </h3>
-                <p className="text-[11px] text-zinc-400 mt-0.5 line-clamp-1">
-                  Ongoing • This Season
-                </p>
-              </div>
-            </Link>
-          );
-        })}
+        {activeAnimeList.map((item, idx) => (
+          <ScheduleCard key={`schedule-${item.id}-${idx}`} item={item} idx={idx} />
+        ))}
       </div>
     </section>
+  );
+}
+
+function ScheduleCard({ item, idx }: { item: Movie; idx: number }) {
+  const title = displayTitle(item);
+  const posterUrl = img(item.poster_path, "w342");
+  const [imgSrc, setImgSrc] = useState(posterUrl);
+  const episodeNumber = ((item.id % 24) || 12) + (idx % 2);
+  const airingHours = ["17:30", "18:00", "19:30", "20:00", "21:30", "22:00"][
+    (item.id + idx) % 6
+  ];
+
+  return (
+    <Link
+      href={`/series/${item.id}`}
+      className="group block rounded-xl overflow-hidden bg-[#131620] border border-white/[0.08] hover:border-[#FF6400]/60 transition-all duration-300 hover:-translate-y-1"
+    >
+      {/* Poster with Airing Badge */}
+      <div className="relative aspect-[3/4] w-full overflow-hidden bg-black/40">
+        <Image
+          src={imgSrc}
+          alt={title}
+          fill
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 200px"
+          className="object-cover transition-transform duration-300 group-hover:scale-105"
+          onError={() => setImgSrc("/poster-placeholder.svg")}
+        />
+
+        {/* Airing Time Pill */}
+        <div className="absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-black bg-black/80 text-white backdrop-blur-md border border-white/10">
+          {airingHours} JST
+        </div>
+
+        {/* Episode Badge in Crunchyroll Orange */}
+        <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md text-[10px] font-black bg-[#FF6400] text-black shadow-sm">
+          EP {episodeNumber}
+        </div>
+
+        <div className="absolute bottom-2 left-2 px-1.5 py-0.5 rounded text-[9px] font-bold bg-black/70 text-zinc-300 backdrop-blur-sm">
+          SUB
+        </div>
+      </div>
+
+      {/* Info */}
+      <div className="p-3">
+        <h3 className="text-xs sm:text-sm font-bold text-white line-clamp-1 group-hover:text-[#FF6400] transition-colors">
+          {title}
+        </h3>
+        <p className="text-[11px] text-zinc-400 mt-0.5 line-clamp-1">
+          Ongoing • This Season
+        </p>
+      </div>
+    </Link>
   );
 }

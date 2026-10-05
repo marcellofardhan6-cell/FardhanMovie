@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 342 513" width="342" height="513">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#141724" />
+      <stop offset="100%" stop-color="#0a0c14" />
+    </linearGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#bg)" />
+  <rect x="1" y="1" width="340" height="511" fill="none" stroke="#232738" stroke-width="2" rx="8" />
+  
+  <g transform="translate(131, 200)" fill="none" stroke="#484f68" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="2" y="2" width="76" height="76" rx="10" />
+    <path d="M2 28h76" />
+    <path d="M22 2l12 26" />
+    <path d="M42 2l12 26" />
+    <circle cx="40" cy="54" r="12" />
+    <polygon points="37 49 46 54 37 59" fill="#484f68" />
+  </g>
+  
+  <text x="50%" y="320" text-anchor="middle" fill="#6b7280" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="600" letter-spacing="2">
+    NO POSTER AVAILABLE
+  </text>
+</svg>
