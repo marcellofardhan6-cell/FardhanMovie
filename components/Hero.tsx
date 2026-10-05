@@ -31,8 +31,7 @@ export default function Hero({ items, item, isAnime }: Props) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [trailerOpen, setTrailerOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const [isNavHovered, setIsNavHovered] = useState(false);
 
   const currentItem = heroList[currentIndex] || heroList[0];
 
@@ -44,18 +43,16 @@ export default function Hero({ items, item, isAnime }: Props) {
     setCurrentIndex((prev) => (prev - 1 + heroList.length) % heroList.length);
   }, [heroList.length]);
 
-  // Auto-advance slides every 7 seconds when not paused or modal open
+  // Silky-smooth auto-advance slides every 5 seconds
   useEffect(() => {
-    if (heroList.length <= 1 || isPaused || trailerOpen || detailOpen) return;
+    if (heroList.length <= 1 || trailerOpen || detailOpen || isNavHovered) return;
 
-    timerRef.current = setInterval(() => {
-      nextSlide();
-    }, 7000);
+    const timer = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % heroList.length);
+    }, 5000);
 
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [heroList.length, isPaused, trailerOpen, detailOpen, nextSlide]);
+    return () => clearInterval(timer);
+  }, [heroList.length, trailerOpen, detailOpen, isNavHovered, currentIndex]);
 
   if (!currentItem) return null;
 
@@ -73,8 +70,6 @@ export default function Hero({ items, item, isAnime }: Props) {
         className="relative w-full overflow-hidden select-none group/hero"
         style={{ minHeight: "580px", background: "#06070a" }}
         aria-label={`Featured: ${title}`}
-        onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => setIsPaused(false)}
       >
         {/* Full Backdrop with smooth cross-fade */}
         {heroList.map((m, idx) => (
@@ -255,7 +250,12 @@ export default function Hero({ items, item, isAnime }: Props) {
 
             {/* Slide Navigation & Controls (Cleanly positioned below buttons, never covers title) */}
             {heroList.length > 1 && (
-              <div className="flex items-center gap-2.5 sm:gap-3 mt-6 sm:mt-7" aria-label="Hero slide navigation">
+              <div
+                className="flex items-center gap-2.5 sm:gap-3 mt-6 sm:mt-7"
+                aria-label="Hero slide navigation"
+                onMouseEnter={() => setIsNavHovered(true)}
+                onMouseLeave={() => setIsNavHovered(false)}
+              >
                 {/* Prev Slide Arrow */}
                 <button
                   onClick={prevSlide}
@@ -269,21 +269,30 @@ export default function Hero({ items, item, isAnime }: Props) {
                   </svg>
                 </button>
 
-                {/* Dot Indicators */}
+                {/* Dot Indicators with animated auto-slide progress */}
                 <div className="flex items-center gap-1.5 sm:gap-2">
                   {heroList.map((m, idx) => (
                     <button
                       key={`dot-${m.id}`}
                       onClick={() => setCurrentIndex(idx)}
                       aria-label={`Jump to slide ${idx + 1}: ${displayTitle(m)}`}
-                      className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
+                      className={`relative h-2 rounded-full overflow-hidden transition-all duration-300 cursor-pointer ${
                         idx === currentIndex
-                          ? isAnimePage
-                            ? "w-7 sm:w-8 bg-[#FF6400] shadow-md shadow-[#FF6400]/50"
-                            : "w-7 sm:w-8 bg-red-600 shadow-md shadow-red-600/50"
+                          ? "w-8 sm:w-10 bg-white/20"
                           : "w-2 bg-white/30 hover:bg-white/60"
                       }`}
-                    />
+                    >
+                      {idx === currentIndex && (
+                        <span
+                          key={`progress-${currentIndex}`}
+                          className={`absolute inset-0 rounded-full animate-hero-progress ${
+                            isAnimePage
+                              ? "bg-[#FF6400] shadow-sm shadow-[#FF6400]/50"
+                              : "bg-red-600 shadow-sm shadow-red-600/50"
+                          }`}
+                        />
+                      )}
+                    </button>
                   ))}
                 </div>
 

@@ -122,3 +122,17 @@ body {
   background-size: 200% 100%;
   animation: shimmer 1.6s infinite;
 }
+
+/* Hero Carousel Slide Progress */
+@keyframes heroProgress {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+.animate-hero-progress {
+  animation: heroProgress 5s linear forwards;
+}
+
