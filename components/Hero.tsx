@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { Movie, backdrop, displayTitle, displayYear, isTV } from "@/lib/tmdb";
 import FavoriteButton from "./FavoriteButton";
 import TrailerModal from "./TrailerModal";
+import DetailModal from "./DetailModal";
 
 interface Props {
   items?: Movie[];
@@ -29,6 +30,7 @@ export default function Hero({ items, item, isAnime }: Props) {
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [trailerOpen, setTrailerOpen] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -42,9 +44,9 @@ export default function Hero({ items, item, isAnime }: Props) {
     setCurrentIndex((prev) => (prev - 1 + heroList.length) % heroList.length);
   }, [heroList.length]);
 
-  // Auto-advance slides every 7 seconds when not paused
+  // Auto-advance slides every 7 seconds when not paused or modal open
   useEffect(() => {
-    if (heroList.length <= 1 || isPaused || trailerOpen) return;
+    if (heroList.length <= 1 || isPaused || trailerOpen || detailOpen) return;
 
     timerRef.current = setInterval(() => {
       nextSlide();
@@ -53,7 +55,7 @@ export default function Hero({ items, item, isAnime }: Props) {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [heroList.length, isPaused, trailerOpen, nextSlide]);
+  }, [heroList.length, isPaused, trailerOpen, detailOpen, nextSlide]);
 
   if (!currentItem) return null;
 
@@ -161,16 +163,16 @@ export default function Hero({ items, item, isAnime }: Props) {
 
             {/* Action Buttons: Mobile Pill vs Desktop Grid */}
             {/* Mobile Buttons (< md) */}
-            <div className="flex md:hidden flex-wrap items-center justify-center gap-2.5 w-full max-w-xs mt-1">
+            <div className="flex md:hidden flex-wrap items-center justify-center gap-2 w-full max-w-sm mt-1">
               <Link
                 href={href}
-                className={`flex-1 inline-flex items-center justify-center gap-2 font-bold px-5 py-2.5 rounded-full text-sm transition-all shadow-xl active:scale-95 cursor-pointer ${
+                className={`flex-1 inline-flex items-center justify-center gap-2 font-bold px-4 py-2.5 rounded-full text-xs sm:text-sm transition-all shadow-xl active:scale-95 cursor-pointer ${
                   isAnimePage
                     ? "bg-[#FF6400] hover:bg-[#ff7b1a] text-black shadow-[#FF6400]/25"
                     : "bg-white hover:bg-zinc-200 text-black"
                 }`}
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M5 3l14 9-14 9V3z" />
                 </svg>
                 <span>Play</span>
@@ -179,21 +181,33 @@ export default function Hero({ items, item, isAnime }: Props) {
               <button
                 type="button"
                 onClick={() => setTrailerOpen(true)}
-                className="inline-flex items-center justify-center gap-1.5 bg-white/15 hover:bg-white/25 text-white font-semibold px-4 py-2.5 rounded-full text-xs backdrop-blur-md border border-white/20 transition-all active:scale-95 cursor-pointer"
+                className="inline-flex items-center justify-center gap-1.5 bg-white/15 hover:bg-white/25 text-white font-semibold px-3.5 py-2.5 rounded-full text-xs backdrop-blur-md border border-white/20 transition-all active:scale-95 cursor-pointer"
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <polygon points="5 3 19 12 5 21 5 3" />
                 </svg>
                 <span>Trailer</span>
               </button>
 
+              <button
+                type="button"
+                onClick={() => setDetailOpen(true)}
+                className="inline-flex items-center justify-center gap-1.5 bg-white/15 hover:bg-white/25 text-white font-semibold px-3.5 py-2.5 rounded-full text-xs backdrop-blur-md border border-white/20 transition-all active:scale-95 cursor-pointer"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 16v-4M12 8h.01" />
+                </svg>
+                <span>Details</span>
+              </button>
+
               <FavoriteButton
                 item={currentItem}
-                showText={true}
+                showText={false}
                 activeText="In List"
                 inactiveText="My List"
                 iconType="plus"
-                className="!bg-white/15 hover:!bg-white/25 !text-white !backdrop-blur-md !border-white/20 !rounded-full px-4 py-2.5 font-semibold text-xs active:scale-95"
+                className="!bg-white/15 hover:!bg-white/25 !text-white !backdrop-blur-md !border-white/20 !rounded-full p-2.5 font-semibold text-xs active:scale-95"
               />
             </div>
 
@@ -224,8 +238,9 @@ export default function Hero({ items, item, isAnime }: Props) {
                 <span>Trailer</span>
               </button>
 
-              <Link
-                href={href}
+              <button
+                type="button"
+                onClick={() => setDetailOpen(true)}
                 className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/15 text-white font-semibold px-4 py-3 rounded-xl text-sm backdrop-blur-md border border-white/10 transition-colors cursor-pointer"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -233,7 +248,7 @@ export default function Hero({ items, item, isAnime }: Props) {
                   <path d="M12 16v-4M12 8h.01" />
                 </svg>
                 <span>Details</span>
-              </Link>
+              </button>
 
               <FavoriteButton item={currentItem} className="px-3.5 py-3 !rounded-xl" />
             </div>
@@ -302,6 +317,14 @@ export default function Hero({ items, item, isAnime }: Props) {
         title={title}
         tmdbId={Number(currentItem.id)}
         type={mediaType}
+      />
+
+      {/* Netflix-Style Detail Modal */}
+      <DetailModal
+        isOpen={detailOpen}
+        onClose={() => setDetailOpen(false)}
+        item={currentItem}
+        isAnime={isAnimePage}
       />
     </>
   );

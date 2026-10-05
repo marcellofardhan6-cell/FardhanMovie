@@ -24,6 +24,8 @@ interface Props {
   cast?: CastMember[];
   type?: "movie" | "tv";
   isAnime?: boolean;
+  watchHref?: string;
+  showWatchNow?: boolean;
 }
 
 export default function DetailCard({
@@ -38,6 +40,8 @@ export default function DetailCard({
   cast = [],
   type = "movie",
   isAnime = false,
+  watchHref,
+  showWatchNow = true,
 }: Props) {
   const [showMore, setShowMore] = useState(false);
   const [downloadOpen, setDownloadOpen] = useState(false);
@@ -45,6 +49,16 @@ export default function DetailCard({
 
   const displayRating = rating > 0 ? rating.toFixed(1) : null;
   const targetRoute = type === "tv" ? "/series" : "/films";
+  const defaultWatchHref = type === "tv" ? `/series/${tmdbId}` : `/film/${tmdbId}`;
+  const resolvedWatchHref = watchHref || defaultWatchHref;
+
+  const handleWatchClick = (e: React.MouseEvent) => {
+    const playerEl = document.getElementById("player");
+    if (playerEl) {
+      e.preventDefault();
+      playerEl.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
   return (
     <div className="rounded-2xl bg-[#0d0f16] border border-white/[0.08] p-6 sm:p-8 shadow-2xl text-zinc-200">
@@ -63,7 +77,7 @@ export default function DetailCard({
         </div>
 
         {/* Title, Rating, Meta & Genre Badges */}
-        <div className="flex-1 min-w-0 pt-0.5">
+        <div className="flex-1 min-w-0 pt-0.5 pr-8 sm:pr-10">
           {/* Film / Series Title + Anime Badge */}
           <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
             <h1 className="text-xl sm:text-3xl md:text-4xl font-extrabold uppercase tracking-tight text-white leading-tight">
@@ -141,9 +155,27 @@ export default function DetailCard({
             </div>
           )}
 
-          {/* Download & Subtitles Trigger */}
+          {/* Action Buttons: Watch Now, Download & Subtitles Trigger */}
           {tmdbId && (
-            <div className="mt-3.5 flex items-center gap-2">
+            <div className="mt-3.5 flex flex-wrap items-center gap-2">
+              {showWatchNow && (
+                <Link
+                  href={resolvedWatchHref}
+                  onClick={handleWatchClick}
+                  className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer ${
+                    isAnime
+                      ? "bg-[#FF6400] hover:bg-[#ff7b1a] text-black shadow-[#FF6400]/25"
+                      : "bg-white hover:bg-zinc-200 text-black shadow-white/10"
+                  }`}
+                  title="Watch Now"
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                    <path d="M5 3l14 9-14 9V3z" />
+                  </svg>
+                  <span>Watch Now</span>
+                </Link>
+              )}
+
               <button
                 type="button"
                 onClick={() => setDownloadOpen(true)}
@@ -165,7 +197,7 @@ export default function DetailCard({
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-400 hover:text-white bg-red-600/15 hover:bg-red-600 border border-red-500/30 transition-all cursor-pointer"
                 title="Unduh Subtitle Indonesia (.SRT) Langsung"
               >
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                   <rect width="20" height="15" x="2" y="4.5" rx="2" />
                   <line x1="7" y1="12" x2="17" y2="12" />
                   <line x1="7" y1="15" x2="13" y2="15" />
