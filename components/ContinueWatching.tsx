@@ -5,6 +5,17 @@ import Image from "next/image";
 import { useWatchHistory } from "@/context/WatchHistoryContext";
 import { img, backdrop } from "@/lib/tmdb";
 
+function formatMinutes(seconds?: number): string {
+  if (!seconds || seconds <= 0) return "0m";
+  const mins = Math.floor(seconds / 60);
+  if (mins >= 60) {
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return m > 0 ? `${h}j ${m}m` : `${h}j`;
+  }
+  return `${mins}m`;
+}
+
 export default function ContinueWatching() {
   const { history, removeHistory, isLoaded } = useWatchHistory();
 
@@ -24,10 +35,10 @@ export default function ContinueWatching() {
               className="text-lg sm:text-xl font-bold text-white tracking-tight"
               style={{ fontFamily: "var(--font-fraunces)" }}
             >
-              Continue Watching
+              Lanjutkan Menonton
             </h2>
             <p className="text-[11px] text-zinc-400">
-              Pick up where you left off
+              Lanjutkan tontonan tepat di menit terakhir
             </p>
           </div>
         </div>
@@ -41,13 +52,32 @@ export default function ContinueWatching() {
       >
         {history.map((item) => {
           const isSeries = item.type === "tv";
+          const currentSec = item.currentTime || 0;
+          const durSec = item.duration || 0;
+
+          const percent = item.progress
+            ? Math.min(100, Math.max(4, item.progress))
+            : durSec > 0 && currentSec > 0
+            ? Math.min(100, Math.max(4, Math.round((currentSec / durSec) * 100)))
+            : currentSec > 30
+            ? 10
+            : 4;
+
+          const startParam = currentSec > 15 ? `&startAt=${Math.floor(currentSec)}` : "";
           const href = isSeries
-            ? `/series/${item.id}?season=${item.season || 1}&episode=${item.episode || 1}`
-            : `/film/${item.id}`;
+            ? `/series/${item.id}?season=${item.season || 1}&episode=${item.episode || 1}${startParam}`
+            : `/film/${item.id}${currentSec > 15 ? `?startAt=${Math.floor(currentSec)}` : ""}`;
 
           const imageSrc = item.backdrop_path
             ? backdrop(item.backdrop_path)
             : img(item.poster_path ?? null, "w500");
+
+          const timeText =
+            currentSec > 0
+              ? durSec > 0
+                ? `${formatMinutes(currentSec)} / ${formatMinutes(durSec)}`
+                : `Menit ${Math.floor(currentSec / 60)}`
+              : "Mulai tonton";
 
           return (
             <div
@@ -75,21 +105,32 @@ export default function ContinueWatching() {
                   </div>
                 </div>
 
-                {/* Badge: S1 : E2 or Movie */}
-                <div className="absolute bottom-2.5 left-2.5 flex items-center gap-1.5">
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-red-600 text-white shadow-md">
-                    {isSeries ? `S${item.season || 1} : E${item.episode || 1}` : "MOVIE"}
-                  </span>
-                  {item.vote_average ? (
-                    <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-black/70 text-amber-400 backdrop-blur-sm">
-                      ★ {item.vote_average.toFixed(1)}
+                {/* Badges: Season/Episode & Real Time Status */}
+                <div className="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between gap-1.5 pointer-events-none">
+                  <div className="flex items-center gap-1.5">
+                    <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-red-600 text-white shadow-md">
+                      {isSeries ? `S${item.season || 1} : E${item.episode || 1}` : "MOVIE"}
                     </span>
-                  ) : null}
+                    {item.vote_average ? (
+                      <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-black/70 text-amber-400 backdrop-blur-sm">
+                        ★ {item.vote_average.toFixed(1)}
+                      </span>
+                    ) : null}
+                  </div>
+
+                  {currentSec > 0 && (
+                    <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-black/80 text-zinc-200 backdrop-blur-sm border border-white/10">
+                      {timeText}
+                    </span>
+                  )}
                 </div>
 
-                {/* Simulated watch progress bar */}
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
-                  <div className="h-full bg-red-600 w-3/4 rounded-r" />
+                {/* REAL Watch Progress Bar */}
+                <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-black/60 overflow-hidden">
+                  <div
+                    className="h-full bg-red-600 rounded-r transition-all duration-300 shadow-sm shadow-red-600/80"
+                    style={{ width: `${percent}%` }}
+                  />
                 </div>
               </Link>
 
@@ -102,23 +143,34 @@ export default function ContinueWatching() {
                   removeHistory(item.id, item.type);
                 }}
                 className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/70 hover:bg-red-600 text-zinc-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer z-10 backdrop-blur-sm border border-white/10"
-                title="Remove from history"
-                aria-label={`Remove ${item.title} from history`}
+                title="Hapus dari riwayat"
+                aria-label={`Hapus ${item.title} dari riwayat`}
               >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M18 6 6 18M6 6l12 12" />
                 </svg>
               </button>
 
-              {/* Card Title */}
+              {/* Card Title & Real Watch Minutes */}
               <div className="p-3">
                 <Link href={href} className="block">
                   <h3 className="text-xs sm:text-sm font-semibold text-white group-hover:text-red-400 transition-colors truncate">
                     {item.title}
                   </h3>
-                  <p className="text-[11px] text-zinc-400 mt-0.5">
-                    {isSeries ? "Continue episode" : "Continue movie"} &rarr;
-                  </p>
+                  <div className="flex items-center justify-between text-[11px] text-zinc-400 mt-1">
+                    <span className="text-zinc-300 font-medium truncate">
+                      {currentSec > 0
+                        ? durSec > 0
+                          ? `${formatMinutes(currentSec)} dari ${formatMinutes(durSec)} (${percent}%)`
+                          : `Menit ${Math.floor(currentSec / 60)}`
+                        : isSeries
+                        ? "Mulai episode"
+                        : "Mulai film"}
+                    </span>
+                    <span className="text-red-400 font-bold shrink-0 ml-2 group-hover:translate-x-0.5 transition-transform">
+                      Lanjut &rarr;
+                    </span>
+                  </div>
                 </Link>
               </div>
             </div>

@@ -21,18 +21,22 @@ interface Props {
   videos?: { id?: string; key: string; name: string; type: string; site?: string; official?: boolean }[];
   posterPath?: string | null;
   backdropPath?: string | null;
+  runtimeMinutes?: number | null;
 }
 
-function buildServerUrl(server: Server, props: Props, isAnimeTheme?: boolean): string {
+function buildServerUrl(server: Server, props: Props, isAnimeTheme?: boolean, startAt?: number): string {
   const { tmdbId, type, season = 1, episode = 1 } = props;
   const id = String(tmdbId);
   const primaryColor = isAnimeTheme ? "ff6400" : "e50914";
+  const startAtSec = startAt && startAt > 15 ? Math.floor(startAt) : 0;
 
   switch (server.key) {
-    case "vidlink":
+    case "vidlink": {
+      const startAtParam = startAtSec > 0 ? `&startAt=${startAtSec}` : "";
       return type === "movie"
-        ? `https://vidlink.pro/movie/${id}?primaryColor=${primaryColor}`
-        : `https://vidlink.pro/tv/${id}/${season}/${episode}?primaryColor=${primaryColor}`;
+        ? `https://vidlink.pro/movie/${id}?primaryColor=${primaryColor}${startAtParam}`
+        : `https://vidlink.pro/tv/${id}/${season}/${episode}?primaryColor=${primaryColor}${startAtParam}`;
+    }
     case "vidsrcpm":
       return type === "movie"
         ? `https://vidsrc.pm/embed/movie/${id}`
@@ -90,8 +94,18 @@ const SERVERS: Server[] = [
 ];
 
 export default function ServerSwitcher(props: Props) {
-  const { trailerKey, title, tmdbId, type, season = 1, episode = 1, posterPath, backdropPath } = props;
-  const { addHistory } = useWatchHistory();
+  const {
+    trailerKey,
+    title,
+    tmdbId,
+    type,
+    season = 1,
+    episode = 1,
+    posterPath,
+    backdropPath,
+    runtimeMinutes,
+  } = props;
+  const { addHistory, updateProgress, getHistoryItem } = useWatchHistory();
   const { isAnimeTheme } = useAnimeTheme();
   const [activeServer, setActiveServer] = useState(0);
   const [isTrailerActive, setIsTrailerActive] = useState(false);
@@ -100,9 +114,47 @@ export default function ServerSwitcher(props: Props) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showAllServers, setShowAllServers] = useState(true);
   const [downloadOpen, setDownloadOpen] = useState(false);
+  const [resumeToast, setResumeToast] = useState<string | null>(null);
+  const [startAtSec, setStartAtSec] = useState<number>(0);
+  const currentTimeRef = useRef<number>(0);
   const playerContainerRef = useRef<HTMLDivElement>(null);
 
-  // Automatically record watch history
+  // Total duration in seconds
+  const totalDurationSec =
+    runtimeMinutes && runtimeMinutes > 0
+      ? runtimeMinutes * 60
+      : type === "movie"
+      ? 7200
+      : 2700;
+
+  // Check initial resume point (URL query `startAt` or localStorage history)
+  useEffect(() => {
+    if (!tmdbId) return;
+    let initialTime = 0;
+    if (typeof window !== "undefined") {
+      const q = new URLSearchParams(window.location.search).get("startAt");
+      if (q && !isNaN(Number(q)) && Number(q) > 15) {
+        initialTime = Number(q);
+      }
+    }
+    if (initialTime === 0) {
+      const saved = getHistoryItem(Number(tmdbId), type, season, episode);
+      if (saved?.currentTime && saved.currentTime > 15) {
+        initialTime = saved.currentTime;
+      }
+    }
+
+    if (initialTime > 15) {
+      setStartAtSec(initialTime);
+      currentTimeRef.current = initialTime;
+      const mins = Math.floor(initialTime / 60);
+      setResumeToast(`Melanjutkan tontonan dari menit ${mins}...`);
+      const toastTimer = setTimeout(() => setResumeToast(null), 4500);
+      return () => clearTimeout(toastTimer);
+    }
+  }, [tmdbId, type, season, episode, getHistoryItem]);
+
+  // Initial history entry
   useEffect(() => {
     if (tmdbId && title) {
       addHistory({
@@ -113,9 +165,80 @@ export default function ServerSwitcher(props: Props) {
         episode: type === "tv" ? episode : undefined,
         poster_path: posterPath,
         backdrop_path: backdropPath,
+        duration: totalDurationSec,
       });
     }
-  }, [tmdbId, type, title, season, episode, posterPath, backdropPath, addHistory]);
+  }, [tmdbId, type, title, season, episode, posterPath, backdropPath, totalDurationSec, addHistory]);
+
+  // Real-time playback message listener (VidLink PLAYER_EVENT & standard embeds)
+  useEffect(() => {
+    if (!tmdbId || !title) return;
+
+    const handleMessage = (event: MessageEvent) => {
+      try {
+        const data = event.data;
+        if (!data) return;
+
+        // VidLink PLAYER_EVENT
+        if (data.type === "PLAYER_EVENT" && data.data) {
+          const { currentTime, duration } = data.data;
+          if (typeof currentTime === "number" && currentTime > 0) {
+            currentTimeRef.current = currentTime;
+            const dur = typeof duration === "number" && duration > 0 ? duration : totalDurationSec;
+            updateProgress(Number(tmdbId), type, currentTime, dur, {
+              title,
+              poster_path: posterPath,
+              backdrop_path: backdropPath,
+              season: type === "tv" ? season : undefined,
+              episode: type === "tv" ? episode : undefined,
+            });
+          }
+        }
+
+        // Generic timeupdate event
+        if (data.event === "timeupdate" || data.type === "timeupdate") {
+          const time = Number(data.currentTime ?? data.time ?? data.data?.currentTime);
+          const dur = Number(data.duration ?? data.data?.duration ?? totalDurationSec);
+          if (!isNaN(time) && time > 0) {
+            currentTimeRef.current = time;
+            updateProgress(Number(tmdbId), type, time, dur, {
+              title,
+              poster_path: posterPath,
+              backdrop_path: backdropPath,
+              season: type === "tv" ? season : undefined,
+              episode: type === "tv" ? episode : undefined,
+            });
+          }
+        }
+      } catch {}
+    };
+
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [tmdbId, type, title, season, episode, posterPath, backdropPath, totalDurationSec, updateProgress]);
+
+  // Active watching session timer (ticks every 5s while tab is active)
+  useEffect(() => {
+    if (!tmdbId || !title || isTrailerActive || isLoading) return;
+
+    const interval = setInterval(() => {
+      if (typeof document !== "undefined" && document.hidden) return;
+      currentTimeRef.current += 5;
+      if (currentTimeRef.current > totalDurationSec) {
+        currentTimeRef.current = totalDurationSec;
+      }
+
+      updateProgress(Number(tmdbId), type, currentTimeRef.current, totalDurationSec, {
+        title,
+        poster_path: posterPath,
+        backdrop_path: backdropPath,
+        season: type === "tv" ? season : undefined,
+        episode: type === "tv" ? episode : undefined,
+      });
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [tmdbId, type, title, season, episode, posterPath, backdropPath, isTrailerActive, isLoading, totalDurationSec, updateProgress]);
 
   const currentServer = SERVERS[activeServer] || SERVERS[0];
   const trailerEmbedUrl = trailerKey
@@ -124,7 +247,7 @@ export default function ServerSwitcher(props: Props) {
 
   const src = isTrailerActive && trailerEmbedUrl
     ? trailerEmbedUrl
-    : buildServerUrl(currentServer, props, isAnimeTheme);
+    : buildServerUrl(currentServer, props, isAnimeTheme, startAtSec);
 
   // Auto-dismiss loading after 2.5s so iframe controls are never blocked
   useEffect(() => {
@@ -418,6 +541,14 @@ export default function ServerSwitcher(props: Props) {
           ref={playerContainerRef}
           className="relative w-full aspect-video min-h-[275px] xs:min-h-[310px] sm:min-h-0 bg-black [&:fullscreen]:aspect-auto [&:fullscreen]:w-screen [&:fullscreen]:h-screen"
         >
+          {/* Resume Playback Notification Pill */}
+          {resumeToast && (
+            <div className="absolute top-4 left-4 z-30 flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/85 border border-white/20 text-xs font-bold text-white shadow-2xl backdrop-blur-md animate-fade-in pointer-events-none">
+              <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
+              <span>{resumeToast}</span>
+            </div>
+          )}
+
           {/* Floating Exit Fullscreen Button when in fullscreen mode */}
           {isFullscreen && (
             <button

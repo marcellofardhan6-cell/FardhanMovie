@@ -154,6 +154,7 @@ export default function TVPlayer({
         trailerKey={trailerKey}
         posterPath={posterPath}
         backdropPath={backdropPath}
+        runtimeMinutes={currentEpisodeData?.runtime || 24}
       />
 
       {/* Auto-Next Countdown Toast */}

@@ -85,6 +85,7 @@ export default async function FilmDetailPage({ params }: Props) {
             videos={videos}
             posterPath={movie.poster_path}
             backdropPath={movie.backdrop_path}
+            runtimeMinutes={movie.runtime}
           />
         </div>
 
