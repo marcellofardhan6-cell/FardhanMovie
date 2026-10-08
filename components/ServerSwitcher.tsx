@@ -37,27 +37,30 @@ function buildServerUrl(server: Server, props: Props, isAnimeTheme?: boolean, st
         ? `https://vidlink.pro/movie/${id}?primaryColor=${primaryColor}${startAtParam}`
         : `https://vidlink.pro/tv/${id}/${season}/${episode}?primaryColor=${primaryColor}${startAtParam}`;
     }
-    case "vidsrcpm":
-      return type === "movie"
-        ? `https://vidsrc.pm/embed/movie/${id}`
-        : `https://vidsrc.pm/embed/tv/${id}/${season}/${episode}`;
-    case "vidsrcwiki":
-      return type === "movie"
-        ? `https://vidsrc.wiki/embed/movie/${id}`
-        : `https://vidsrc.wiki/embed/tv/${id}/${season}/${episode}`;
     case "superembed":
+    case "multiembed":
       return type === "movie"
         ? `https://multiembed.mov/?video_id=${id}&tmdb=1`
         : `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${episode}`;
     case "vsembed":
+    case "vidsrcto":
       return type === "movie"
         ? `https://vidsrc.to/embed/movie/${id}`
         : `https://vidsrc.to/embed/tv/${id}/${season}/${episode}`;
-    case "videasy":
+    case "autoembed":
       return type === "movie"
-        ? `https://player.videasy.net/movie/${id}`
-        : `https://player.videasy.net/tv/${id}/${season}/${episode}`;
+        ? `https://autoembed.co/movie/tmdb/${id}`
+        : `https://autoembed.co/tv/tmdb/${id}-${season}-${episode}`;
+    case "vidsrcpm":
+      return type === "movie"
+        ? `https://vidsrc.pm/embed/movie/${id}`
+        : `https://vidsrc.pm/embed/tv/${id}/${season}/${episode}`;
+    case "smashy":
+      return type === "movie"
+        ? `https://embed.smashystream.com/playere.php?tmdb=${id}`
+        : `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${season}&episode=${episode}`;
     case "vidsrcvip":
+    case "vidsrcme":
       return type === "movie"
         ? `https://vidsrc.me/embed/movie?tmdb=${id}`
         : `https://vidsrc.me/embed/tv?tmdb=${id}&season=${season}&episode=${episode}`;
@@ -65,32 +68,32 @@ function buildServerUrl(server: Server, props: Props, isAnimeTheme?: boolean, st
       return type === "movie"
         ? `https://www.2embed.cc/embed/${id}`
         : `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${episode}`;
-    case "autoembed":
+    case "vidsrcdev":
       return type === "movie"
-        ? `https://player.autoembed.cc/embed/movie/${id}`
-        : `https://player.autoembed.cc/embed/tv/${id}/${season}/${episode}`;
-    case "adrock":
-      return type === "movie"
-        ? `https://adrock.to/embed/movie/${id}`
-        : `https://adrock.to/embed/tv/${id}/${season}/${episode}`;
-    default:
+        ? `https://vidsrc.dev/embed/movie/${id}`
+        : `https://vidsrc.dev/embed/tv/${id}/${season}/${episode}`;
+    case "vidsrcwiki":
       return type === "movie"
         ? `https://vidsrc.wiki/embed/movie/${id}`
         : `https://vidsrc.wiki/embed/tv/${id}/${season}/${episode}`;
+    default:
+      return type === "movie"
+        ? `https://vidlink.pro/movie/${id}?primaryColor=${primaryColor}`
+        : `https://vidlink.pro/tv/${id}/${season}/${episode}?primaryColor=${primaryColor}`;
   }
 }
 
 const SERVERS: Server[] = [
-  { id: 1, name: "VidSrc Wiki", key: "vidsrcwiki", badge: "Primary" },
-  { id: 2, name: "VidLink Pro (CC)", key: "vidlink", badge: "Subtitles" },
-  { id: 3, name: "VidSrc PM", key: "vidsrcpm", badge: "Fast" },
-  { id: 4, name: "SuperEmbed Cinema", key: "superembed", badge: "All-Movies" },
-  { id: 5, name: "VSEmbed (VidSrc)", key: "vsembed", badge: "HD" },
-  { id: 6, name: "VidEasy 4K", key: "videasy", badge: "4K" },
-  { id: 7, name: "VidSrc VIP", key: "vidsrcvip", badge: "VIP" },
+  { id: 1, name: "VidLink Pro (CC)", key: "vidlink", badge: "Primary" },
+  { id: 2, name: "MultiEmbed Cinema", key: "superembed", badge: "Multi-Source" },
+  { id: 3, name: "VidSrc TO (HD)", key: "vsembed", badge: "Fast" },
+  { id: 4, name: "AutoEmbed Prime", key: "autoembed", badge: "UHD" },
+  { id: 5, name: "VidSrc PM (Vidflix)", key: "vidsrcpm", badge: "Player" },
+  { id: 6, name: "SmashyStream", key: "smashy", badge: "VIP" },
+  { id: 7, name: "VidSrc ME (Mirror)", key: "vidsrcvip", badge: "Mirror" },
   { id: 8, name: "2Embed Mirror", key: "twoembed" },
-  { id: 9, name: "AutoEmbed Ultra HD", key: "autoembed", badge: "UHD" },
-  { id: 10, name: "AdRock Fast", key: "adrock" },
+  { id: 9, name: "VidSrc Dev", key: "vidsrcdev", badge: "Dev" },
+  { id: 10, name: "VidSrc Wiki", key: "vidsrcwiki", badge: "Backup" },
 ];
 
 export default function ServerSwitcher(props: Props) {
@@ -623,7 +626,7 @@ export default function ServerSwitcher(props: Props) {
             className="absolute inset-0 w-full h-full border-0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen *"
             allowFullScreen={true}
-            referrerPolicy="no-referrer"
+            referrerPolicy="origin"
             onLoad={handleLoad}
             onError={handleIframeError}
           />

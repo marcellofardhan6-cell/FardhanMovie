@@ -81,20 +81,20 @@ export default function DownloadModal({
   const paheUrl = `https://pahe.ink/?s=${encodedQuery}`;
   const gdriveUrl = `https://www.google.com/search?q=${encodeURIComponent(searchQuery + ' "drive.google.com" OR "mediafire.com" download')}`;
 
-  const vidsrcWikiUrl =
-    type === "movie"
-      ? `https://vidsrc.wiki/embed/movie/${id}`
-      : `https://vidsrc.wiki/embed/tv/${id}/${season}/${episode}`;
-
   const vidlinkUrl =
     type === "movie"
       ? `https://vidlink.pro/movie/${id}`
       : `https://vidlink.pro/tv/${id}/${season}/${episode}`;
 
+  const multiembedUrl =
+    type === "movie"
+      ? `https://multiembed.mov/?video_id=${id}&tmdb=1`
+      : `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${episode}`;
+
   const vidsrcUrl =
     type === "movie"
-      ? `https://vidsrc.pm/embed/movie/${id}`
-      : `https://vidsrc.pm/embed/tv/${id}/${season}/${episode}`;
+      ? `https://vidsrc.to/embed/movie/${id}`
+      : `https://vidsrc.to/embed/tv/${id}/${season}/${episode}`;
 
   return (
     <div
@@ -297,37 +297,11 @@ export default function DownloadModal({
             </div>
 
             <div className="space-y-2">
-              {/* VidSrc Wiki */}
-              <div className="p-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-between gap-2">
-                <div className="min-w-0">
-                  <span className="font-bold text-white text-xs block truncate">VidSrc Wiki</span>
-                  <span className="text-[10px] text-zinc-400">Server Utama (Official)</span>
-                </div>
-
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <a
-                    href={vidsrcWikiUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="py-1 px-2.5 rounded-md text-[11px] font-bold bg-white/[0.08] hover:bg-white/[0.15] text-white transition-colors"
-                  >
-                    Buka Player
-                  </a>
-                  <button
-                    type="button"
-                    onClick={() => copyToClipboard(vidsrcWikiUrl, "vidsrcwiki")}
-                    className="py-1 px-2.5 rounded-md text-[11px] font-semibold bg-red-600/20 hover:bg-red-600 text-red-300 hover:text-white border border-red-500/30 transition-colors"
-                  >
-                    {copiedKey === "vidsrcwiki" ? "Tersalin!" : "Salin Link"}
-                  </button>
-                </div>
-              </div>
-
               {/* VidLink Pro */}
               <div className="p-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-between gap-2">
                 <div className="min-w-0">
-                  <span className="font-bold text-white text-xs block truncate">VidLink Pro</span>
-                  <span className="text-[10px] text-emerald-400">Ada CC Subtitle Indonesia</span>
+                  <span className="font-bold text-white text-xs block truncate">VidLink Pro (CC)</span>
+                  <span className="text-[10px] text-emerald-400">Server Utama - Subtitle Indonesia</span>
                 </div>
 
                 <div className="flex items-center gap-1.5 shrink-0">
@@ -349,11 +323,37 @@ export default function DownloadModal({
                 </div>
               </div>
 
-              {/* VidSrc PM */}
+              {/* MultiEmbed Cinema */}
               <div className="p-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-between gap-2">
                 <div className="min-w-0">
-                  <span className="font-bold text-white text-xs block truncate">VidSrc PM</span>
-                  <span className="text-[10px] text-zinc-400">Stream CDN Cepat</span>
+                  <span className="font-bold text-white text-xs block truncate">MultiEmbed Cinema</span>
+                  <span className="text-[10px] text-zinc-400">Multi-Source Backup</span>
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <a
+                    href={multiembedUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="py-1 px-2.5 rounded-md text-[11px] font-bold bg-white/[0.08] hover:bg-white/[0.15] text-white transition-colors"
+                  >
+                    Buka Player
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => copyToClipboard(multiembedUrl, "multiembed")}
+                    className="py-1 px-2.5 rounded-md text-[11px] font-semibold bg-red-600/20 hover:bg-red-600 text-red-300 hover:text-white border border-red-500/30 transition-colors"
+                  >
+                    {copiedKey === "multiembed" ? "Tersalin!" : "Salin Link"}
+                  </button>
+                </div>
+              </div>
+
+              {/* VidSrc TO */}
+              <div className="p-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <span className="font-bold text-white text-xs block truncate">VidSrc TO</span>
+                  <span className="text-[10px] text-zinc-400">Stream HD Cepat</span>
                 </div>
 
                 <div className="flex items-center gap-1.5 shrink-0">
