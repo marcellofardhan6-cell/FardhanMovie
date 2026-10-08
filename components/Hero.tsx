@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Movie, backdrop, displayTitle, displayYear, isTV } from "@/lib/tmdb";
+import { Movie, backdrop, displayTitle, displayYear, isTV, getGenreNames } from "@/lib/tmdb";
 import FavoriteButton from "./FavoriteButton";
 import TrailerModal from "./TrailerModal";
 import DetailModal from "./DetailModal";
@@ -31,7 +31,7 @@ export default function Hero({ items, item, isAnime }: Props) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [trailerOpen, setTrailerOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
-  const [isNavHovered, setIsNavHovered] = useState(false);
+  const [clientLogos, setClientLogos] = useState<Record<number, string | null>>({});
 
   const currentItem = heroList[currentIndex] || heroList[0];
 
@@ -43,16 +43,31 @@ export default function Hero({ items, item, isAnime }: Props) {
     setCurrentIndex((prev) => (prev - 1 + heroList.length) % heroList.length);
   }, [heroList.length]);
 
+  // Client-side fallback: fetch logo if not already attached on server
+  useEffect(() => {
+    heroList.forEach(async (m) => {
+      if (m.logo_path || clientLogos[m.id] !== undefined) return;
+      try {
+        const mType = m.media_type === "tv" || (!m.title && m.name) ? "tv" : "movie";
+        const res = await fetch(`/api/logo?id=${m.id}&type=${mType}`);
+        const data = await res.json();
+        setClientLogos((prev) => ({ ...prev, [m.id]: data.logoPath ?? null }));
+      } catch {
+        setClientLogos((prev) => ({ ...prev, [m.id]: null }));
+      }
+    });
+  }, [heroList, clientLogos]);
+
   // Silky-smooth auto-advance slides every 5 seconds
   useEffect(() => {
-    if (heroList.length <= 1 || trailerOpen || detailOpen || isNavHovered) return;
+    if (heroList.length <= 1 || trailerOpen || detailOpen) return;
 
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % heroList.length);
-    }, 5000);
+    }, 5500);
 
     return () => clearInterval(timer);
-  }, [heroList.length, trailerOpen, detailOpen, isNavHovered, currentIndex]);
+  }, [heroList.length, trailerOpen, detailOpen, currentIndex]);
 
   if (!currentItem) return null;
 
@@ -63,12 +78,14 @@ export default function Hero({ items, item, isAnime }: Props) {
   const mediaType: "movie" | "tv" = isSeries ? "tv" : "movie";
   const href = `/${type === "movie" ? "film" : "series"}/${currentItem.id}`;
   const rating = currentItem.vote_average ? currentItem.vote_average.toFixed(1) : null;
+  const genres = getGenreNames(currentItem.genre_ids, 2);
+  const currentLogo = currentItem.logo_path || clientLogos[currentItem.id];
 
   return (
     <>
       <section
         className="relative w-full overflow-hidden select-none group/hero"
-        style={{ minHeight: "580px", background: "#06070a" }}
+        style={{ minHeight: "560px", background: "#06070a" }}
         aria-label={`Featured: ${title}`}
       >
         {/* Full Backdrop with smooth cross-fade */}
@@ -90,20 +107,20 @@ export default function Hero({ items, item, isAnime }: Props) {
               />
             )}
             {/* Subtle top shade for navbar legibility */}
-            <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-black/40 to-transparent pointer-events-none" />
+            <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" />
 
-            {/* Thin bottom transition into page content */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#06070a] via-[#06070a]/30 to-transparent pointer-events-none" />
+            {/* Bottom smooth dark vignette into page content */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#06070a] via-[#06070a]/40 to-transparent pointer-events-none" />
 
-            {/* Thin, focused side vignette just for the text area */}
-            <div className="hidden md:block absolute inset-0 bg-gradient-to-r from-[#06070a]/85 via-[#06070a]/25 to-transparent max-w-xl pointer-events-none" />
+            {/* Left focused vignette behind movie logo and details */}
+            <div className="hidden md:block absolute inset-0 bg-gradient-to-r from-[#06070a]/90 via-[#06070a]/40 to-transparent max-w-2xl pointer-events-none" />
           </div>
         ))}
 
         {/* Hero Content Container */}
         <div
           className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-end z-10"
-          style={{ minHeight: "580px", paddingBottom: "2.5rem", paddingTop: "5.5rem" }}
+          style={{ minHeight: "560px", paddingBottom: "3rem", paddingTop: "5.5rem" }}
         >
           <div className="w-full max-w-2xl mx-auto md:mx-0 flex flex-col items-center md:items-start text-center md:text-left">
             {/* Tag / Category Badge */}
@@ -120,13 +137,32 @@ export default function Hero({ items, item, isAnime }: Props) {
               </span>
             </div>
 
-            {/* Title with smooth transition */}
-            <h1 className="text-3xl sm:text-4xl md:text-6xl font-black text-white tracking-tight leading-[1.08] mb-2 sm:mb-3 drop-shadow-2xl">
-              {title}
-            </h1>
+            {/* Title: Official TMDB Graphic Logo (if available) or Stylized Fraunces Typography */}
+            <div className="mb-3 sm:mb-4 min-h-[60px] sm:min-h-[80px] md:min-h-[105px] flex items-center justify-center md:justify-start">
+              {currentLogo ? (
+                <div className="relative h-14 sm:h-20 md:h-28 max-w-[280px] sm:max-w-[360px] md:max-w-[440px] w-auto">
+                  <Image
+                    key={`hero-logo-${currentItem.id}`}
+                    src={`https://image.tmdb.org/t/p/w500${currentLogo}`}
+                    alt={`Logo ${title}`}
+                    width={440}
+                    height={120}
+                    priority={currentIndex === 0}
+                    className="h-full w-auto max-h-14 sm:max-h-20 md:max-h-28 object-contain object-center md:object-left drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)] animate-fade-in"
+                  />
+                </div>
+              ) : (
+                <h1
+                  className="text-3xl sm:text-4xl md:text-6xl font-black text-white tracking-tight leading-[1.08] drop-shadow-2xl animate-fade-in"
+                  style={{ fontFamily: "var(--font-fraunces)" }}
+                >
+                  {title}
+                </h1>
+              )}
+            </div>
 
-            {/* Metadata Row */}
-            <div className="flex flex-wrap items-center justify-center md:justify-start gap-2.5 mb-4 text-xs font-semibold text-zinc-300">
+            {/* Metadata Row matching 7reels / Netflix aesthetic */}
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-2.5 sm:gap-3 mb-3 text-xs sm:text-sm font-semibold text-zinc-300">
               {rating && (
                 <span className="flex items-center gap-1 font-bold text-amber-400">
                   <span className="text-sm">★</span>
@@ -134,189 +170,102 @@ export default function Hero({ items, item, isAnime }: Props) {
                 </span>
               )}
               {year && <span>{year}</span>}
-              <span className="text-zinc-500">•</span>
-              <span className="px-2 py-0.5 rounded bg-white/10 text-[10px] text-zinc-300 border border-white/15">
-                {isAnimePage ? "Anime Series" : type === "movie" ? "Movie" : "TV Series"}
+              <span className="px-1.5 py-0.5 rounded text-[10px] sm:text-[11px] font-bold text-zinc-300 border border-white/20 bg-black/40">
+                17+
               </span>
-              {isAnimePage ? (
-                <span className="px-1.5 py-0.5 rounded bg-[#FF6400]/20 text-[#FF6400] border border-[#FF6400]/40 text-[10px] font-bold">
-                  SUB & DUB
-                </span>
-              ) : (
-                <span className="px-1.5 py-0.5 rounded bg-white/10 text-[10px] text-zinc-400 font-mono border border-white/15">
-                  4K Ultra HD
+              {genres && (
+                <span className="text-zinc-400 text-xs sm:text-sm">
+                  {genres}
                 </span>
               )}
             </div>
 
             {/* Synopsis */}
             {currentItem.overview && (
-              <p className="hidden md:block text-sm sm:text-base leading-relaxed text-zinc-300/90 mb-6 line-clamp-3 max-w-xl font-normal">
+              <p className="text-xs sm:text-sm md:text-base leading-relaxed text-zinc-300/90 mb-5 sm:mb-6 line-clamp-2 sm:line-clamp-3 max-w-xl font-normal">
                 {currentItem.overview}
               </p>
             )}
 
-            {/* Action Buttons: Mobile Pill vs Desktop Grid */}
-            {/* Mobile Buttons (< md) */}
-            <div className="flex md:hidden flex-wrap items-center justify-center gap-2 w-full max-w-sm mt-1">
+            {/* Action Buttons: Watch Now & More Info (Detail Modal) */}
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-2.5 sm:gap-3 mt-1">
+              {/* Watch Now */}
               <Link
                 href={href}
-                className={`flex-1 inline-flex items-center justify-center gap-2 font-bold px-4 py-2.5 rounded-full text-xs sm:text-sm transition-all shadow-xl active:scale-95 cursor-pointer ${
+                className={`inline-flex items-center justify-center gap-2 font-bold px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm transition-all shadow-xl active:scale-95 cursor-pointer ${
                   isAnimePage
                     ? "bg-[#FF6400] hover:bg-[#ff7b1a] text-black shadow-[#FF6400]/25"
-                    : "bg-white hover:bg-zinc-200 text-black"
+                    : "bg-white hover:bg-zinc-200 text-black shadow-white/10"
                 }`}
               >
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M5 3l14 9-14 9V3z" />
                 </svg>
-                <span>Play</span>
+                <span>Watch Now</span>
               </Link>
 
+              {/* More Info (Opens Detail Modal) */}
+              <button
+                type="button"
+                onClick={() => setDetailOpen(true)}
+                className="inline-flex items-center justify-center gap-2 font-semibold px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm bg-zinc-900/80 hover:bg-zinc-800 text-white backdrop-blur-md border border-white/15 hover:border-white/30 transition-all active:scale-95 cursor-pointer"
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="16" x2="12" y2="12" />
+                  <line x1="12" y1="8" x2="12.01" y2="8" />
+                </svg>
+                <span>More Info</span>
+              </button>
+
+              {/* Trailer Button */}
               <button
                 type="button"
                 onClick={() => setTrailerOpen(true)}
-                className="inline-flex items-center justify-center gap-1.5 bg-white/15 hover:bg-white/25 text-white font-semibold px-3.5 py-2.5 rounded-full text-xs backdrop-blur-md border border-white/20 transition-all active:scale-95 cursor-pointer"
+                className="hidden sm:inline-flex items-center justify-center gap-1.5 bg-white/10 hover:bg-white/15 text-white font-semibold px-3.5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm backdrop-blur-md border border-white/10 hover:border-white/20 transition-all active:scale-95 cursor-pointer"
               >
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polygon points="5 3 19 12 5 21 5 3" />
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="6 3 20 12 6 21 6 3" />
                 </svg>
                 <span>Trailer</span>
               </button>
 
-              <button
-                type="button"
-                onClick={() => setDetailOpen(true)}
-                className="inline-flex items-center justify-center gap-1.5 bg-white/15 hover:bg-white/25 text-white font-semibold px-3.5 py-2.5 rounded-full text-xs backdrop-blur-md border border-white/20 transition-all active:scale-95 cursor-pointer"
-              >
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M12 16v-4M12 8h.01" />
-                </svg>
-                <span>Details</span>
-              </button>
-
+              {/* Favorite / My List */}
               <FavoriteButton
                 item={currentItem}
                 showText={false}
                 activeText="In List"
                 inactiveText="My List"
                 iconType="plus"
-                className="!bg-white/15 hover:!bg-white/25 !text-white !backdrop-blur-md !border-white/20 !rounded-full p-2.5 font-semibold text-xs active:scale-95"
+                className="!bg-white/10 hover:!bg-white/20 !text-white !backdrop-blur-md !border-white/15 !rounded-xl p-2.5 sm:p-3 font-semibold text-xs active:scale-95"
               />
             </div>
-
-            {/* Desktop Buttons (>= md) */}
-            <div className="hidden md:flex items-center gap-3">
-              <Link
-                href={href}
-                className={`inline-flex items-center gap-2 font-black px-6 py-3 rounded-xl text-sm transition-all shadow-lg active:scale-95 cursor-pointer ${
-                  isAnimePage
-                    ? "bg-[#FF6400] hover:bg-[#ff7b1a] text-black shadow-lg shadow-[#FF6400]/25"
-                    : "bg-white hover:bg-zinc-200 text-black hover:shadow-white/10"
-                }`}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M5 3l14 9-14 9V3z" />
-                </svg>
-                <span>Watch Now</span>
-              </Link>
-
-              <button
-                type="button"
-                onClick={() => setTrailerOpen(true)}
-                className="inline-flex items-center gap-2 bg-zinc-800/80 hover:bg-zinc-700/90 text-white font-bold px-5 py-3 rounded-xl text-sm backdrop-blur-md border border-white/10 hover:border-white/25 transition-all active:scale-95 cursor-pointer"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <polygon points="6 3 20 12 6 21 6 3" />
-                </svg>
-                <span>Trailer</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setDetailOpen(true)}
-                className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/15 text-white font-semibold px-4 py-3 rounded-xl text-sm backdrop-blur-md border border-white/10 transition-colors cursor-pointer"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M12 16v-4M12 8h.01" />
-                </svg>
-                <span>Details</span>
-              </button>
-
-              <FavoriteButton item={currentItem} className="px-3.5 py-3 !rounded-xl" />
-            </div>
-
-            {/* Slide Navigation & Controls (Cleanly positioned below buttons, never covers title) */}
-            {heroList.length > 1 && (
-              <div
-                className="flex items-center gap-2.5 sm:gap-3 mt-6 sm:mt-7"
-                aria-label="Hero slide navigation"
-                onMouseEnter={() => setIsNavHovered(true)}
-                onMouseLeave={() => setIsNavHovered(false)}
-              >
-                {/* Prev Slide Arrow */}
-                <button
-                  onClick={prevSlide}
-                  aria-label="Previous slide"
-                  className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center bg-white/10 text-white border border-white/15 transition-all shadow-md active:scale-95 cursor-pointer ${
-                    isAnimePage ? "hover:bg-[#FF6400] hover:text-black hover:border-[#FF6400]" : "hover:bg-red-600"
-                  }`}
-                >
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="m15 18-6-6 6-6" />
-                  </svg>
-                </button>
-
-                {/* Dot Indicators with animated auto-slide progress */}
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  {heroList.map((m, idx) => (
-                    <button
-                      key={`dot-${m.id}`}
-                      onClick={() => setCurrentIndex(idx)}
-                      aria-label={`Jump to slide ${idx + 1}: ${displayTitle(m)}`}
-                      className={`relative h-2 rounded-full overflow-hidden transition-all duration-300 cursor-pointer ${
-                        idx === currentIndex
-                          ? "w-8 sm:w-10 bg-white/20"
-                          : "w-2 bg-white/30 hover:bg-white/60"
-                      }`}
-                    >
-                      {idx === currentIndex && (
-                        <span
-                          key={`progress-${currentIndex}`}
-                          className={`absolute inset-0 rounded-full animate-hero-progress ${
-                            isAnimePage
-                              ? "bg-[#FF6400] shadow-sm shadow-[#FF6400]/50"
-                              : "bg-red-600 shadow-sm shadow-red-600/50"
-                          }`}
-                        />
-                      )}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Next Slide Arrow */}
-                <button
-                  onClick={nextSlide}
-                  aria-label="Next slide"
-                  className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center bg-white/10 text-white border border-white/15 transition-all shadow-md active:scale-95 cursor-pointer ${
-                    isAnimePage ? "hover:bg-[#FF6400] hover:text-black hover:border-[#FF6400]" : "hover:bg-red-600"
-                  }`}
-                >
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="m9 18 6-6-6-6" />
-                  </svg>
-                </button>
-
-                {/* Slide Counter */}
-                <span className="text-[11px] font-mono text-zinc-400 font-bold ml-1">
-                  {currentIndex + 1} / {heroList.length}
-                </span>
-              </div>
-            )}
           </div>
         </div>
+
+        {/* Slide Indicator Dots (Bottom Right matching 7reels layout) */}
+        {heroList.length > 1 && (
+          <div
+            className="absolute bottom-5 sm:bottom-6 right-4 sm:right-8 z-20 flex items-center gap-1.5 sm:gap-2"
+            aria-label="Slide indicators"
+          >
+            {heroList.map((m, idx) => (
+              <button
+                key={`dot-${m.id}`}
+                type="button"
+                onClick={() => setCurrentIndex(idx)}
+                aria-label={`Go to slide ${idx + 1}: ${displayTitle(m)}`}
+                className={`transition-all duration-300 rounded-full cursor-pointer ${
+                  idx === currentIndex
+                    ? isAnimePage
+                      ? "w-6 sm:w-8 h-1.5 bg-[#FF6400] shadow-[0_0_10px_rgba(255,100,0,0.6)]"
+                      : "w-6 sm:w-8 h-1.5 bg-white shadow-sm"
+                    : "w-1.5 sm:w-2 h-1.5 sm:h-2 bg-white/35 hover:bg-white/70"
+                }`}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Official YouTube Trailer Modal */}

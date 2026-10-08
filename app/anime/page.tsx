@@ -5,6 +5,7 @@ import {
   getAnimeTopRated,
   getAnimeFantasyIsekai,
   ANIME_GENRE_LIST,
+  attachTitleLogos,
 } from "@/lib/tmdb";
 import Hero from "@/components/Hero";
 import Carousel from "@/components/Carousel";
@@ -62,8 +63,8 @@ export default async function AnimePage({ searchParams }: Props) {
     media_type: (selectedGenre === "movie" ? "movie" : "tv") as "movie" | "tv",
   }));
 
-  // Hero Spotlight picks top 5 trending with backdrops
-  const heroItems = trendingAnimeList.filter((a) => a.backdrop_path).slice(0, 5);
+  // Hero Spotlight picks top 5 trending with backdrops and attaches official title logos
+  const heroItems = await attachTitleLogos(trendingAnimeList.filter((a) => a.backdrop_path).slice(0, 5));
 
   return (
     <div className="min-h-screen bg-[#08090d] text-white">

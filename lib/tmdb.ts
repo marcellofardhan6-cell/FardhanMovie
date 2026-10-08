@@ -70,6 +70,7 @@ export interface Movie {
   overview: string;
   poster_path: string | null;
   backdrop_path: string | null;
+  logo_path?: string | null;
   vote_average: number;
   vote_count: number;
   release_date?: string;
@@ -545,4 +546,78 @@ export function displayYear(item: Movie): string {
 
 export function isTV(item: Movie): boolean {
   return Boolean(item.name && !item.title) || item.media_type === "tv";
+}
+
+export function logo(path: string | null, size: string = "w500"): string | null {
+  if (!path) return null;
+  return `https://image.tmdb.org/t/p/${size}${path}`;
+}
+
+const GENRE_MAP: Record<number, string> = {
+  28: "Action",
+  12: "Adventure",
+  16: "Animation",
+  35: "Comedy",
+  80: "Crime",
+  99: "Documentary",
+  18: "Drama",
+  10751: "Family",
+  14: "Fantasy",
+  36: "History",
+  27: "Horror",
+  10402: "Music",
+  9648: "Mystery",
+  10749: "Romance",
+  878: "Sci-Fi",
+  10770: "TV Movie",
+  53: "Thriller",
+  10752: "War",
+  37: "Western",
+  10759: "Action & Adventure",
+  10762: "Kids",
+  10763: "News",
+  10764: "Reality",
+  10765: "Sci-Fi & Fantasy",
+  10766: "Soap",
+  10767: "Talk",
+  10768: "War & Politics",
+};
+
+export function getGenreNames(genreIds?: number[], limit = 2): string {
+  if (!genreIds || genreIds.length === 0) return "";
+  return genreIds
+    .map((id) => GENRE_MAP[id])
+    .filter(Boolean)
+    .slice(0, limit)
+    .join(" · ");
+}
+
+export async function getTitleLogo(
+  id: number | string,
+  type: "movie" | "tv" = "movie"
+): Promise<string | null> {
+  try {
+    const data = await tmdbFetch<{
+      logos?: { file_path: string; iso_639_1: string | null }[];
+    }>(`/${type}/${id}/images`, { include_image_language: "en,null,id" });
+    if (!data?.logos || data.logos.length === 0) return null;
+    const best =
+      data.logos.find((l) => l.iso_639_1 === "en") ||
+      data.logos.find((l) => !l.iso_639_1) ||
+      data.logos[0];
+    return best?.file_path ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function attachTitleLogos(items: Movie[]): Promise<Movie[]> {
+  return Promise.all(
+    items.map(async (item) => {
+      if (item.logo_path) return item;
+      const type = item.media_type === "tv" || (!item.title && item.name) ? "tv" : "movie";
+      const logoPath = await getTitleLogo(item.id, type);
+      return { ...item, logo_path: logoPath };
+    })
+  );
 }

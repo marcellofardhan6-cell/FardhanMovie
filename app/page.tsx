@@ -5,6 +5,7 @@ import {
   getAnime,
   getTopRatedMovies,
   getLatestUploads,
+  attachTitleLogos,
   Movie,
 } from "@/lib/tmdb";
 import Hero from "@/components/Hero";
@@ -36,6 +37,9 @@ export default async function HomePage() {
   ]);
 
   const trendingList = trending.results.filter((m) => Boolean(m.poster_path));
+  const heroCandidates = trendingList.filter((m) => m.backdrop_path).slice(0, 5);
+  const heroItems = await attachTitleLogos(heroCandidates);
+
   const popularMoviesList = popularMovies.results.filter((m) => Boolean(m.poster_path));
   const popularTVList = popularTV.results.filter((m) => Boolean(m.poster_path));
   const animeList = anime.results.filter((m) => Boolean(m.poster_path || m.backdrop_path));
@@ -49,8 +53,8 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* Dynamic Multi-Slide Hero (Top 5 Spotlight) */}
-      <Hero items={trendingList} />
+      {/* Dynamic Multi-Slide Hero (Top 5 Spotlight) with Official Title Logos */}
+      <Hero items={heroItems} />
 
       {/* Content Rows with Rich Visual Rhythm */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-8 sm:space-y-14">
