@@ -80,11 +80,14 @@ export function WatchHistoryProvider({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     if (!isLoaded) return;
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
-    } catch (e) {
-      console.error("Failed to save watch history to localStorage:", e);
-    }
+    const timer = setTimeout(() => {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+      } catch (e) {
+        console.error("Failed to save watch history to localStorage:", e);
+      }
+    }, 1000);
+    return () => clearTimeout(timer);
   }, [history, isLoaded]);
 
   const addHistory = useCallback((item: Omit<WatchHistoryItem, "updatedAt">) => {
@@ -120,6 +123,15 @@ export function WatchHistoryProvider({ children }: { children: React.ReactNode }
     ) => {
       setHistory((prev) => {
         const existing = prev.find((e) => e.id === id && e.type === type);
+        // Throttle: don't re-render if difference is less than 8 seconds
+        if (
+          existing &&
+          existing.currentTime !== undefined &&
+          Math.abs(currentTime - existing.currentTime) < 8
+        ) {
+          return prev;
+        }
+
         const effectiveDuration = duration && duration > 0 ? duration : existing?.duration;
         const progress =
           effectiveDuration && effectiveDuration > 0

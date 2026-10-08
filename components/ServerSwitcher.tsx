@@ -84,13 +84,13 @@ function buildServerUrl(server: Server, props: Props, isAnimeTheme?: boolean, st
 }
 
 const SERVERS: Server[] = [
-  { id: 1, name: "VidLink Pro (CC)", key: "vidlink", badge: "Primary" },
-  { id: 2, name: "MultiEmbed Cinema", key: "superembed", badge: "Multi-Source" },
-  { id: 3, name: "VidSrc TO (HD)", key: "vsembed", badge: "Fast" },
-  { id: 4, name: "AutoEmbed Prime", key: "autoembed", badge: "UHD" },
-  { id: 5, name: "VidSrc PM (Vidflix)", key: "vidsrcpm", badge: "Player" },
-  { id: 6, name: "SmashyStream", key: "smashy", badge: "VIP" },
-  { id: 7, name: "VidSrc ME (Mirror)", key: "vidsrcvip", badge: "Mirror" },
+  { id: 1, name: "AutoEmbed Prime", key: "autoembed", badge: "Anti-Lag" },
+  { id: 2, name: "VidLink Pro (CC)", key: "vidlink", badge: "Sub Indo" },
+  { id: 3, name: "VidSrc TO (HD)", key: "vsembed", badge: "Fast HD" },
+  { id: 4, name: "MultiEmbed Cinema", key: "superembed", badge: "Multi-Source" },
+  { id: 5, name: "VidSrc ME (Mirror)", key: "vidsrcvip", badge: "Stabil" },
+  { id: 6, name: "VidSrc PM (Vidflix)", key: "vidsrcpm", badge: "Player" },
+  { id: 7, name: "SmashyStream", key: "smashy", badge: "VIP" },
   { id: 8, name: "2Embed Mirror", key: "twoembed" },
   { id: 9, name: "VidSrc Dev", key: "vidsrcdev", badge: "Dev" },
   { id: 10, name: "VidSrc Wiki", key: "vidsrcwiki", badge: "Backup" },
@@ -177,6 +177,8 @@ export default function ServerSwitcher(props: Props) {
   useEffect(() => {
     if (!tmdbId || !title) return;
 
+    let lastProgressSave = 0;
+
     const handleMessage = (event: MessageEvent) => {
       try {
         const data = event.data;
@@ -187,14 +189,18 @@ export default function ServerSwitcher(props: Props) {
           const { currentTime, duration } = data.data;
           if (typeof currentTime === "number" && currentTime > 0) {
             currentTimeRef.current = currentTime;
-            const dur = typeof duration === "number" && duration > 0 ? duration : totalDurationSec;
-            updateProgress(Number(tmdbId), type, currentTime, dur, {
-              title,
-              poster_path: posterPath,
-              backdrop_path: backdropPath,
-              season: type === "tv" ? season : undefined,
-              episode: type === "tv" ? episode : undefined,
-            });
+            const now = Date.now();
+            if (now - lastProgressSave >= 8000) {
+              lastProgressSave = now;
+              const dur = typeof duration === "number" && duration > 0 ? duration : totalDurationSec;
+              updateProgress(Number(tmdbId), type, currentTime, dur, {
+                title,
+                poster_path: posterPath,
+                backdrop_path: backdropPath,
+                season: type === "tv" ? season : undefined,
+                episode: type === "tv" ? episode : undefined,
+              });
+            }
           }
         }
 
@@ -204,13 +210,17 @@ export default function ServerSwitcher(props: Props) {
           const dur = Number(data.duration ?? data.data?.duration ?? totalDurationSec);
           if (!isNaN(time) && time > 0) {
             currentTimeRef.current = time;
-            updateProgress(Number(tmdbId), type, time, dur, {
-              title,
-              poster_path: posterPath,
-              backdrop_path: backdropPath,
-              season: type === "tv" ? season : undefined,
-              episode: type === "tv" ? episode : undefined,
-            });
+            const now = Date.now();
+            if (now - lastProgressSave >= 8000) {
+              lastProgressSave = now;
+              updateProgress(Number(tmdbId), type, time, dur, {
+                title,
+                poster_path: posterPath,
+                backdrop_path: backdropPath,
+                season: type === "tv" ? season : undefined,
+                episode: type === "tv" ? episode : undefined,
+              });
+            }
           }
         }
       } catch {}
@@ -220,13 +230,13 @@ export default function ServerSwitcher(props: Props) {
     return () => window.removeEventListener("message", handleMessage);
   }, [tmdbId, type, title, season, episode, posterPath, backdropPath, totalDurationSec, updateProgress]);
 
-  // Active watching session timer (ticks every 5s while tab is active)
+  // Active watching session timer (ticks every 15s as fallback while tab is active)
   useEffect(() => {
     if (!tmdbId || !title || isTrailerActive || isLoading) return;
 
     const interval = setInterval(() => {
       if (typeof document !== "undefined" && document.hidden) return;
-      currentTimeRef.current += 5;
+      currentTimeRef.current += 15;
       if (currentTimeRef.current > totalDurationSec) {
         currentTimeRef.current = totalDurationSec;
       }
@@ -238,7 +248,7 @@ export default function ServerSwitcher(props: Props) {
         season: type === "tv" ? season : undefined,
         episode: type === "tv" ? episode : undefined,
       });
-    }, 5000);
+    }, 15000);
 
     return () => clearInterval(interval);
   }, [tmdbId, type, title, season, episode, posterPath, backdropPath, isTrailerActive, isLoading, totalDurationSec, updateProgress]);
@@ -543,6 +553,7 @@ export default function ServerSwitcher(props: Props) {
         <div
           ref={playerContainerRef}
           className="relative w-full aspect-video min-h-[275px] xs:min-h-[310px] sm:min-h-0 bg-black [&:fullscreen]:aspect-auto [&:fullscreen]:w-screen [&:fullscreen]:h-screen"
+          style={{ transform: "translateZ(0)", willChange: "transform" }}
         >
           {/* Resume Playback Notification Pill */}
           {resumeToast && (
@@ -626,6 +637,7 @@ export default function ServerSwitcher(props: Props) {
             className="absolute inset-0 w-full h-full border-0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen *"
             allowFullScreen={true}
+            loading="eager"
             referrerPolicy="origin"
             onLoad={handleLoad}
             onError={handleIframeError}
