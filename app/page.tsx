@@ -1,19 +1,38 @@
-import { getTrending, getPopularMovies, getPopularTV, getAnime, getTopRatedMovies, Movie } from "@/lib/tmdb";
+import {
+  getTrending,
+  getPopularMovies,
+  getPopularTV,
+  getAnime,
+  getTopRatedMovies,
+  getLatestUploads,
+  Movie,
+} from "@/lib/tmdb";
 import Hero from "@/components/Hero";
 import Carousel from "@/components/Carousel";
 import ContinueWatching from "@/components/ContinueWatching";
+import LatestUploads from "@/components/LatestUploads";
 
 export const revalidate = 3600;
 
 const EMPTY: Movie[] = [];
 
 export default async function HomePage() {
-  const [trending, popularMovies, popularTV, anime, topRated] = await Promise.all([
+  const [
+    trending,
+    popularMovies,
+    popularTV,
+    anime,
+    topRated,
+    latestMovies,
+    latestTV,
+  ] = await Promise.all([
     getTrending("all", "week").catch(() => ({ results: EMPTY, total_pages: 0, total_results: 0, page: 1 })),
     getPopularMovies().catch(() => ({ results: EMPTY, total_pages: 0, total_results: 0, page: 1 })),
     getPopularTV().catch(() => ({ results: EMPTY, total_pages: 0, total_results: 0, page: 1 })),
     getAnime().catch(() => ({ results: EMPTY, total_pages: 0, total_results: 0, page: 1 })),
     getTopRatedMovies().catch(() => ({ results: EMPTY, total_pages: 0, total_results: 0, page: 1 })),
+    getLatestUploads({ type: "movie" }).catch(() => EMPTY),
+    getLatestUploads({ type: "tv" }).catch(() => EMPTY),
   ]);
 
   const trendingList = trending.results.filter((m) => Boolean(m.poster_path));
@@ -21,6 +40,12 @@ export default async function HomePage() {
   const popularTVList = popularTV.results.filter((m) => Boolean(m.poster_path));
   const animeList = anime.results.filter((m) => Boolean(m.poster_path || m.backdrop_path));
   const topRatedList = topRated.results.filter((m) => Boolean(m.poster_path));
+
+  const latestAll = [...latestMovies, ...latestTV].sort((a, b) => {
+    const dateA = a.release_date || a.first_air_date || "";
+    const dateB = b.release_date || b.first_air_date || "";
+    return dateB.localeCompare(dateA);
+  });
 
   return (
     <>
@@ -68,6 +93,13 @@ export default async function HomePage() {
           title="Top Rated Movies"
           items={topRatedList}
           seeAllHref="/films?sort=top_rated"
+        />
+
+        {/* 6. Upload Terbaru (Ngefilm21-style section with anti-AI quality filters) */}
+        <LatestUploads
+          initialAll={latestAll}
+          initialMovies={latestMovies}
+          initialTV={latestTV}
         />
       </div>
     </>

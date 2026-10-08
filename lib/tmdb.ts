@@ -438,7 +438,9 @@ export async function discoverMovies(params: {
   }
   if (params.sort_by === "primary_release_date.desc") {
     p["primary_release_date.lte"] = today;
-    p["vote_count.gte"] = "1";
+    // Strict threshold: eliminate 0-vote AI-generated test uploads and unverified amateur junk
+    p["vote_count.gte"] = "25";
+    p["popularity.gte"] = "12";
   }
   if (params.country) p.with_origin_country = params.country;
   return tmdbFetch<TMDBResponse<Movie>>("/discover/movie", p);
@@ -464,10 +466,61 @@ export async function discoverTV(params: {
   }
   if (params.sort_by === "first_air_date.desc") {
     p["first_air_date.lte"] = today;
-    p["vote_count.gte"] = "1";
+    // Strict threshold: eliminate AI-generated placeholder series
+    p["vote_count.gte"] = "25";
+    p["popularity.gte"] = "12";
   }
   if (params.country) p.with_origin_country = params.country;
   return tmdbFetch<TMDBResponse<Movie>>("/discover/tv", p);
+}
+
+export async function getLatestUploads(params?: {
+  page?: number;
+  type?: "all" | "movie" | "tv";
+}): Promise<Movie[]> {
+  const page = params?.page ?? 1;
+  const type = params?.type ?? "all";
+  const today = new Date().toISOString().split("T")[0];
+
+  const fetchMovies = async () => {
+    const res = await tmdbFetch<TMDBResponse<Movie>>("/discover/movie", {
+      sort_by: "primary_release_date.desc",
+      "primary_release_date.lte": today,
+      "vote_count.gte": "25",
+      "popularity.gte": "12",
+      page: String(page),
+      include_adult: "false",
+    }).catch(() => ({ results: [] as Movie[], total_pages: 0, total_results: 0, page }));
+
+    return (res.results || [])
+      .filter((m) => Boolean(m.poster_path && m.overview && m.overview.length > 15))
+      .map((m) => ({ ...m, media_type: "movie" as const }));
+  };
+
+  const fetchTV = async () => {
+    const res = await tmdbFetch<TMDBResponse<Movie>>("/discover/tv", {
+      sort_by: "first_air_date.desc",
+      "first_air_date.lte": today,
+      "vote_count.gte": "25",
+      "popularity.gte": "12",
+      page: String(page),
+      include_adult: "false",
+    }).catch(() => ({ results: [] as Movie[], total_pages: 0, total_results: 0, page }));
+
+    return (res.results || [])
+      .filter((m) => Boolean(m.poster_path && m.overview && m.overview.length > 15))
+      .map((m) => ({ ...m, media_type: "tv" as const }));
+  };
+
+  if (type === "movie") return fetchMovies();
+  if (type === "tv") return fetchTV();
+
+  const [movies, tv] = await Promise.all([fetchMovies(), fetchTV()]);
+  return [...movies, ...tv].sort((a, b) => {
+    const dateA = a.release_date || a.first_air_date || "";
+    const dateB = b.release_date || b.first_air_date || "";
+    return dateB.localeCompare(dateA);
+  });
 }
 
 // ---- Image Helpers ----
