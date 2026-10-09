@@ -9,14 +9,16 @@ interface Props {
   initialAll: Movie[];
   initialMovies: Movie[];
   initialTV: Movie[];
+  initialID?: Movie[];
 }
 
-type TabType = "all" | "movie" | "tv";
+type TabType = "all" | "movie" | "tv" | "id";
 
 export default function LatestUploads({
   initialAll,
   initialMovies,
   initialTV,
+  initialID = [],
 }: Props) {
   const [activeTab, setActiveTab] = useState<TabType>("all");
 
@@ -26,6 +28,8 @@ export default function LatestUploads({
         return initialMovies;
       case "tv":
         return initialTV;
+      case "id":
+        return initialID;
       case "all":
       default:
         return initialAll;
@@ -37,7 +41,9 @@ export default function LatestUploads({
   const getSeeAllHref = () => {
     switch (activeTab) {
       case "tv":
-        return "/series";
+        return "/series?sort=latest";
+      case "id":
+        return "/country?code=ID&sort=latest";
       case "movie":
       case "all":
       default:
@@ -65,7 +71,7 @@ export default function LatestUploads({
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex items-center gap-2" role="tablist" aria-label="Pilihan upload terbaru">
+        <div className="flex flex-wrap items-center gap-2" role="tablist" aria-label="Pilihan upload terbaru">
           <button
             type="button"
             role="tab"
@@ -104,6 +110,19 @@ export default function LatestUploads({
             }`}
           >
             Serial
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === "id"}
+            onClick={() => setActiveTab("id")}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer ${
+              activeTab === "id"
+                ? "bg-red-600 text-white shadow-[0_0_15px_rgba(229,9,20,0.4)]"
+                : "bg-white/[0.05] text-zinc-400 hover:text-white hover:bg-white/[0.1] border border-white/[0.06]"
+            }`}
+          >
+            Indonesia
           </button>
           <Link
             href={getSeeAllHref()}

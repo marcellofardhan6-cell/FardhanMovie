@@ -439,9 +439,12 @@ export async function discoverMovies(params: {
   }
   if (params.sort_by === "primary_release_date.desc") {
     p["primary_release_date.lte"] = today;
-    // Strict threshold: eliminate 0-vote AI-generated test uploads and unverified amateur junk
-    p["vote_count.gte"] = "25";
-    p["popularity.gte"] = "12";
+    // Only apply vote threshold for global unfiltered queries to eliminate bot/test uploads.
+    // When a country (e.g. Indonesia, Korea, Japan) or year is explicitly selected, do not apply
+    // high vote thresholds as regional cinema has significantly fewer TMDB votes.
+    if (!params.country && !params.year) {
+      p["vote_count.gte"] = "10";
+    }
   }
   if (params.country) p.with_origin_country = params.country;
   return tmdbFetch<TMDBResponse<Movie>>("/discover/movie", p);
@@ -467,9 +470,9 @@ export async function discoverTV(params: {
   }
   if (params.sort_by === "first_air_date.desc") {
     p["first_air_date.lte"] = today;
-    // Strict threshold: eliminate AI-generated placeholder series
-    p["vote_count.gte"] = "25";
-    p["popularity.gte"] = "12";
+    if (!params.country && !params.year) {
+      p["vote_count.gte"] = "10";
+    }
   }
   if (params.country) p.with_origin_country = params.country;
   return tmdbFetch<TMDBResponse<Movie>>("/discover/tv", p);
@@ -478,38 +481,60 @@ export async function discoverTV(params: {
 export async function getLatestUploads(params?: {
   page?: number;
   type?: "all" | "movie" | "tv";
+  country?: string;
 }): Promise<Movie[]> {
   const page = params?.page ?? 1;
   const type = params?.type ?? "all";
+  const country = params?.country;
   const today = new Date().toISOString().split("T")[0];
 
   const fetchMovies = async () => {
-    const res = await tmdbFetch<TMDBResponse<Movie>>("/discover/movie", {
+    const q: Record<string, string> = {
       sort_by: "primary_release_date.desc",
       "primary_release_date.lte": today,
-      "vote_count.gte": "25",
-      "popularity.gte": "12",
       page: String(page),
       include_adult: "false",
-    }).catch(() => ({ results: [] as Movie[], total_pages: 0, total_results: 0, page }));
+    };
+    if (country) {
+      q.with_origin_country = country;
+    } else {
+      q["vote_count.gte"] = "10";
+    }
+
+    const res = await tmdbFetch<TMDBResponse<Movie>>("/discover/movie", q).catch(() => ({
+      results: [] as Movie[],
+      total_pages: 0,
+      total_results: 0,
+      page,
+    }));
 
     return (res.results || [])
-      .filter((m) => Boolean(m.poster_path && m.overview && m.overview.length > 15))
+      .filter((m) => Boolean(m.poster_path && m.overview && m.overview.length > 10))
       .map((m) => ({ ...m, media_type: "movie" as const }));
   };
 
   const fetchTV = async () => {
-    const res = await tmdbFetch<TMDBResponse<Movie>>("/discover/tv", {
+    const q: Record<string, string> = {
       sort_by: "first_air_date.desc",
       "first_air_date.lte": today,
-      "vote_count.gte": "25",
-      "popularity.gte": "12",
       page: String(page),
       include_adult: "false",
-    }).catch(() => ({ results: [] as Movie[], total_pages: 0, total_results: 0, page }));
+    };
+    if (country) {
+      q.with_origin_country = country;
+    } else {
+      q["vote_count.gte"] = "10";
+    }
+
+    const res = await tmdbFetch<TMDBResponse<Movie>>("/discover/tv", q).catch(() => ({
+      results: [] as Movie[],
+      total_pages: 0,
+      total_results: 0,
+      page,
+    }));
 
     return (res.results || [])
-      .filter((m) => Boolean(m.poster_path && m.overview && m.overview.length > 15))
+      .filter((m) => Boolean(m.poster_path && m.overview && m.overview.length > 10))
       .map((m) => ({ ...m, media_type: "tv" as const }));
   };
 

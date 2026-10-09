@@ -26,6 +26,7 @@ export default async function HomePage() {
     topRated,
     latestMovies,
     latestTV,
+    latestID,
   ] = await Promise.all([
     getTrending("all", "week").catch(() => ({ results: EMPTY, total_pages: 0, total_results: 0, page: 1 })),
     getPopularMovies().catch(() => ({ results: EMPTY, total_pages: 0, total_results: 0, page: 1 })),
@@ -34,6 +35,7 @@ export default async function HomePage() {
     getTopRatedMovies().catch(() => ({ results: EMPTY, total_pages: 0, total_results: 0, page: 1 })),
     getLatestUploads({ type: "movie" }).catch(() => EMPTY),
     getLatestUploads({ type: "tv" }).catch(() => EMPTY),
+    getLatestUploads({ country: "ID" }).catch(() => EMPTY),
   ]);
 
   const trendingList = trending.results.filter((m) => Boolean(m.poster_path));
@@ -104,6 +106,7 @@ export default async function HomePage() {
           initialAll={latestAll}
           initialMovies={latestMovies}
           initialTV={latestTV}
+          initialID={latestID}
         />
       </div>
     </>
