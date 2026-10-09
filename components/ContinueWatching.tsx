@@ -87,7 +87,7 @@ export default function ContinueWatching() {
                   alt={item.title}
                   fill
                   sizes="260px"
-                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  className="object-cover object-[center_top] transition-transform duration-300 group-hover:scale-105"
                   unoptimized={imageSrc.startsWith("/")}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />

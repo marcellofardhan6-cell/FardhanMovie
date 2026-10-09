@@ -37,7 +37,7 @@ export default function LandscapeCard({ item, priority = false }: Props) {
           alt={`Backdrop ${title}`}
           fill
           sizes="(max-width: 640px) 70vw, (max-width: 1024px) 35vw, 320px"
-          className="object-cover transition-transform duration-500 ease-out group-hover:scale-106"
+          className="object-cover object-[center_top] transition-transform duration-500 ease-out group-hover:scale-106"
           priority={priority}
           onError={() => setImgSrc("/backdrop-placeholder.svg")}
         />

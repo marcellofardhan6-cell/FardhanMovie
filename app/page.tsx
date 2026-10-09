@@ -44,7 +44,7 @@ export default async function HomePage() {
 
   const popularMoviesList = popularMovies.results.filter((m) => Boolean(m.poster_path));
   const popularTVList = popularTV.results.filter((m) => Boolean(m.poster_path));
-  const animeList = anime.results.filter((m) => Boolean(m.poster_path || m.backdrop_path));
+  const animeList = anime.results.filter((m) => Boolean(m.backdrop_path));
   const topRatedList = topRated.results.filter((m) => Boolean(m.poster_path));
 
   const latestAll = [...latestMovies, ...latestTV].sort((a, b) => {

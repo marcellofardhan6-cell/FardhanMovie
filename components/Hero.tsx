@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Movie, backdrop, displayTitle, displayYear, isTV, getGenreNames } from "@/lib/tmdb";
+import { Movie, backdrop, img, displayTitle, displayYear, isTV, getGenreNames } from "@/lib/tmdb";
 import FavoriteButton from "./FavoriteButton";
 import TrailerModal from "./TrailerModal";
 import DetailModal from "./DetailModal";
@@ -84,43 +84,87 @@ export default function Hero({ items, item, isAnime }: Props) {
   return (
     <>
       <section
-        className="relative w-full overflow-hidden select-none group/hero"
-        style={{ minHeight: "560px", background: "#06070a" }}
+        className="relative w-full overflow-hidden select-none group/hero min-h-[520px] sm:min-h-[580px] md:min-h-[660px] lg:min-h-[740px] xl:min-h-[800px] h-[78vh] sm:h-[82vh] lg:h-[88vh] max-h-[880px] bg-[#06070a]"
         aria-label={`Featured: ${title}`}
       >
-        {/* Full Backdrop with smooth cross-fade */}
-        {heroList.map((m, idx) => (
-          <div
-            key={`hero-bg-${m.id}`}
-            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-              idx === currentIndex ? "opacity-100 z-0" : "opacity-0 pointer-events-none"
-            }`}
-          >
-            {m.backdrop_path && (
-              <Image
-                src={backdrop(m.backdrop_path)}
-                alt={`Backdrop ${displayTitle(m)}`}
-                fill
-                priority={idx === 0}
-                className="object-cover object-center"
-                sizes="100vw"
-              />
-            )}
-            {/* Subtle top shade for navbar legibility */}
-            <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-black/50 to-transparent pointer-events-none" />
+        {/* Full Backdrop / Poster with smooth cross-fade */}
+        {heroList.map((m, idx) => {
+          const isCurrent = idx === currentIndex;
+          const bgPoster = m.poster_path ? img(m.poster_path, "original") : null;
+          const bgBackdrop = m.backdrop_path ? backdrop(m.backdrop_path) : null;
 
-            {/* Bottom smooth dark vignette into page content */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#06070a] via-[#06070a]/40 to-transparent pointer-events-none" />
+          return (
+            <div
+              key={`hero-bg-${m.id}`}
+              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+                isCurrent ? "opacity-100 z-0" : "opacity-0 pointer-events-none"
+              }`}
+            >
+              {/* Mobile View: Vertical Poster fits portrait phone screens perfectly without cutting off character sides */}
+              {bgPoster ? (
+                <div className="block sm:hidden absolute inset-0">
+                  <Image
+                    src={bgPoster}
+                    alt={`Poster ${displayTitle(m)}`}
+                    fill
+                    priority={idx === 0}
+                    className="object-cover object-[center_top]"
+                    sizes="100vw"
+                  />
+                </div>
+              ) : bgBackdrop ? (
+                <div className="block sm:hidden absolute inset-0">
+                  <Image
+                    src={bgBackdrop}
+                    alt={`Backdrop ${displayTitle(m)}`}
+                    fill
+                    priority={idx === 0}
+                    className="object-cover object-[center_top]"
+                    sizes="100vw"
+                  />
+                </div>
+              ) : null}
 
-            {/* Left focused vignette behind movie logo and details */}
-            <div className="hidden md:block absolute inset-0 bg-gradient-to-r from-[#06070a]/90 via-[#06070a]/40 to-transparent max-w-2xl pointer-events-none" />
-          </div>
-        ))}
+              {/* Tablet & Desktop View: Wide Landscape Backdrop pinned to top-center so heads/faces are never cut off */}
+              {bgBackdrop ? (
+                <div className="hidden sm:block absolute inset-0">
+                  <Image
+                    src={bgBackdrop}
+                    alt={`Backdrop ${displayTitle(m)}`}
+                    fill
+                    priority={idx === 0}
+                    className="object-cover object-[center_top] md:object-[center_15%]"
+                    sizes="100vw"
+                  />
+                </div>
+              ) : bgPoster ? (
+                <div className="hidden sm:block absolute inset-0">
+                  <Image
+                    src={bgPoster}
+                    alt={`Poster ${displayTitle(m)}`}
+                    fill
+                    priority={idx === 0}
+                    className="object-cover object-[center_top]"
+                    sizes="100vw"
+                  />
+                </div>
+              ) : null}
+
+              {/* Subtle top shade for navbar legibility */}
+              <div className="absolute top-0 left-0 right-0 h-28 bg-gradient-to-b from-black/75 via-black/35 to-transparent pointer-events-none" />
+
+              {/* Bottom smooth dark vignette into page content (focused on bottom 35% where text sits) */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#06070a] via-[#06070a]/80 via-30% to-transparent pointer-events-none" />
+
+              {/* Left focused vignette behind movie logo and details */}
+              <div className="hidden md:block absolute inset-0 bg-gradient-to-r from-[#06070a]/90 via-[#06070a]/40 to-transparent max-w-2xl pointer-events-none" />
+            </div>
+          );
+        })}
 
         {/* Hero Content Container */}
         <div
-          className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-end z-10"
-          style={{ minHeight: "560px", paddingBottom: "3rem", paddingTop: "5.5rem" }}
+          className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-end z-10 min-h-[520px] sm:min-h-[580px] md:min-h-[660px] lg:min-h-[740px] xl:min-h-[800px] h-[78vh] sm:h-[82vh] lg:h-[88vh] max-h-[880px] pb-8 sm:pb-12 pt-20 sm:pt-24"
         >
           <div className="w-full max-w-2xl mx-auto md:mx-0 flex flex-col items-center md:items-start text-center md:text-left">
             {/* Tag / Category Badge */}
