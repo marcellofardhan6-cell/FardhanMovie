@@ -84,7 +84,7 @@ export default function Hero({ items, item, isAnime }: Props) {
   return (
     <>
       <section
-        className="relative w-full overflow-hidden select-none group/hero min-h-[520px] sm:min-h-[580px] md:min-h-[660px] lg:min-h-[740px] xl:min-h-[800px] h-[78vh] sm:h-[82vh] lg:h-[88vh] max-h-[880px] bg-[#06070a]"
+        className="relative w-full overflow-hidden select-none group/hero h-[66vh] sm:h-[72vh] min-h-[480px] sm:min-h-[520px] max-h-[580px] sm:max-h-[620px] bg-[#06070a]"
         aria-label={`Featured: ${title}`}
       >
         {/* Full Backdrop / Poster with smooth cross-fade */}
@@ -164,11 +164,11 @@ export default function Hero({ items, item, isAnime }: Props) {
 
         {/* Hero Content Container */}
         <div
-          className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-end z-10 min-h-[520px] sm:min-h-[580px] md:min-h-[660px] lg:min-h-[740px] xl:min-h-[800px] h-[78vh] sm:h-[82vh] lg:h-[88vh] max-h-[880px] pb-8 sm:pb-12 pt-20 sm:pt-24"
+          className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-end z-10 h-full pb-6 sm:pb-8 pt-16 sm:pt-20"
         >
           <div className="w-full max-w-2xl mx-auto md:mx-0 flex flex-col items-center md:items-start text-center md:text-left">
             {/* Tag / Category Badge */}
-            <div className="inline-flex items-center gap-2 mb-2 sm:mb-3">
+            <div className="inline-flex items-center gap-2 mb-1.5 sm:mb-2">
               <span
                 className={`px-2.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider shadow-sm transition-colors ${
                   isAnimePage ? "bg-[#FF6400] text-black" : "bg-red-600 text-white"
@@ -182,22 +182,22 @@ export default function Hero({ items, item, isAnime }: Props) {
             </div>
 
             {/* Title: Official TMDB Graphic Logo (if available) or Stylized Fraunces Typography */}
-            <div className="mb-3 sm:mb-4 min-h-[60px] sm:min-h-[80px] md:min-h-[105px] flex items-center justify-center md:justify-start">
+            <div className="mb-2 sm:mb-2.5 min-h-[44px] sm:min-h-[56px] md:min-h-[68px] flex items-center justify-center md:justify-start">
               {currentLogo ? (
-                <div className="relative h-14 sm:h-20 md:h-28 max-w-[280px] sm:max-w-[360px] md:max-w-[440px] w-auto">
+                <div className="relative h-11 sm:h-14 md:h-16 max-w-[220px] sm:max-w-[280px] md:max-w-[340px] w-auto">
                   <Image
                     key={`hero-logo-${currentItem.id}`}
                     src={`https://image.tmdb.org/t/p/w500${currentLogo}`}
                     alt={`Logo ${title}`}
-                    width={440}
-                    height={120}
+                    width={340}
+                    height={85}
                     priority={currentIndex === 0}
-                    className="h-full w-auto max-h-14 sm:max-h-20 md:max-h-28 object-contain object-center md:object-left drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)] animate-fade-in"
+                    className="h-full w-auto max-h-11 sm:max-h-14 md:max-h-16 object-contain object-center md:object-left drop-shadow-[0_4px_20px_rgba(0,0,0,0.95)] animate-fade-in"
                   />
                 </div>
               ) : (
                 <h1
-                  className="text-3xl sm:text-4xl md:text-6xl font-black text-white tracking-tight leading-[1.08] drop-shadow-2xl animate-fade-in"
+                  className="text-2xl sm:text-3xl md:text-5xl font-black text-white tracking-tight leading-[1.1] drop-shadow-2xl animate-fade-in"
                   style={{ fontFamily: "var(--font-fraunces)" }}
                 >
                   {title}
@@ -206,7 +206,7 @@ export default function Hero({ items, item, isAnime }: Props) {
             </div>
 
             {/* Metadata Row matching 7reels / Netflix aesthetic */}
-            <div className="flex flex-wrap items-center justify-center md:justify-start gap-2.5 sm:gap-3 mb-3 text-xs sm:text-sm font-semibold text-zinc-300">
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 sm:gap-2.5 mb-2 sm:mb-2.5 text-xs sm:text-sm font-semibold text-zinc-300">
               {rating && (
                 <span className="flex items-center gap-1 font-bold text-amber-400">
                   <span className="text-sm">★</span>
@@ -226,23 +226,23 @@ export default function Hero({ items, item, isAnime }: Props) {
 
             {/* Synopsis */}
             {currentItem.overview && (
-              <p className="text-xs sm:text-sm md:text-base leading-relaxed text-zinc-300/90 mb-5 sm:mb-6 line-clamp-2 sm:line-clamp-3 max-w-xl font-normal">
+              <p className="text-xs sm:text-sm leading-relaxed text-zinc-300/90 mb-3 sm:mb-3.5 line-clamp-2 max-w-lg font-normal">
                 {currentItem.overview}
               </p>
             )}
 
             {/* Action Buttons: Watch Now & More Info (Detail Modal) */}
-            <div className="flex flex-wrap items-center justify-center md:justify-start gap-2.5 sm:gap-3 mt-1">
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 sm:gap-2.5 mt-0.5">
               {/* Watch Now */}
               <Link
                 href={href}
-                className={`inline-flex items-center justify-center gap-2 font-bold px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm transition-all shadow-xl active:scale-95 cursor-pointer ${
+                className={`inline-flex items-center justify-center gap-2 font-bold px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm transition-all shadow-xl active:scale-95 cursor-pointer ${
                   isAnimePage
                     ? "bg-[#FF6400] hover:bg-[#ff7b1a] text-black shadow-[#FF6400]/25"
                     : "bg-white hover:bg-zinc-200 text-black shadow-white/10"
                 }`}
               >
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M5 3l14 9-14 9V3z" />
                 </svg>
                 <span>Watch Now</span>
@@ -252,9 +252,9 @@ export default function Hero({ items, item, isAnime }: Props) {
               <button
                 type="button"
                 onClick={() => setDetailOpen(true)}
-                className="inline-flex items-center justify-center gap-2 font-semibold px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm bg-zinc-900/80 hover:bg-zinc-800 text-white backdrop-blur-md border border-white/15 hover:border-white/30 transition-all active:scale-95 cursor-pointer"
+                className="inline-flex items-center justify-center gap-2 font-semibold px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm bg-zinc-900/80 hover:bg-zinc-800 text-white backdrop-blur-md border border-white/15 hover:border-white/30 transition-all active:scale-95 cursor-pointer"
               >
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                   <circle cx="12" cy="12" r="10" />
                   <line x1="12" y1="16" x2="12" y2="12" />
                   <line x1="12" y1="8" x2="12.01" y2="8" />
@@ -266,9 +266,9 @@ export default function Hero({ items, item, isAnime }: Props) {
               <button
                 type="button"
                 onClick={() => setTrailerOpen(true)}
-                className="hidden sm:inline-flex items-center justify-center gap-1.5 bg-white/10 hover:bg-white/15 text-white font-semibold px-3.5 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm backdrop-blur-md border border-white/10 hover:border-white/20 transition-all active:scale-95 cursor-pointer"
+                className="hidden sm:inline-flex items-center justify-center gap-1.5 bg-white/10 hover:bg-white/15 text-white font-semibold px-3 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm backdrop-blur-md border border-white/10 hover:border-white/20 transition-all active:scale-95 cursor-pointer"
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <polygon points="6 3 20 12 6 21 6 3" />
                 </svg>
                 <span>Trailer</span>
@@ -281,7 +281,7 @@ export default function Hero({ items, item, isAnime }: Props) {
                 activeText="In List"
                 inactiveText="My List"
                 iconType="plus"
-                className="!bg-white/10 hover:!bg-white/20 !text-white !backdrop-blur-md !border-white/15 !rounded-xl p-2.5 sm:p-3 font-semibold text-xs active:scale-95"
+                className="!bg-white/10 hover:!bg-white/20 !text-white !backdrop-blur-md !border-white/15 !rounded-xl p-2 sm:p-2.5 font-semibold text-xs active:scale-95"
               />
             </div>
           </div>
@@ -290,7 +290,7 @@ export default function Hero({ items, item, isAnime }: Props) {
         {/* Slide Indicator Dots (Bottom Right matching 7reels layout) */}
         {heroList.length > 1 && (
           <div
-            className="absolute bottom-5 sm:bottom-6 right-4 sm:right-8 z-20 flex items-center gap-1.5 sm:gap-2"
+            className="absolute bottom-4 sm:bottom-5 right-4 sm:right-6 z-20 flex items-center gap-1.5 sm:gap-2"
             aria-label="Slide indicators"
           >
             {heroList.map((m, idx) => (
