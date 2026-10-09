@@ -24,23 +24,19 @@ export default function ContinueWatching() {
   return (
     <section aria-label="Continue Watching" className="relative w-full">
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-red-600/15 border border-red-500/25 flex items-center justify-center text-red-500">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" />
-            </svg>
-          </div>
-          <div>
+        <div>
+          <div className="flex items-center gap-2.5">
+            <span className="w-1.5 h-5 bg-red-600 rounded-full" aria-hidden="true" />
             <h2
               className="text-lg sm:text-xl font-bold text-white tracking-tight"
               style={{ fontFamily: "var(--font-fraunces)" }}
             >
               Lanjutkan Menonton
             </h2>
-            <p className="text-[11px] text-zinc-400">
-              Lanjutkan tontonan tepat di menit terakhir
-            </p>
           </div>
+          <p className="text-xs text-zinc-400 mt-0.5 pl-4">
+            Lanjutkan tontonan tepat di menit terakhir
+          </p>
         </div>
       </div>
 
