@@ -102,7 +102,7 @@ export default function DownloadModal({
       onClick={onClose}
       role="dialog"
       aria-modal="true"
-      aria-label="Download dan Subtitle"
+      aria-label="Download and Subtitles"
     >
       <div
         className="relative w-full max-w-lg max-h-[90vh] flex flex-col rounded-2xl bg-[#0c0e15] border border-white/[0.12] shadow-2xl p-5 sm:p-6 text-zinc-100 overflow-hidden"
@@ -137,7 +137,7 @@ export default function DownloadModal({
             type="button"
             onClick={onClose}
             className="p-1.5 rounded-lg text-zinc-400 hover:text-white bg-white/[0.05] hover:bg-white/[0.1] transition-colors cursor-pointer shrink-0"
-            aria-label="Tutup modal"
+            aria-label="Close modal"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18" />
@@ -157,15 +157,15 @@ export default function DownloadModal({
                   <line x1="12" y1="8" x2="12" y2="12" />
                   <line x1="12" y1="16" x2="12.01" y2="16" />
                 </svg>
-                <span>Status: Belum Resmi Rilis (Tahun {year})</span>
+                <span>Status: Unreleased ({year})</span>
               </div>
               <p className="text-[11px] text-amber-200/90 leading-relaxed">
-                Film ini masih berstatus rilis mendatang. Berkas film dan subtitle Indonesia baru akan tersedia setelah penayangan resmi di bioskop/digital.
+                This title is currently scheduled for upcoming release. Video and subtitle files will become available following official cinema/digital streaming premiere.
               </p>
             </div>
           )}
 
-          {/* SECTION 1: DIRECT SUBTITLE INDONESIA (.SRT) */}
+          {/* SECTION 1: DIRECT SUBTITLES (.SRT) */}
           <div className="p-4 rounded-xl bg-red-600/[0.08] border border-red-500/30">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1.5">
@@ -174,17 +174,17 @@ export default function DownloadModal({
                   <line x1="7" y1="12" x2="17" y2="12" />
                   <line x1="7" y1="15" x2="13" y2="15" />
                 </svg>
-                <span className="font-bold text-white text-sm">Unduh Subtitle Indonesia (.SRT)</span>
+                <span className="font-bold text-white text-sm">Download Subtitles (.SRT)</span>
               </div>
               <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-600/20 text-red-400 border border-red-500/30 uppercase">
-                1-Klik
+                1-Click
               </span>
             </div>
             <p className="text-[11px] text-zinc-400 mb-3">
-              Klik untuk mencari dan mengunduh berkas subtitle .SRT Indonesia langsung dari semua sumber:
+              Search and download subtitles (.SRT) directly across multiple sources:
             </p>
 
-            {/* Primary 1-Click Button (Google Subtitle Search - Guarantees No 404) */}
+            {/* Primary 1-Click Button */}
             <a
               href={googleSrtUrl}
               target="_blank"
@@ -196,12 +196,12 @@ export default function DownloadModal({
                 <polyline points="7 10 12 15 17 10" />
                 <line x1="12" y1="15" x2="12" y2="3" />
               </svg>
-              <span>Unduh Subtitle Indonesia Langsung</span>
+              <span>Download Subtitles Directly</span>
             </a>
 
             {/* Alternative Database Badges */}
             <div className="flex flex-wrap items-center gap-1.5 pt-1">
-              <span className="text-[10px] text-zinc-500 font-medium mr-1">Database Subtitle:</span>
+              <span className="text-[10px] text-zinc-500 font-medium mr-1">Subtitle Repositories:</span>
               <a
                 href={subdlUrl}
                 target="_blank"
@@ -229,7 +229,7 @@ export default function DownloadModal({
             </div>
           </div>
 
-          {/* SECTION 2: UNDUH VIDEO LENGKAP DENGAN SUB INDO */}
+          {/* SECTION 2: DOWNLOAD VIDEO + SUBTITLES */}
           <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.08]">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1.5">
@@ -238,14 +238,14 @@ export default function DownloadModal({
                   <polyline points="7 10 12 15 17 10" />
                   <line x1="12" y1="15" x2="12" y2="3" />
                 </svg>
-                <span className="font-bold text-white text-sm">Unduh Video + Subtitle Indo</span>
+                <span className="font-bold text-white text-sm">Download Video + Subtitles</span>
               </div>
               <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/25">
                 GDrive &amp; Mega
               </span>
             </div>
             <p className="text-[11px] text-zinc-400 mb-3">
-              Rilisan video resolusi 720p/1080p yang sudah dilengkapi subtitle Indonesia:
+              720p / 1080p video releases with pre-embedded or packaged subtitles:
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -276,9 +276,9 @@ export default function DownloadModal({
               >
                 <div>
                   <span className="font-bold text-white text-xs block group-hover:text-amber-400 transition-colors">
-                    Pencarian Google Drive
+                    Google Drive Search
                   </span>
-                  <span className="text-[10px] text-zinc-400">Berkas video publik</span>
+                  <span className="text-[10px] text-zinc-400">Public shared videos</span>
                 </div>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-zinc-500 group-hover:text-white transition-colors">
                   <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
@@ -289,11 +289,11 @@ export default function DownloadModal({
             </div>
           </div>
 
-          {/* SECTION 3: STREAM CAPTURE FOR 1DM & IDM */}
+          {/* SECTION 3: DIRECT STREAM FOR 1DM & IDM */}
           <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.08]">
             <div className="flex items-center justify-between mb-2">
-              <span className="font-bold text-white text-xs">Unduh Stream Video (1DM / IDM)</span>
-              <span className="text-[10px] text-zinc-500">Player Mirror</span>
+              <span className="font-bold text-white text-xs">Direct Stream Links (1DM / IDM)</span>
+              <span className="text-[10px] text-zinc-500">Player Mirrors</span>
             </div>
 
             <div className="space-y-2">
@@ -301,7 +301,7 @@ export default function DownloadModal({
               <div className="p-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-between gap-2">
                 <div className="min-w-0">
                   <span className="font-bold text-white text-xs block truncate">VidLink Pro (CC)</span>
-                  <span className="text-[10px] text-emerald-400">Server Utama - Subtitle Indonesia</span>
+                  <span className="text-[10px] text-emerald-400">Primary Server with Multi-CC</span>
                 </div>
 
                 <div className="flex items-center gap-1.5 shrink-0">
@@ -311,14 +311,14 @@ export default function DownloadModal({
                     rel="noopener noreferrer"
                     className="py-1 px-2.5 rounded-md text-[11px] font-bold bg-white/[0.08] hover:bg-white/[0.15] text-white transition-colors"
                   >
-                    Buka Player
+                    Open Player
                   </a>
                   <button
                     type="button"
                     onClick={() => copyToClipboard(vidlinkUrl, "vidlink")}
                     className="py-1 px-2.5 rounded-md text-[11px] font-semibold bg-red-600/20 hover:bg-red-600 text-red-300 hover:text-white border border-red-500/30 transition-colors"
                   >
-                    {copiedKey === "vidlink" ? "Tersalin!" : "Salin Link"}
+                    {copiedKey === "vidlink" ? "Copied!" : "Copy Link"}
                   </button>
                 </div>
               </div>
@@ -337,14 +337,14 @@ export default function DownloadModal({
                     rel="noopener noreferrer"
                     className="py-1 px-2.5 rounded-md text-[11px] font-bold bg-white/[0.08] hover:bg-white/[0.15] text-white transition-colors"
                   >
-                    Buka Player
+                    Open Player
                   </a>
                   <button
                     type="button"
                     onClick={() => copyToClipboard(multiembedUrl, "multiembed")}
                     className="py-1 px-2.5 rounded-md text-[11px] font-semibold bg-red-600/20 hover:bg-red-600 text-red-300 hover:text-white border border-red-500/30 transition-colors"
                   >
-                    {copiedKey === "multiembed" ? "Tersalin!" : "Salin Link"}
+                    {copiedKey === "multiembed" ? "Copied!" : "Copy Link"}
                   </button>
                 </div>
               </div>
@@ -353,7 +353,7 @@ export default function DownloadModal({
               <div className="p-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-between gap-2">
                 <div className="min-w-0">
                   <span className="font-bold text-white text-xs block truncate">VidSrc TO</span>
-                  <span className="text-[10px] text-zinc-400">Stream HD Cepat</span>
+                  <span className="text-[10px] text-zinc-400">Fast HD Stream</span>
                 </div>
 
                 <div className="flex items-center gap-1.5 shrink-0">
@@ -363,14 +363,14 @@ export default function DownloadModal({
                     rel="noopener noreferrer"
                     className="py-1 px-2.5 rounded-md text-[11px] font-bold bg-white/[0.08] hover:bg-white/[0.15] text-white transition-colors"
                   >
-                    Buka Player
+                    Open Player
                   </a>
                   <button
                     type="button"
                     onClick={() => copyToClipboard(vidsrcUrl, "vidsrc")}
                     className="py-1 px-2.5 rounded-md text-[11px] font-semibold bg-white/[0.06] hover:bg-white/[0.12] text-zinc-300 hover:text-white border border-white/10 transition-colors"
                   >
-                    {copiedKey === "vidsrc" ? "Tersalin!" : "Salin Link"}
+                    {copiedKey === "vidsrc" ? "Copied!" : "Copy Link"}
                   </button>
                 </div>
               </div>

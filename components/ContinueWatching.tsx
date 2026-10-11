@@ -11,7 +11,7 @@ function formatMinutes(seconds?: number): string {
   if (mins >= 60) {
     const h = Math.floor(mins / 60);
     const m = mins % 60;
-    return m > 0 ? `${h}j ${m}m` : `${h}j`;
+    return m > 0 ? `${h}h ${m}m` : `${h}h`;
   }
   return `${mins}m`;
 }
@@ -31,11 +31,11 @@ export default function ContinueWatching() {
               className="text-lg sm:text-xl font-bold text-white tracking-tight"
               style={{ fontFamily: "var(--font-fraunces)" }}
             >
-              Lanjutkan Menonton
+              Continue Watching
             </h2>
           </div>
           <p className="text-xs text-zinc-400 mt-0.5 pl-4">
-            Lanjutkan tontonan tepat di menit terakhir
+            Pick up right where you left off
           </p>
         </div>
       </div>
@@ -72,8 +72,8 @@ export default function ContinueWatching() {
             currentSec > 0
               ? durSec > 0
                 ? `${formatMinutes(currentSec)} / ${formatMinutes(durSec)}`
-                : `Menit ${Math.floor(currentSec / 60)}`
-              : "Mulai tonton";
+                : `${Math.floor(currentSec / 60)}m`
+              : "Start watching";
 
           return (
             <div
@@ -139,8 +139,8 @@ export default function ContinueWatching() {
                   removeHistory(item.id, item.type);
                 }}
                 className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/70 hover:bg-red-600 text-zinc-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer z-10 backdrop-blur-sm border border-white/10"
-                title="Hapus dari riwayat"
-                aria-label={`Hapus ${item.title} dari riwayat`}
+                title="Remove from history"
+                aria-label={`Remove ${item.title} from history`}
               >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M18 6 6 18M6 6l12 12" />
@@ -157,14 +157,14 @@ export default function ContinueWatching() {
                     <span className="text-zinc-300 font-medium truncate">
                       {currentSec > 0
                         ? durSec > 0
-                          ? `${formatMinutes(currentSec)} dari ${formatMinutes(durSec)} (${percent}%)`
-                          : `Menit ${Math.floor(currentSec / 60)}`
+                          ? `${formatMinutes(currentSec)} of ${formatMinutes(durSec)} (${percent}%)`
+                          : `${Math.floor(currentSec / 60)}m`
                         : isSeries
-                        ? "Mulai episode"
-                        : "Mulai film"}
+                        ? "Start episode"
+                        : "Start movie"}
                     </span>
                     <span className="text-red-400 font-bold shrink-0 ml-2 group-hover:translate-x-0.5 transition-transform">
-                      Lanjut &rarr;
+                      Resume &rarr;
                     </span>
                   </div>
                 </Link>

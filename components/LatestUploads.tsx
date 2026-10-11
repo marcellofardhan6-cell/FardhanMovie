@@ -52,7 +52,7 @@ export default function LatestUploads({
   };
 
   return (
-    <section aria-label="Upload Terbaru" className="relative pt-4 sm:pt-6">
+    <section aria-label="Latest Releases" className="relative pt-4 sm:pt-6">
       {/* Header with Title and Tabs */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 pb-3 border-b border-white/[0.08]">
         <div>
@@ -62,16 +62,16 @@ export default function LatestUploads({
               className="text-xl sm:text-2xl font-bold tracking-tight text-white"
               style={{ fontFamily: "var(--font-fraunces)" }}
             >
-              Upload Terbaru
+              Latest Releases
             </h2>
           </div>
           <p className="text-xs sm:text-sm text-zinc-400 mt-1 pl-4">
-            Film dan serial rilis resmi terbaru kualitas HD / WEB-DL
+            Latest official movies & TV series in HD / WEB-DL
           </p>
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex flex-wrap items-center gap-2" role="tablist" aria-label="Pilihan upload terbaru">
+        <div className="flex flex-wrap items-center gap-2" role="tablist" aria-label="Latest releases filter">
           <button
             type="button"
             role="tab"
@@ -83,7 +83,7 @@ export default function LatestUploads({
                 : "bg-white/[0.05] text-zinc-400 hover:text-white hover:bg-white/[0.1] border border-white/[0.06]"
             }`}
           >
-            Semua
+            All
           </button>
           <button
             type="button"
@@ -96,7 +96,7 @@ export default function LatestUploads({
                 : "bg-white/[0.05] text-zinc-400 hover:text-white hover:bg-white/[0.1] border border-white/[0.06]"
             }`}
           >
-            Film
+            Movies
           </button>
           <button
             type="button"
@@ -109,7 +109,7 @@ export default function LatestUploads({
                 : "bg-white/[0.05] text-zinc-400 hover:text-white hover:bg-white/[0.1] border border-white/[0.06]"
             }`}
           >
-            Serial
+            TV Shows
           </button>
           <button
             type="button"
@@ -128,7 +128,7 @@ export default function LatestUploads({
             href={getSeeAllHref()}
             className="hidden sm:inline-flex items-center gap-1 ml-3 text-xs font-semibold text-zinc-400 hover:text-white transition-colors"
           >
-            Lihat Semua
+            See All
             <svg
               width="14"
               height="14"
@@ -149,7 +149,7 @@ export default function LatestUploads({
       {/* Grid of Cards */}
       {currentItems.length === 0 ? (
         <div className="py-16 text-center rounded-xl bg-white/[0.02] border border-white/[0.06]">
-          <p className="text-sm text-zinc-400">Tidak ada konten upload terbaru saat ini.</p>
+          <p className="text-sm text-zinc-400">No releases available right now.</p>
         </div>
       ) : (
         <ul
@@ -170,7 +170,7 @@ export default function LatestUploads({
           href={getSeeAllHref()}
           className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-white bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.1] hover:border-white/20 transition-all duration-200 shadow-sm"
         >
-          Lihat Semua Rilis Terbaru
+          Browse All Latest Releases
           <svg
             width="14"
             height="14"

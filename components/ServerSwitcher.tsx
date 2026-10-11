@@ -84,16 +84,16 @@ function buildServerUrl(server: Server, props: Props, isAnimeTheme?: boolean, st
 }
 
 const SERVERS: Server[] = [
-  { id: 1, name: "AutoEmbed Prime", key: "autoembed", badge: "Anti-Lag" },
-  { id: 2, name: "VidLink Pro (CC)", key: "vidlink", badge: "Sub Indo" },
-  { id: 3, name: "VidSrc TO (HD)", key: "vsembed", badge: "Fast HD" },
-  { id: 4, name: "MultiEmbed Cinema", key: "superembed", badge: "Multi-Source" },
-  { id: 5, name: "VidSrc ME (Mirror)", key: "vidsrcvip", badge: "Stabil" },
-  { id: 6, name: "VidSrc PM (Vidflix)", key: "vidsrcpm", badge: "Player" },
-  { id: 7, name: "SmashyStream", key: "smashy", badge: "VIP" },
-  { id: 8, name: "2Embed Mirror", key: "twoembed" },
-  { id: 9, name: "VidSrc Dev", key: "vidsrcdev", badge: "Dev" },
-  { id: 10, name: "VidSrc Wiki", key: "vidsrcwiki", badge: "Backup" },
+  { id: 1, name: "AutoEmbed", key: "autoembed" },
+  { id: 2, name: "VidLink (CC)", key: "vidlink", badge: "CC" },
+  { id: 3, name: "VidSrc TO", key: "vsembed", badge: "HD" },
+  { id: 4, name: "MultiEmbed", key: "superembed" },
+  { id: 5, name: "VidSrc ME", key: "vidsrcvip" },
+  { id: 6, name: "VidSrc PM", key: "vidsrcpm" },
+  { id: 7, name: "SmashyStream", key: "smashy" },
+  { id: 8, name: "2Embed", key: "twoembed" },
+  { id: 9, name: "VidSrc Dev", key: "vidsrcdev" },
+  { id: 10, name: "VidSrc Wiki", key: "vidsrcwiki" },
 ];
 
 export default function ServerSwitcher(props: Props) {
@@ -115,7 +115,6 @@ export default function ServerSwitcher(props: Props) {
   const [isLoading, setIsLoading] = useState(true);
   const [showHelp, setShowHelp] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [showAllServers, setShowAllServers] = useState(true);
   const [downloadOpen, setDownloadOpen] = useState(false);
   const [resumeToast, setResumeToast] = useState<string | null>(null);
   const [startAtSec, setStartAtSec] = useState<number>(0);
@@ -147,13 +146,16 @@ export default function ServerSwitcher(props: Props) {
       }
     }
 
-    if (initialTime > 15) {
+    if (initialTime >= 30) {
       setStartAtSec(initialTime);
       currentTimeRef.current = initialTime;
       const mins = Math.floor(initialTime / 60);
-      setResumeToast(`Melanjutkan tontonan dari menit ${mins}...`);
-      const toastTimer = setTimeout(() => setResumeToast(null), 4500);
+      setResumeToast(`Resuming playback from ${mins}m...`);
+      const toastTimer = setTimeout(() => setResumeToast(null), 4000);
       return () => clearTimeout(toastTimer);
+    } else if (initialTime > 0) {
+      setStartAtSec(initialTime);
+      currentTimeRef.current = initialTime;
     }
   }, [tmdbId, type, season, episode, getHistoryItem]);
 
@@ -321,8 +323,6 @@ export default function ServerSwitcher(props: Props) {
     setShowHelp(true);
   }, []);
 
-  const displayedServers = showAllServers ? SERVERS : SERVERS.slice(0, 5);
-
   return (
     <section aria-label="Video player" className="relative w-full">
       {/* Ambient Cinema Theater Glow behind the player */}
@@ -337,49 +337,34 @@ export default function ServerSwitcher(props: Props) {
       {/* Main Player Container */}
       <div className="relative rounded-2xl overflow-hidden border border-white/[0.08] bg-[#0c0e15] shadow-2xl">
         {/* Sleek Servers Header & Pill Bar */}
-        <div className="p-3.5 sm:p-5 bg-[#12141c] border-b border-white/[0.08]">
-          {/* Header Row: SERVERS + Active Server Name */}
-          <div className="flex items-center justify-between mb-2.5 sm:mb-3.5">
-            <div className="flex items-center gap-2 sm:gap-2.5">
-              <span className="text-[10px] sm:text-[11px] font-bold tracking-[0.2em] text-zinc-500 uppercase">
-                {isTrailerActive ? "TRAILER" : "SERVERS"}
+        <div className="p-3 sm:p-4 bg-[#12141c] border-b border-white/[0.08]">
+          {/* Header Row: SERVERS + Active Server Name + Actions */}
+          <div className="flex items-center justify-between gap-3 mb-3">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold tracking-[0.2em] text-zinc-500 uppercase">
+                {isTrailerActive ? "TRAILER" : "SERVER"}
               </span>
-              <span className="text-xs sm:text-sm font-bold text-white tracking-wide truncate max-w-[170px] sm:max-w-none">
-                {isTrailerActive ? "Official Trailer (YouTube 4K)" : currentServer.name}
+              <span className="text-xs sm:text-sm font-semibold text-white tracking-wide truncate max-w-[170px] sm:max-w-none">
+                {isTrailerActive ? "Official Trailer (4K)" : currentServer.name}
               </span>
             </div>
 
-            {/* Right: Fullscreen Toggle and Direct YouTube link */}
+            {/* Right Actions: Subtitles, Download, Fullscreen */}
             <div className="flex items-center gap-1.5 shrink-0">
               {isTrailerActive && trailerKey && (
                 <a
                   href={`https://www.youtube.com/watch?v=${trailerKey}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-lg text-xs font-semibold text-red-400 hover:text-white bg-red-600/10 hover:bg-red-600 border border-red-500/20 transition-all cursor-pointer"
-                  title="Open on YouTube"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-red-400 hover:text-white bg-red-600/10 hover:bg-red-600 border border-red-500/20 transition-all cursor-pointer"
+                  title="Open YouTube"
                 >
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
                     <path d="M10 15l5.19-3L10 9v6m11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25.9-.83 1.48-1.73 1.73-.47.13-1.33.22-2.65.28-1.3.07-2.49.1-3.59.1L12 2c-4.19 0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83-1.48 1.73-1.73.47-.13 1.33-.22 2.65-.28 1.3-.07 2.49-.1 3.59-.1L12 2c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73z"/>
                   </svg>
-                  <span className="hidden sm:inline text-[11px]">Open YouTube</span>
+                  <span className="hidden sm:inline text-[11px]">YouTube</span>
                 </a>
               )}
-
-              <button
-                type="button"
-                onClick={() => setDownloadOpen(true)}
-                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold text-zinc-300 hover:text-white bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.1] transition-colors cursor-pointer"
-                title="Download & Subtitles"
-                aria-label="Download & Subtitles"
-              >
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                  <polyline points="7 10 12 15 17 10" />
-                  <line x1="12" y1="15" x2="12" y2="3" />
-                </svg>
-                <span className="text-[11px] font-bold">Download</span>
-              </button>
 
               {title && (
                 <a
@@ -390,27 +375,42 @@ export default function ServerSwitcher(props: Props) {
                     )
                       .replace(/[:\/\\#?&]/g, " ")
                       .replace(/\s+/g, " ")
-                      .trim() + " subtitle indonesia srt download"
+                      .trim() + " subtitle srt download"
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold text-red-400 hover:text-white bg-red-600/15 hover:bg-red-600 border border-red-500/30 transition-all cursor-pointer"
-                  title="Unduh Subtitle Indonesia (.SRT) Langsung"
-                  aria-label="Unduh Subtitle Indonesia Langsung"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-zinc-300 hover:text-white bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] transition-colors cursor-pointer"
+                  title="Search & Download Subtitles (.SRT)"
+                  aria-label="Search & Download Subtitles"
                 >
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                     <rect width="20" height="15" x="2" y="4.5" rx="2" />
                     <line x1="7" y1="12" x2="17" y2="12" />
                     <line x1="7" y1="15" x2="13" y2="15" />
                   </svg>
-                  <span className="text-[11px] font-bold">Sub Indo</span>
+                  <span className="text-[11px] font-medium">Subtitles</span>
                 </a>
               )}
 
               <button
                 type="button"
+                onClick={() => setDownloadOpen(true)}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-zinc-300 hover:text-white bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] transition-colors cursor-pointer"
+                title="Download & Streams"
+                aria-label="Download & Streams"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                <span className="text-[11px] font-medium">Download</span>
+              </button>
+
+              <button
+                type="button"
                 onClick={toggleFullscreen}
-                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold text-zinc-300 hover:text-white bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.1] transition-colors cursor-pointer"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-zinc-300 hover:text-white bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] transition-colors cursor-pointer"
                 title={isFullscreen ? "Exit Fullscreen" : "Fullscreen Player"}
                 aria-label={isFullscreen ? "Exit Fullscreen" : "Fullscreen Player"}
               >
@@ -419,27 +419,27 @@ export default function ServerSwitcher(props: Props) {
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                       <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
                     </svg>
-                    <span className="text-[11px] font-bold">Exit</span>
+                    <span className="text-[11px] font-medium">Exit</span>
                   </>
                 ) : (
                   <>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                       <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
                     </svg>
-                    <span className="text-[11px] font-bold">Fullscreen</span>
+                    <span className="text-[11px] font-medium">Fullscreen</span>
                   </>
                 )}
               </button>
             </div>
           </div>
 
-          {/* Servers Pills Row: Horizontal Swipeable on Mobile, Wrapped on Desktop */}
+          {/* Clean Horizontal Scrollable Server Selector */}
           <div
-            className="flex items-center gap-2 overflow-x-auto sm:overflow-visible sm:flex-wrap pb-2 sm:pb-0 scroll-snap-x scrollbar-none -mx-1 px-1 sm:mx-0 sm:px-0"
+            className="flex items-center gap-2 overflow-x-auto pb-1.5 pt-0.5 scroll-snap-x scrollbar-none -mx-1 px-1"
             role="group"
             aria-label="Streaming server selection"
           >
-            {/* Optional Trailer Button */}
+            {/* Trailer Pill */}
             {trailerEmbedUrl && (
               <button
                 type="button"
@@ -450,43 +450,21 @@ export default function ServerSwitcher(props: Props) {
                 }}
                 aria-pressed={isTrailerActive}
                 aria-label="Play Trailer"
-                className={`shrink-0 scroll-snap-item flex items-center gap-1.5 px-3 sm:px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer ${
+                className={`shrink-0 scroll-snap-item flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 cursor-pointer ${
                   isTrailerActive
-                    ? "bg-amber-500 text-black shadow-[0_0_18px_rgba(245,158,11,0.5)] ring-2 ring-amber-400/50"
-                    : "bg-[#181a22] text-amber-300 hover:text-white hover:bg-[#20232e] border border-amber-500/30"
+                    ? "bg-amber-500 text-black shadow-md font-bold"
+                    : "bg-white/[0.04] text-amber-300 hover:text-white hover:bg-white/[0.08] border border-amber-500/25"
                 }`}
               >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
                   <path d="M5 3l14 9-14 9V3z" />
                 </svg>
                 <span>Trailer</span>
-                <span className={`text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded ${
-                  isTrailerActive ? "bg-black/30 text-black" : "bg-amber-500/20 text-amber-300"
-                }`}>
-                  4K
-                </span>
-                {isTrailerActive && (
-                  <svg
-                    width="13"
-                    height="13"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="text-black ml-0.5 shrink-0"
-                    aria-hidden
-                  >
-                    <path d="M20 6 9 17l-5-5" />
-                  </svg>
-                )}
               </button>
             )}
 
-            {/* Streaming Servers */}
-            {displayedServers.map((server) => {
-              const idx = SERVERS.findIndex((s) => s.id === server.id);
+            {/* Servers List */}
+            {SERVERS.map((server, idx) => {
               const isActive = !isTrailerActive && idx === activeServer;
               return (
                 <button
@@ -494,58 +472,28 @@ export default function ServerSwitcher(props: Props) {
                   onClick={() => switchServer(idx)}
                   aria-pressed={isActive}
                   aria-label={`Switch to ${server.name}`}
-                  className={`shrink-0 scroll-snap-item flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer ${
+                  className={`shrink-0 scroll-snap-item flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer ${
                     isActive
-                      ? "bg-[#22252e] text-white border border-white/20 shadow-md ring-1 ring-white/10"
-                      : "bg-[#181a22] text-zinc-300 hover:text-white hover:bg-[#1f222c] border border-white/[0.05]"
+                      ? "bg-red-600 text-white shadow-md font-semibold border border-red-500/40"
+                      : "bg-white/[0.04] text-zinc-300 hover:text-white hover:bg-white/[0.08] border border-white/[0.06]"
                   }`}
                 >
-                  {/* Status Indicator Dot */}
-                  <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-emerald-400 shrink-0 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
-
-                  {/* Server Name */}
                   <span className="whitespace-nowrap">{server.name}</span>
 
-                  {/* Badge */}
                   {server.badge && (
-                    <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-[#3b2354]/60 text-purple-300 border border-purple-400/25">
+                    <span
+                      className={`text-[9px] font-bold uppercase px-1 py-0.2 rounded ${
+                        isActive
+                          ? "bg-black/30 text-white"
+                          : "bg-white/[0.08] text-zinc-400"
+                      }`}
+                    >
                       {server.badge}
                     </span>
-                  )}
-
-                  {/* Active Checkmark */}
-                  {isActive && (
-                    <svg
-                      width="13"
-                      height="13"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="text-amber-500 ml-0.5 shrink-0"
-                      aria-hidden
-                    >
-                      <path d="M20 6 9 17l-5-5" />
-                    </svg>
                   )}
                 </button>
               );
             })}
-
-            {/* Desktop FEWER / MORE Expander Toggle */}
-            <button
-              type="button"
-              onClick={() => setShowAllServers((v) => !v)}
-              className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-bold text-zinc-400 hover:text-white uppercase tracking-wider transition-colors cursor-pointer ml-auto sm:ml-0 shrink-0"
-              aria-label={showAllServers ? "Show fewer servers" : "Show more servers"}
-            >
-              <span>{showAllServers ? "FEWER" : "MORE"}</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                {showAllServers ? <path d="m18 15-6-6-6 6" /> : <path d="m6 9 6 6 6-6" />}
-              </svg>
-            </button>
           </div>
         </div>
 
