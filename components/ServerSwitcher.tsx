@@ -84,11 +84,11 @@ function buildServerUrl(server: Server, props: Props, isAnimeTheme?: boolean, st
 }
 
 const SERVERS: Server[] = [
-  { id: 1, name: "VidSrc TO (Nebula/Hydra)", key: "vidsrcto", badge: "HD" },
-  { id: 2, name: "VidSrc ME", key: "vidsrcvip" },
+  { id: 1, name: "VidSrc Wiki", key: "vidsrcwiki", badge: "Primary" },
+  { id: 2, name: "VidSrc TO", key: "vidsrcto", badge: "HD" },
   { id: 3, name: "VidSrc PM", key: "vidsrcpm" },
-  { id: 4, name: "AutoEmbed", key: "autoembed" },
-  { id: 5, name: "VidLink (CC)", key: "vidlink", badge: "CC" },
+  { id: 4, name: "VidSrc ME", key: "vidsrcvip" },
+  { id: 5, name: "AutoEmbed", key: "autoembed" },
 ];
 
 export default function ServerSwitcher(props: Props) {
