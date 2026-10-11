@@ -140,7 +140,11 @@ export default function Hero({ items, item, isAnime }: Props) {
             >
               {/* Mobile View: Vertical Poster fits portrait phone screens perfectly */}
               {bgPoster ? (
-                <div className="block sm:hidden absolute inset-0">
+                <div
+                  className={`block sm:hidden absolute inset-0 transition-opacity duration-700 ${
+                    isCurrent && isPreviewPlaying && activeTrailerKey ? "opacity-0" : "opacity-100"
+                  }`}
+                >
                   <Image
                     src={bgPoster}
                     alt={`Poster ${displayTitle(m)}`}
@@ -151,7 +155,11 @@ export default function Hero({ items, item, isAnime }: Props) {
                   />
                 </div>
               ) : bgBackdrop ? (
-                <div className="block sm:hidden absolute inset-0">
+                <div
+                  className={`block sm:hidden absolute inset-0 transition-opacity duration-700 ${
+                    isCurrent && isPreviewPlaying && activeTrailerKey ? "opacity-0" : "opacity-100"
+                  }`}
+                >
                   <Image
                     src={bgBackdrop}
                     alt={`Backdrop ${displayTitle(m)}`}
@@ -165,7 +173,11 @@ export default function Hero({ items, item, isAnime }: Props) {
 
               {/* Tablet & Desktop View: Wide Landscape Backdrop */}
               {bgBackdrop ? (
-                <div className="hidden sm:block absolute inset-0">
+                <div
+                  className={`hidden sm:block absolute inset-0 transition-opacity duration-700 ${
+                    isCurrent && isPreviewPlaying && activeTrailerKey ? "opacity-0" : "opacity-100"
+                  }`}
+                >
                   <Image
                     src={bgBackdrop}
                     alt={`Backdrop ${displayTitle(m)}`}
@@ -176,7 +188,11 @@ export default function Hero({ items, item, isAnime }: Props) {
                   />
                 </div>
               ) : bgPoster ? (
-                <div className="hidden sm:block absolute inset-0">
+                <div
+                  className={`hidden sm:block absolute inset-0 transition-opacity duration-700 ${
+                    isCurrent && isPreviewPlaying && activeTrailerKey ? "opacity-0" : "opacity-100"
+                  }`}
+                >
                   <Image
                     src={bgPoster}
                     alt={`Poster ${displayTitle(m)}`}
@@ -190,26 +206,28 @@ export default function Hero({ items, item, isAnime }: Props) {
 
               {/* Ambient Active Video Trailer Preview Overlay (YouTube Iframe with autoplays) */}
               {isCurrent && isPreviewPlaying && activeTrailerKey && (
-                <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none transition-opacity duration-1000 animate-fade-in">
+                <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
                   <iframe
                     src={`https://www.youtube-nocookie.com/embed/${activeTrailerKey}?autoplay=1&mute=${
                       isPreviewMuted ? "1" : "0"
-                    }&controls=0&loop=1&playlist=${activeTrailerKey}&playsinline=1&rel=0&modestbranding=1&enablejsapi=1`}
+                    }&controls=0&loop=1&playlist=${activeTrailerKey}&playsinline=1&rel=0&modestbranding=1&disablekb=1&fs=0&iv_load_policy=3&enablejsapi=1`}
                     title={`Preview - ${title}`}
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140vw] h-[140vh] min-w-[100%] min-h-[100%] object-cover pointer-events-none border-none opacity-90 scale-105"
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[160vw] h-[160vh] min-w-[120%] min-h-[120%] object-cover pointer-events-none border-none opacity-95 scale-110"
                     allow="autoplay; encrypted-media"
                   />
+                  {/* Invisible Shield Layer over iframe: Completely blocks any hover/cursor interaction that triggers YouTube's pause button icon */}
+                  <div className="absolute inset-0 z-[1] bg-transparent pointer-events-none" />
                 </div>
               )}
 
               {/* Subtle top shade for navbar legibility */}
-              <div className="absolute top-0 left-0 right-0 h-28 bg-gradient-to-b from-black/75 via-black/35 to-transparent pointer-events-none z-[1]" />
+              <div className="absolute top-0 left-0 right-0 h-28 bg-gradient-to-b from-black/80 via-black/40 to-transparent pointer-events-none z-[2]" />
 
               {/* Bottom smooth dark vignette into page content */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#06070a] via-[#06070a]/80 via-30% to-transparent pointer-events-none z-[1]" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#06070a] via-[#06070a]/80 via-30% to-transparent pointer-events-none z-[2]" />
 
               {/* Left focused vignette behind movie logo and details */}
-              <div className="hidden md:block absolute inset-0 bg-gradient-to-r from-[#06070a]/90 via-[#06070a]/40 to-transparent max-w-2xl pointer-events-none z-[1]" />
+              <div className="hidden md:block absolute inset-0 bg-gradient-to-r from-[#06070a]/90 via-[#06070a]/40 to-transparent max-w-2xl pointer-events-none z-[2]" />
             </div>
           );
         })}
