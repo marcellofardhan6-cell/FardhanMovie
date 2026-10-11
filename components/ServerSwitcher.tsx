@@ -84,8 +84,8 @@ function buildServerUrl(server: Server, props: Props, isAnimeTheme?: boolean, st
 }
 
 const SERVERS: Server[] = [
-  { id: 1, name: "VidLink (CC)", key: "vidlink", badge: "CC" },
-  { id: 2, name: "AutoEmbed", key: "autoembed" },
+  { id: 1, name: "AutoEmbed", key: "autoembed", badge: "Fast" },
+  { id: 2, name: "VidLink (CC)", key: "vidlink", badge: "CC" },
   { id: 3, name: "MultiEmbed", key: "superembed" },
   { id: 4, name: "VidSrc TO", key: "vsembed", badge: "HD" },
   { id: 5, name: "VidSrc ME", key: "vidsrcvip" },
