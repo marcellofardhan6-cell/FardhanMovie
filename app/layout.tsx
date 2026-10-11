@@ -3,6 +3,7 @@ import { Fraunces, Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SmoothScroll from "@/components/SmoothScroll";
 import { FavoritesProvider } from "@/context/FavoritesContext";
 import { WatchHistoryProvider } from "@/context/WatchHistoryContext";
 import { AnimeThemeProvider } from "@/context/AnimeThemeContext";
@@ -31,6 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${inter.variable} ${fraunces.variable}`}>
       <body>
+        <SmoothScroll />
         <AnimeThemeProvider>
           <FavoritesProvider>
             <WatchHistoryProvider>
