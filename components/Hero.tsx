@@ -32,19 +32,14 @@ export default function Hero({ items, item, isAnime }: Props) {
   const [trailerOpen, setTrailerOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [clientLogos, setClientLogos] = useState<Record<number, string | null>>({});
-  const [trailerKeys, setTrailerKeys] = useState<Record<number, string | null>>({});
-  const [isPreviewPlaying, setIsPreviewPlaying] = useState(false);
-  const [isPreviewMuted, setIsPreviewMuted] = useState(true);
 
   const currentItem = heroList[currentIndex] || heroList[0];
 
   const nextSlide = useCallback(() => {
-    setIsPreviewPlaying(false);
     setCurrentIndex((prev) => (prev + 1) % heroList.length);
   }, [heroList.length]);
 
   const prevSlide = useCallback(() => {
-    setIsPreviewPlaying(false);
     setCurrentIndex((prev) => (prev - 1 + heroList.length) % heroList.length);
   }, [heroList.length]);
 
@@ -63,48 +58,16 @@ export default function Hero({ items, item, isAnime }: Props) {
     });
   }, [heroList, clientLogos]);
 
-  // Fetch trailer key for current slide so preview can be ready
+  // Silky-smooth auto-advance slides every 5.5 seconds
   useEffect(() => {
-    if (!currentItem?.id) return;
-    const id = currentItem.id;
-    if (trailerKeys[id] !== undefined) return;
-
-    const mType = currentItem.media_type === "tv" || isTV(currentItem) ? "tv" : "movie";
-    fetch(`/api/trailer?id=${id}&type=${mType}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setTrailerKeys((prev) => ({ ...prev, [id]: data.trailer?.key ?? null }));
-      })
-      .catch(() => {
-        setTrailerKeys((prev) => ({ ...prev, [id]: null }));
-      });
-  }, [currentItem, trailerKeys]);
-
-  // When staying on a slide for 2.8 seconds, automatically start video preview (Netflix style)
-  useEffect(() => {
-    setIsPreviewPlaying(false);
-    if (!currentItem?.id || trailerOpen || detailOpen) return;
-
-    const previewTimer = setTimeout(() => {
-      const key = trailerKeys[currentItem.id];
-      if (key) {
-        setIsPreviewPlaying(true);
-      }
-    }, 2800);
-
-    return () => clearTimeout(previewTimer);
-  }, [currentIndex, currentItem?.id, trailerKeys, trailerOpen, detailOpen]);
-
-  // Silky-smooth auto-advance slides (pauses while video preview is playing or modal is open)
-  useEffect(() => {
-    if (heroList.length <= 1 || trailerOpen || detailOpen || isPreviewPlaying) return;
+    if (heroList.length <= 1 || trailerOpen || detailOpen) return;
 
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % heroList.length);
-    }, 6000);
+    }, 5500);
 
     return () => clearInterval(timer);
-  }, [heroList.length, trailerOpen, detailOpen, currentIndex, isPreviewPlaying]);
+  }, [heroList.length, trailerOpen, detailOpen, currentIndex]);
 
   if (!currentItem) return null;
 
@@ -117,7 +80,6 @@ export default function Hero({ items, item, isAnime }: Props) {
   const rating = currentItem.vote_average ? currentItem.vote_average.toFixed(1) : null;
   const genres = getGenreNames(currentItem.genre_ids, 2);
   const currentLogo = currentItem.logo_path || clientLogos[currentItem.id];
-  const activeTrailerKey = currentItem?.id ? trailerKeys[currentItem.id] : null;
 
   return (
     <>
@@ -140,11 +102,7 @@ export default function Hero({ items, item, isAnime }: Props) {
             >
               {/* Mobile View: Vertical Poster fits portrait phone screens perfectly */}
               {bgPoster ? (
-                <div
-                  className={`block sm:hidden absolute inset-0 transition-opacity duration-700 ${
-                    isCurrent && isPreviewPlaying && activeTrailerKey ? "opacity-0" : "opacity-100"
-                  }`}
-                >
+                <div className="block sm:hidden absolute inset-0">
                   <Image
                     src={bgPoster}
                     alt={`Poster ${displayTitle(m)}`}
@@ -155,11 +113,7 @@ export default function Hero({ items, item, isAnime }: Props) {
                   />
                 </div>
               ) : bgBackdrop ? (
-                <div
-                  className={`block sm:hidden absolute inset-0 transition-opacity duration-700 ${
-                    isCurrent && isPreviewPlaying && activeTrailerKey ? "opacity-0" : "opacity-100"
-                  }`}
-                >
+                <div className="block sm:hidden absolute inset-0">
                   <Image
                     src={bgBackdrop}
                     alt={`Backdrop ${displayTitle(m)}`}
@@ -173,11 +127,7 @@ export default function Hero({ items, item, isAnime }: Props) {
 
               {/* Tablet & Desktop View: Wide Landscape Backdrop */}
               {bgBackdrop ? (
-                <div
-                  className={`hidden sm:block absolute inset-0 transition-opacity duration-700 ${
-                    isCurrent && isPreviewPlaying && activeTrailerKey ? "opacity-0" : "opacity-100"
-                  }`}
-                >
+                <div className="hidden sm:block absolute inset-0">
                   <Image
                     src={bgBackdrop}
                     alt={`Backdrop ${displayTitle(m)}`}
@@ -188,11 +138,7 @@ export default function Hero({ items, item, isAnime }: Props) {
                   />
                 </div>
               ) : bgPoster ? (
-                <div
-                  className={`hidden sm:block absolute inset-0 transition-opacity duration-700 ${
-                    isCurrent && isPreviewPlaying && activeTrailerKey ? "opacity-0" : "opacity-100"
-                  }`}
-                >
+                <div className="hidden sm:block absolute inset-0">
                   <Image
                     src={bgPoster}
                     alt={`Poster ${displayTitle(m)}`}
@@ -203,22 +149,6 @@ export default function Hero({ items, item, isAnime }: Props) {
                   />
                 </div>
               ) : null}
-
-              {/* Ambient Active Video Trailer Preview Overlay (YouTube Iframe with autoplays) */}
-              {isCurrent && isPreviewPlaying && activeTrailerKey && (
-                <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-                  <iframe
-                    src={`https://www.youtube-nocookie.com/embed/${activeTrailerKey}?autoplay=1&mute=${
-                      isPreviewMuted ? "1" : "0"
-                    }&controls=0&loop=1&playlist=${activeTrailerKey}&playsinline=1&rel=0&modestbranding=1&disablekb=1&fs=0&iv_load_policy=3&enablejsapi=1`}
-                    title={`Preview - ${title}`}
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[160vw] h-[160vh] min-w-[120%] min-h-[120%] object-cover pointer-events-none border-none opacity-95 scale-110"
-                    allow="autoplay; encrypted-media"
-                  />
-                  {/* Invisible Shield Layer over iframe: Completely blocks any hover/cursor interaction that triggers YouTube's pause button icon */}
-                  <div className="absolute inset-0 z-[1] bg-transparent pointer-events-none" />
-                </div>
-              )}
 
               {/* Subtle top shade for navbar legibility */}
               <div className="absolute top-0 left-0 right-0 h-28 bg-gradient-to-b from-black/80 via-black/40 to-transparent pointer-events-none z-[2]" />
@@ -357,59 +287,29 @@ export default function Hero({ items, item, isAnime }: Props) {
           </div>
         </div>
 
-        {/* Controls: Mute/Unmute & Slide Indicator Dots (Bottom Right) */}
-        <div className="absolute bottom-4 sm:bottom-5 right-4 sm:right-6 z-20 flex items-center gap-3">
-          {/* Preview Mute/Unmute toggle (appears when video preview is active) */}
-          {isPreviewPlaying && activeTrailerKey && (
-            <button
-              type="button"
-              onClick={() => setIsPreviewMuted((v) => !v)}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 hover:bg-black/90 text-white text-xs font-semibold backdrop-blur-md border border-white/20 transition-all cursor-pointer animate-fade-in"
-              title={isPreviewMuted ? "Unmute preview" : "Mute preview"}
-              aria-label={isPreviewMuted ? "Unmute preview" : "Mute preview"}
-            >
-              {isPreviewMuted ? (
-                <>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                    <line x1="23" y1="9" x2="17" y2="15" />
-                    <line x1="17" y1="9" x2="23" y2="15" />
-                  </svg>
-                  <span className="text-[10px]">Muted</span>
-                </>
-              ) : (
-                <>
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
-                  </svg>
-                  <span className="text-[10px]">Playing</span>
-                </>
-              )}
-            </button>
-          )}
-
-          {/* Slide Indicator Dots */}
-          {heroList.length > 1 && (
-            <div className="flex items-center gap-1.5 sm:gap-2" aria-label="Slide indicators">
-              {heroList.map((m, idx) => (
-                <button
-                  key={`dot-${m.id}`}
-                  type="button"
-                  onClick={() => setCurrentIndex(idx)}
-                  aria-label={`Go to slide ${idx + 1}: ${displayTitle(m)}`}
-                  className={`transition-all duration-300 rounded-full cursor-pointer ${
-                    idx === currentIndex
-                      ? isAnimePage
-                        ? "w-6 sm:w-8 h-1.5 bg-[#FF6400] shadow-[0_0_10px_rgba(255,100,0,0.6)]"
-                        : "w-6 sm:w-8 h-1.5 bg-white shadow-sm"
-                      : "w-1.5 sm:w-2 h-1.5 sm:h-2 bg-white/35 hover:bg-white/70"
-                  }`}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+        {/* Slide Indicator Dots (Bottom Right matching 7reels layout) */}
+        {heroList.length > 1 && (
+          <div
+            className="absolute bottom-4 sm:bottom-5 right-4 sm:right-6 z-20 flex items-center gap-1.5 sm:gap-2"
+            aria-label="Slide indicators"
+          >
+            {heroList.map((m, idx) => (
+              <button
+                key={`dot-${m.id}`}
+                type="button"
+                onClick={() => setCurrentIndex(idx)}
+                aria-label={`Go to slide ${idx + 1}: ${displayTitle(m)}`}
+                className={`transition-all duration-300 rounded-full cursor-pointer ${
+                  idx === currentIndex
+                    ? isAnimePage
+                      ? "w-6 sm:w-8 h-1.5 bg-[#FF6400] shadow-[0_0_10px_rgba(255,100,0,0.6)]"
+                      : "w-6 sm:w-8 h-1.5 bg-white shadow-sm"
+                    : "w-1.5 sm:w-2 h-1.5 sm:h-2 bg-white/35 hover:bg-white/70"
+                }`}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Official YouTube Trailer Modal */}
