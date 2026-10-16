@@ -1,5 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getMovieDetail, getTVDetail, getMovieCredits, getTVCredits, displayYear } from "@/lib/tmdb";
+import {
+  getMovieDetail,
+  getTVDetail,
+  getMovieCredits,
+  getTVCredits,
+  getMovieRecommendations,
+  getTVRecommendations,
+  displayYear,
+  Genre,
+} from "@/lib/tmdb";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -11,9 +20,10 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const [detail, credits] = await Promise.all([
+    const [detail, credits, recs]: [any, any, any] = await Promise.all([
       type === "tv" ? getTVDetail(id) : getMovieDetail(id),
       type === "tv" ? getTVCredits(id) : getMovieCredits(id),
+      (type === "tv" ? getTVRecommendations(id) : getMovieRecommendations(id)).catch(() => ({ results: [] })),
     ]);
 
     const runtime =
@@ -24,17 +34,18 @@ export async function GET(req: NextRequest) {
         : null;
 
     const isAnime =
-      Boolean(detail.genres?.some((g) => g.id === 16)) &&
+      Boolean(detail.genres?.some((g: Genre) => g.id === 16)) &&
       Boolean(
         detail.origin_country?.includes("JP") ||
         detail.original_language === "ja" ||
-        detail.production_countries?.some((c) => c.iso_3166_1 === "JP")
+        detail.production_countries?.some((c: { iso_3166_1?: string }) => c.iso_3166_1 === "JP")
       );
 
     return NextResponse.json(
       {
         id: detail.id,
         title: detail.title || detail.name || "Untitled",
+        tagline: detail.tagline || null,
         poster_path: detail.poster_path,
         backdrop_path: detail.backdrop_path,
         vote_average: detail.vote_average,
@@ -43,7 +54,9 @@ export async function GET(req: NextRequest) {
         genres: detail.genres || [],
         overview: detail.overview,
         isAnime,
-        cast: (credits.cast || []).slice(0, 15).map((c) => ({
+        seasons: detail.seasons || [],
+        recommendations: (recs.results || []).slice(0, 6),
+        cast: (credits.cast || []).slice(0, 15).map((c: any) => ({
           id: c.id,
           name: c.name,
           character: c.character,
