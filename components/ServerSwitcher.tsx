@@ -27,68 +27,26 @@ interface Props {
 function buildServerUrl(server: Server, props: Props, isAnimeTheme?: boolean, startAt?: number): string {
   const { tmdbId, type, season = 1, episode = 1 } = props;
   const id = String(tmdbId);
-  const primaryColor = isAnimeTheme ? "ff6400" : "e50914";
-  const startAtSec = startAt && startAt > 15 ? Math.floor(startAt) : 0;
 
   switch (server.key) {
-    case "vidlink": {
-      const startAtParam = startAtSec > 0 ? `&startAt=${startAtSec}` : "";
+    case "cinesrc":
       return type === "movie"
-        ? `https://vidlink.pro/movie/${id}?primaryColor=${primaryColor}${startAtParam}`
-        : `https://vidlink.pro/tv/${id}/${season}/${episode}?primaryColor=${primaryColor}${startAtParam}`;
-    }
-    case "superembed":
-    case "multiembed":
-      return type === "movie"
-        ? `https://multiembed.mov/?video_id=${id}&tmdb=1`
-        : `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${episode}`;
-    case "vsembed":
-    case "vidsrcto":
-      return type === "movie"
-        ? `https://vidsrc.to/embed/movie/${id}`
-        : `https://vidsrc.to/embed/tv/${id}/${season}/${episode}`;
-    case "autoembed":
-      return type === "movie"
-        ? `https://autoembed.co/movie/tmdb/${id}`
-        : `https://autoembed.co/tv/tmdb/${id}-${season}-${episode}`;
-    case "vidsrcpm":
-      return type === "movie"
-        ? `https://vidsrc.pm/embed/movie/${id}`
-        : `https://vidsrc.pm/embed/tv/${id}/${season}/${episode}`;
-    case "smashy":
-      return type === "movie"
-        ? `https://embed.smashystream.com/playere.php?tmdb=${id}`
-        : `https://embed.smashystream.com/playere.php?tmdb=${id}&season=${season}&episode=${episode}`;
-    case "vidsrcvip":
-    case "vidsrcme":
-      return type === "movie"
-        ? `https://vidsrc.me/embed/movie?tmdb=${id}`
-        : `https://vidsrc.me/embed/tv?tmdb=${id}&season=${season}&episode=${episode}`;
-    case "twoembed":
-      return type === "movie"
-        ? `https://www.2embed.cc/embed/${id}`
-        : `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${episode}`;
-    case "vidsrcdev":
-      return type === "movie"
-        ? `https://vidsrc.dev/embed/movie/${id}`
-        : `https://vidsrc.dev/embed/tv/${id}/${season}/${episode}`;
+        ? `https://cinesrc.st/embed/movie/${id}`
+        : `https://cinesrc.st/embed/tv/${id}?s=${season}&e=${episode}`;
     case "vidsrcwiki":
       return type === "movie"
         ? `https://vidsrc.wiki/embed/movie/${id}`
         : `https://vidsrc.wiki/embed/tv/${id}/${season}/${episode}`;
     default:
       return type === "movie"
-        ? `https://vidlink.pro/movie/${id}?primaryColor=${primaryColor}`
-        : `https://vidlink.pro/tv/${id}/${season}/${episode}?primaryColor=${primaryColor}`;
+        ? `https://cinesrc.st/embed/movie/${id}`
+        : `https://cinesrc.st/embed/tv/${id}?s=${season}&e=${episode}`;
   }
 }
 
 const SERVERS: Server[] = [
-  { id: 1, name: "VidSrc Wiki", key: "vidsrcwiki", badge: "Primary" },
-  { id: 2, name: "VidSrc TO", key: "vidsrcto", badge: "HD" },
-  { id: 3, name: "VidSrc PM", key: "vidsrcpm" },
-  { id: 4, name: "VidSrc ME", key: "vidsrcvip" },
-  { id: 5, name: "AutoEmbed", key: "autoembed" },
+  { id: 1, name: "CineSrc", key: "cinesrc", badge: "Primary" },
+  { id: 2, name: "VidSrc Wiki", key: "vidsrcwiki", badge: "HD" },
 ];
 
 export default function ServerSwitcher(props: Props) {

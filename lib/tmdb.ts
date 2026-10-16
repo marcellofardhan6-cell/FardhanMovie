@@ -67,6 +67,8 @@ export interface Movie {
   id: number;
   title?: string;
   name?: string;
+  original_title?: string;
+  original_name?: string;
   overview: string;
   poster_path: string | null;
   backdrop_path: string | null;
@@ -169,6 +171,14 @@ export async function getTopRatedMovies(page = 1) {
 
 export async function getTopRatedTV(page = 1) {
   return tmdbFetch<TMDBResponse<Movie>>("/tv/top_rated", { page: String(page) });
+}
+
+export async function getNowPlaying(page = 1) {
+  return tmdbFetch<TMDBResponse<Movie>>("/movie/now_playing", { page: String(page) });
+}
+
+export async function getOnTheAirTV(page = 1) {
+  return tmdbFetch<TMDBResponse<Movie>>("/tv/on_the_air", { page: String(page) });
 }
 
 export interface AnimeGenreInfo {
@@ -433,21 +443,51 @@ export async function discoverMovies(params: {
   if (params.genre) p.with_genres = params.genre;
   if (params.year) {
     p.primary_release_year = params.year;
+    const currentYear = new Date().getFullYear().toString();
+    if (params.year === currentYear) {
+      p["primary_release_date.lte"] = today;
+    }
   } else {
-    // Prevent unreleased future placeholder movies (e.g. late 2026/2027) from polluting results
     p["primary_release_date.lte"] = today;
   }
-  if (params.sort_by === "primary_release_date.desc") {
-    p["primary_release_date.lte"] = today;
-    // Only apply vote threshold for global unfiltered queries to eliminate bot/test uploads.
-    // When a country (e.g. Indonesia, Korea, Japan) or year is explicitly selected, do not apply
-    // high vote thresholds as regional cinema has significantly fewer TMDB votes.
-    if (!params.country && !params.year) {
+
+  // Quality filters against AI slop and 0-vote amateur uploads
+  if (params.country) {
+    p.with_origin_country = params.country;
+    p.with_release_type = "2|3|4";
+    if (params.country === "ID") {
+      p.with_original_language = "id";
+      p["vote_count.gte"] = "15";
+      p["popularity.gte"] = "1.0";
+    } else {
+      // Regional cinema
+      p["vote_count.gte"] = "15";
+      p["popularity.gte"] = "2.0";
+    }
+  } else {
+    // Global catalog: strict anti-AI thresholds
+    if (params.sort_by === "primary_release_date.desc") {
+      p.with_release_type = "2|3|4";
+      p["primary_release_date.lte"] = today;
+      p["vote_count.gte"] = "25";
+      p["popularity.gte"] = "10";
+    } else {
       p["vote_count.gte"] = "10";
+      p["popularity.gte"] = "5";
     }
   }
-  if (params.country) p.with_origin_country = params.country;
-  return tmdbFetch<TMDBResponse<Movie>>("/discover/movie", p);
+
+  const res = await tmdbFetch<TMDBResponse<Movie>>("/discover/movie", p);
+
+  // Post-filter to guarantee real cinema & digital releases (no missing posters, backdrops, or empty synopsis)
+  const filteredResults = (res.results || []).filter(
+    (m) => Boolean(m.poster_path && m.backdrop_path && m.overview && m.overview.trim().length > 15)
+  );
+
+  return {
+    ...res,
+    results: filteredResults,
+  };
 }
 
 export async function discoverTV(params: {
@@ -465,17 +505,46 @@ export async function discoverTV(params: {
   if (params.genre) p.with_genres = params.genre;
   if (params.year) {
     p.first_air_date_year = params.year;
+    const currentYear = new Date().getFullYear().toString();
+    if (params.year === currentYear) {
+      p["first_air_date.lte"] = today;
+    }
   } else {
     p["first_air_date.lte"] = today;
   }
-  if (params.sort_by === "first_air_date.desc") {
-    p["first_air_date.lte"] = today;
-    if (!params.country && !params.year) {
+
+  // Quality filters against amateur web series & podcasts
+  if (params.country) {
+    p.with_origin_country = params.country;
+    if (params.country === "ID") {
+      p.with_original_language = "id";
+      p["vote_count.gte"] = "5";
+      p["popularity.gte"] = "2";
+    } else {
+      p["vote_count.gte"] = "8";
+      p["popularity.gte"] = "3";
+    }
+  } else {
+    if (params.sort_by === "first_air_date.desc") {
+      p["first_air_date.lte"] = today;
+      p["vote_count.gte"] = "15";
+      p["popularity.gte"] = "8";
+    } else {
       p["vote_count.gte"] = "10";
+      p["popularity.gte"] = "5";
     }
   }
-  if (params.country) p.with_origin_country = params.country;
-  return tmdbFetch<TMDBResponse<Movie>>("/discover/tv", p);
+
+  const res = await tmdbFetch<TMDBResponse<Movie>>("/discover/tv", p);
+
+  const filteredResults = (res.results || []).filter(
+    (m) => Boolean(m.poster_path && m.backdrop_path && m.overview && m.overview.trim().length > 15)
+  );
+
+  return {
+    ...res,
+    results: filteredResults,
+  };
 }
 
 export async function getLatestUploads(params?: {
@@ -489,16 +558,26 @@ export async function getLatestUploads(params?: {
   const today = new Date().toISOString().split("T")[0];
 
   const fetchMovies = async () => {
+    // If no country specified, now_playing gives the top theatrical & digital hits (Ngefilm21 style)
+    if (!country) {
+      const np = await getNowPlaying(page).catch(() => ({ results: [] as Movie[] }));
+      return (np.results || [])
+        .filter((m) => Boolean(m.poster_path && m.backdrop_path && m.overview && m.overview.trim().length > 15))
+        .map((m) => ({ ...m, media_type: "movie" as const }));
+    }
+
     const q: Record<string, string> = {
       sort_by: "primary_release_date.desc",
       "primary_release_date.lte": today,
       page: String(page),
       include_adult: "false",
+      with_origin_country: country,
+      with_release_type: "2|3|4",
+      "vote_count.gte": country === "ID" ? "15" : "15",
+      "popularity.gte": country === "ID" ? "1.0" : "3.0",
     };
-    if (country) {
-      q.with_origin_country = country;
-    } else {
-      q["vote_count.gte"] = "10";
+    if (country === "ID") {
+      q.with_original_language = "id";
     }
 
     const res = await tmdbFetch<TMDBResponse<Movie>>("/discover/movie", q).catch(() => ({
@@ -509,7 +588,7 @@ export async function getLatestUploads(params?: {
     }));
 
     return (res.results || [])
-      .filter((m) => Boolean(m.poster_path && m.overview && m.overview.length > 10))
+      .filter((m) => Boolean(m.poster_path && m.backdrop_path && m.overview && m.overview.trim().length > 15))
       .map((m) => ({ ...m, media_type: "movie" as const }));
   };
 
@@ -522,8 +601,17 @@ export async function getLatestUploads(params?: {
     };
     if (country) {
       q.with_origin_country = country;
+      if (country === "ID") {
+        q.with_original_language = "id";
+        q["vote_count.gte"] = "5";
+        q["popularity.gte"] = "2";
+      } else {
+        q["vote_count.gte"] = "8";
+        q["popularity.gte"] = "3";
+      }
     } else {
-      q["vote_count.gte"] = "10";
+      q["vote_count.gte"] = "15";
+      q["popularity.gte"] = "8";
     }
 
     const res = await tmdbFetch<TMDBResponse<Movie>>("/discover/tv", q).catch(() => ({
@@ -534,7 +622,7 @@ export async function getLatestUploads(params?: {
     }));
 
     return (res.results || [])
-      .filter((m) => Boolean(m.poster_path && m.overview && m.overview.length > 10))
+      .filter((m) => Boolean(m.poster_path && m.backdrop_path && m.overview && m.overview.trim().length > 15))
       .map((m) => ({ ...m, media_type: "tv" as const }));
   };
 
@@ -561,7 +649,10 @@ export function backdrop(path: string | null): string {
 }
 
 export function displayTitle(item: Movie): string {
-  return item.title ?? item.name ?? "Untitled";
+  if (item.original_language === "id") {
+    return item.original_title ?? item.original_name ?? item.title ?? item.name ?? "Untitled";
+  }
+  return item.title ?? item.name ?? item.original_title ?? "Untitled";
 }
 
 export function displayYear(item: Movie): string {

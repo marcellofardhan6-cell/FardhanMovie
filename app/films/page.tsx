@@ -1,4 +1,4 @@
-import { discoverMovies, getMovieGenres } from "@/lib/tmdb";
+import { discoverMovies, getMovieGenres, getNowPlaying } from "@/lib/tmdb";
 import MovieGrid from "@/components/MovieGrid";
 import FilterBar from "@/components/FilterBar";
 import { Suspense } from "react";
@@ -25,12 +25,19 @@ export default async function FilmsPage({ searchParams }: Props) {
       : "popularity.desc";
   const page = Number(params.page ?? 1);
 
+  const fetchPromise =
+    sortParam === "latest" && !genre && !year && !country
+      ? getNowPlaying(page).catch(() => ({ results: [], total_pages: 0, total_results: 0, page: 1 }))
+      : discoverMovies({ genre, year, country, sort_by: sort, page }).catch(() => ({ results: [], total_pages: 0, total_results: 0, page: 1 }));
+
   const [data, genres] = await Promise.all([
-    discoverMovies({ genre, year, country, sort_by: sort, page }).catch(() => ({ results: [], total_pages: 0, total_results: 0, page: 1 })),
+    fetchPromise,
     getMovieGenres().catch(() => []),
   ]);
 
-  let items = data.results.filter((m) => Boolean(m.poster_path));
+  let items = data.results.filter(
+    (m) => Boolean(m.poster_path && m.backdrop_path && m.overview && m.overview.trim().length > 15)
+  );
   if (sortParam === "latest") {
     items = [...items].sort((a, b) => {
       const dateA = new Date(a.release_date || "1970-01-01").getTime();
