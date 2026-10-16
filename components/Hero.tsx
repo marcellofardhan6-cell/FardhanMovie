@@ -235,9 +235,14 @@ export default function Hero({ items, item, isAnime }: Props) {
 
             {/* Action Buttons: Watch Now & More Info (Detail Modal) */}
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 sm:gap-2.5 mt-0.5">
-              {/* Watch Now */}
+              {/* Watch Now (Direct Fullscreen Play) */}
               <Link
                 href={href}
+                onClick={(e) => {
+                  if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+                  e.preventDefault();
+                  openPreview(currentItem, true);
+                }}
                 className={`inline-flex items-center justify-center gap-2 font-bold px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm transition-all shadow-xl active:scale-95 cursor-pointer ${
                   isAnimePage
                     ? "bg-[#FF6400] hover:bg-[#ff7b1a] text-black shadow-[#FF6400]/25"

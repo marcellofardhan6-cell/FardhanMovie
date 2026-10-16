@@ -7,6 +7,7 @@ import { useFavorites } from "@/context/FavoritesContext";
 import { POPULAR_GENRES, ANIME_GENRE_LIST, img } from "@/lib/tmdb";
 import Logo from "@/components/Logo";
 import { useAnimeTheme } from "@/context/AnimeThemeContext";
+import { usePreviewModal } from "@/context/PreviewModalContext";
 
 interface LiveSearchResult {
   id: number;
@@ -21,6 +22,7 @@ interface LiveSearchResult {
 export default function Navbar() {
   const { favoritesCount } = useFavorites();
   const { isAnimeTheme } = useAnimeTheme();
+  const { openPreview } = usePreviewModal();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
@@ -419,7 +421,7 @@ export default function Navbar() {
                           onClick={() => {
                             setSearchDropdownOpen(false);
                             setSearchQuery("");
-                            router.push(item.media_type === "tv" ? `/series/${item.id}` : `/film/${item.id}`);
+                            openPreview(item as any, false);
                           }}
                           className="w-full flex items-center gap-2.5 p-2 rounded-xl hover:bg-white/[0.08] transition-colors text-left group cursor-pointer"
                         >
@@ -621,7 +623,7 @@ export default function Navbar() {
                         onClick={() => {
                           setMobileSearchOpen(false);
                           setSearchQuery("");
-                          router.push(item.media_type === "tv" ? `/series/${item.id}` : `/film/${item.id}`);
+                          openPreview(item as any, false);
                         }}
                         className="w-full flex items-center gap-2.5 p-2 rounded-xl active:bg-white/[0.1] transition-colors text-left"
                       >

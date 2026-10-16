@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Movie, backdrop, img, displayTitle, displayYear, isTV } from "@/lib/tmdb";
 import { useFavorites } from "@/context/FavoritesContext";
+import { usePreviewModal } from "@/context/PreviewModalContext";
 
 interface Props {
   item: Movie;
@@ -13,6 +14,7 @@ interface Props {
 
 export default function LandscapeCard({ item, priority = false }: Props) {
   const { isFavorite, toggleFavorite } = useFavorites();
+  const { openPreview } = usePreviewModal();
   const fav = isFavorite(item.id);
   const title = displayTitle(item);
   const year = displayYear(item);
@@ -24,10 +26,23 @@ export default function LandscapeCard({ item, priority = false }: Props) {
   const [imgSrc, setImgSrc] = useState(imageUrl);
   const rating = item.vote_average ? item.vote_average.toFixed(1) : null;
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+    e.preventDefault();
+    openPreview(item, false);
+  };
+
+  const handlePlayClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    openPreview(item, true);
+  };
+
   return (
     <Link
       href={href}
-      className="group block relative rounded-xl overflow-hidden bg-[#0c0e15] border border-white/[0.08] hover:border-red-500/40 transition-all duration-300 ease-out hover:-translate-y-1.5 focus-visible:ring-2 focus-visible:ring-red-500 shadow-lg select-none"
+      onClick={handleCardClick}
+      className="group block relative rounded-xl overflow-hidden bg-[#0c0e15] border border-white/[0.08] hover:border-red-500/40 transition-all duration-300 ease-out hover:-translate-y-1.5 focus-visible:ring-2 focus-visible:ring-red-500 shadow-lg select-none cursor-pointer"
       aria-label={`${title}${year ? " (" + year + ")" : ""}`}
     >
       {/* 16:9 Backdrop Container */}
@@ -47,11 +62,17 @@ export default function LandscapeCard({ item, priority = false }: Props) {
 
         {/* Center Play Button Overlay on Hover */}
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <div className="w-11 h-11 rounded-full bg-red-600 text-white flex items-center justify-center shadow-xl transform scale-90 group-hover:scale-100 transition-transform">
+          <button
+            type="button"
+            onClick={handlePlayClick}
+            className="w-11 h-11 rounded-full bg-red-600 text-white flex items-center justify-center shadow-xl transform scale-90 group-hover:scale-100 hover:scale-110 transition-transform cursor-pointer"
+            aria-label="Putar film langsung"
+            title="Putar Sekarang"
+          >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
               <path d="M5 3l14 9-14 9V3z" />
             </svg>
-          </div>
+          </button>
         </div>
 
         {/* Rating Badge Top-Left */}

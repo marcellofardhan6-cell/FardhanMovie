@@ -3,7 +3,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import MovieGrid from "@/components/MovieGrid";
 import TVPlayer from "@/components/TVPlayer";
-import DetailCard from "@/components/DetailCard";
 import FavoriteButton from "@/components/FavoriteButton";
 import AnimeThemeSync from "@/components/AnimeThemeSync";
 import type { Metadata } from "next";
@@ -104,21 +103,61 @@ export default async function SeriesDetailPage({ params, searchParams }: Props) 
           </div>
         )}
 
-        {/* Clean Detail & Cast Card */}
-        <div className="mb-14">
-          <DetailCard
-            tmdbId={id}
-            title={show.name}
-            posterPath={show.poster_path}
-            rating={show.vote_average}
-            runtime={seasonInfo}
-            year={year}
-            genres={show.genres}
-            overview={show.overview}
-            cast={mainCast}
-            type="tv"
-            isAnime={isAnime}
-          />
+        {/* Netflix-style Overview & Details */}
+        <div className="mb-12 p-6 sm:p-8 rounded-2xl bg-[#12141c] border border-white/[0.08]">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+            {/* Left Column: Metadata & Synopsis */}
+            <div className="md:col-span-2 space-y-4">
+              <div className="flex flex-wrap items-center gap-2.5 text-xs sm:text-sm font-semibold">
+                <span className="text-[#46d369] font-bold">98% Cocok</span>
+                {year && <span className="text-zinc-300">{year}</span>}
+                <span className="border border-white/40 px-1.5 py-0.2 rounded text-[10px] text-zinc-300 uppercase">
+                  16+
+                </span>
+                {seasonInfo && <span className="text-zinc-300">{seasonInfo}</span>}
+                <span className="border border-white/40 px-1 py-0.2 rounded text-[9px] text-zinc-300 font-bold uppercase">
+                  Ultra HD 4K
+                </span>
+                <span className="border border-white/40 px-1 py-0.2 rounded text-[9px] text-zinc-300 font-bold uppercase">
+                  CC
+                </span>
+              </div>
+
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                {show.name}
+              </h1>
+
+              <p className="text-sm sm:text-base text-zinc-300 leading-relaxed font-normal">
+                {show.overview || "Sinopsis belum tersedia."}
+              </p>
+            </div>
+
+            {/* Right Column: Cast & Genres */}
+            <div className="space-y-3.5 text-xs sm:text-sm text-zinc-400 border-t md:border-t-0 md:border-l border-white/[0.08] pt-4 md:pt-0 md:pl-6">
+              {mainCast.length > 0 && (
+                <div>
+                  <span className="text-zinc-500 font-normal">Pemeran: </span>
+                  <span className="text-white font-medium">
+                    {mainCast.slice(0, 4).map((c) => c.name).join(", ")}
+                  </span>
+                </div>
+              )}
+
+              {show.genres && show.genres.length > 0 && (
+                <div>
+                  <span className="text-zinc-500 font-normal">Genre: </span>
+                  <span className="text-white font-medium">
+                    {show.genres.map((g: any) => g.name).join(", ")}
+                  </span>
+                </div>
+              )}
+
+              <div>
+                <span className="text-zinc-500 font-normal">Kualitas: </span>
+                <span className="text-white font-medium">1080p Full HD • Multi Subtitle</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Recommendations Section */}
