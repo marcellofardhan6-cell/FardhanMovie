@@ -25,6 +25,9 @@ export const metadata: Metadata = {
   title: { default: "FardTV - Free Movies & TV Series Streaming", template: "%s | FardTV" },
   description: "Watch trending movies, popular TV series, and anime online. Free HD streaming without ads.",
   keywords: ["movies", "streaming", "tv series", "anime", "cinema", "watch online"],
+  verification: {
+    google: "L1xsmzaUQHcwSEskRrjWbDUPrD4UZxxzK6cfs-FvaG8",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
