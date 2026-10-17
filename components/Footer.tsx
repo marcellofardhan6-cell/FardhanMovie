@@ -85,9 +85,12 @@ export default function Footer() {
           </button>
         </div>
 
-        {/* Legal & Attribution */}
+        {/* Attribution & Copyright */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-500">
           <p className="text-center sm:text-left">
+            Created by{" "}
+            <span className="text-zinc-300 font-medium">Fardhan Marcello</span>
+            {" • "}
             Movie &amp; TV metadata provided by{" "}
             <a
               href="https://www.themoviedb.org"
@@ -96,10 +99,10 @@ export default function Footer() {
               className="text-zinc-400 hover:text-zinc-200 underline transition-colors"
             >
               TMDB
-            </a>. FardTV does not host or store any media files on its servers.
+            </a>.
           </p>
           <p className="text-zinc-500 text-[11px]">
-            &copy; {new Date().getFullYear()} FardTV. All rights reserved.
+            &copy; {new Date().getFullYear()} FardTV by Fardhan Marcello. All rights reserved.
           </p>
         </div>
       </div>
