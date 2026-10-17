@@ -526,13 +526,25 @@ export default function Navbar() {
               )}
             </Link>
 
-            {/* Support Creator Button */}
+            {/* Support Creator Button - Attractive yet clean and simple */}
             <button
               type="button"
               onClick={openSupport}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-red-600 hover:bg-red-500 transition-colors cursor-pointer"
+              className="group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-white bg-gradient-to-r from-red-600 to-[#d61f26] hover:from-red-500 hover:to-red-600 border border-white/20 shadow-sm shadow-red-950/50 transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer select-none"
+              aria-label="Support FardTV"
+              title="Support FardTV"
             >
-              Support
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className="transition-transform duration-200 group-hover:scale-110 shrink-0 text-white/90"
+                aria-hidden="true"
+              >
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+              </svg>
+              <span className="tracking-wide">Support</span>
             </button>
 
             {/* Mobile Hamburger Button */}
