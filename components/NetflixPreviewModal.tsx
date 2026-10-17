@@ -40,7 +40,7 @@ export default function NetflixPreviewModal() {
   const [selectedSeason, setSelectedSeason] = useState(1);
   const [selectedEpisode, setSelectedEpisode] = useState(1);
   const [isTheaterOpen, setIsTheaterOpen] = useState(false);
-  const [activeServer, setActiveServer] = useState<"vidsrcwiki" | "cinesrc">("vidsrcwiki");
+  const [activeServer, setActiveServer] = useState<"cinesrc" | "vidsrcwiki">("cinesrc");
   const [controlsVisible, setControlsVisible] = useState(true);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -153,7 +153,7 @@ export default function NetflixPreviewModal() {
       setSelectedSeason(1);
       setSelectedEpisode(1);
       setIsTheaterOpen(false);
-      setActiveServer("vidsrcwiki");
+      setActiveServer("cinesrc");
       fetchDetail(activeItem.id, resolvedType);
       document.body.style.overflow = "hidden";
 
@@ -199,23 +199,23 @@ export default function NetflixPreviewModal() {
   const episodeCount = currentSeasonObj?.episode_count || 10;
   const matchPercent = Math.min(99, Math.max(85, Math.round((rating || 7.5) * 10) + 12));
 
-  // Build stream URL for the 2 active servers (VidSrc Wiki as primary)
+  // Build stream URL for the 2 active servers (CineSrc as primary)
   const idStr = String(activeItem.id);
   const streamUrl =
-    activeServer === "vidsrcwiki"
+    activeServer === "cinesrc"
       ? resolvedType === "tv"
-        ? `https://vidsrc.wiki/embed/tv/${idStr}/${selectedSeason}/${selectedEpisode}`
-        : `https://vidsrc.wiki/embed/movie/${idStr}`
+        ? `https://cinesrc.st/embed/tv/${idStr}?s=${selectedSeason}&e=${selectedEpisode}`
+        : `https://cinesrc.st/embed/movie/${idStr}`
       : resolvedType === "tv"
-      ? `https://cinesrc.st/embed/tv/${idStr}?s=${selectedSeason}&e=${selectedEpisode}`
-      : `https://cinesrc.st/embed/movie/${idStr}`;
+      ? `https://vidsrc.wiki/embed/tv/${idStr}/${selectedSeason}/${selectedEpisode}`
+      : `https://vidsrc.wiki/embed/movie/${idStr}`;
 
   return (
     <>
       {/* 1. TRUE FULLSCREEN THEATER PLAYER OVERLAY */}
       {isTheaterOpen && (
         <div
-          className="fixed inset-0 z-[9999] w-screen h-screen bg-black overflow-hidden flex flex-col select-none"
+          className="fixed inset-0 z-[9999] w-full h-full bg-black overflow-hidden flex flex-col select-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
           onMouseMove={handleUserActivity}
           onClick={handleUserActivity}
         >
@@ -294,17 +294,6 @@ export default function NetflixPreviewModal() {
               <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/60 border border-white/10 backdrop-blur-md">
                 <button
                   type="button"
-                  onClick={() => setActiveServer("vidsrcwiki")}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                    activeServer === "vidsrcwiki"
-                      ? "bg-red-600 text-white shadow-md"
-                      : "text-zinc-300 hover:text-white"
-                  }`}
-                >
-                  VidSrc Wiki (Utama)
-                </button>
-                <button
-                  type="button"
                   onClick={() => setActiveServer("cinesrc")}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     activeServer === "cinesrc"
@@ -312,7 +301,18 @@ export default function NetflixPreviewModal() {
                       : "text-zinc-300 hover:text-white"
                   }`}
                 >
-                  CineSrc (Server 2)
+                  CineSrc (Utama)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveServer("vidsrcwiki")}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeServer === "vidsrcwiki"
+                      ? "bg-red-600 text-white shadow-md"
+                      : "text-zinc-300 hover:text-white"
+                  }`}
+                >
+                  VidSrc Wiki (Server 2)
                 </button>
               </div>
 
@@ -335,7 +335,8 @@ export default function NetflixPreviewModal() {
             key={`${streamUrl}-${activeServer}`}
             src={streamUrl}
             title={title}
-            className="w-full h-full border-0"
+            className="w-full h-full border-0 overflow-hidden"
+            scrolling="no"
             referrerPolicy="origin"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen *"
             allowFullScreen
@@ -345,7 +346,9 @@ export default function NetflixPreviewModal() {
 
       {/* 2. AUTHENTIC NETFLIX PREVIEW MODAL */}
       <div
-        className="fixed inset-0 z-[120] flex items-center justify-center p-0 sm:p-4 md:p-6 bg-black/80 backdrop-blur-sm overflow-y-auto animate-fadeIn"
+        className={`fixed inset-0 z-[120] items-center justify-center p-0 sm:p-4 md:p-6 bg-black/80 backdrop-blur-sm overflow-y-auto animate-fadeIn ${
+          isTheaterOpen ? "hidden" : "flex"
+        }`}
         role="dialog"
         aria-modal="true"
         aria-label={`Netflix Preview: ${title}`}
