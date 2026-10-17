@@ -1,11 +1,11 @@
 import { searchMulti } from "@/lib/tmdb";
-import MovieGrid from "@/components/MovieGrid";
+import InfiniteMovieGrid from "@/components/InfiniteMovieGrid";
 import type { Metadata } from "next";
 
 export const revalidate = 300;
 
 interface Props {
-  searchParams: Promise<{ q?: string; page?: string }>;
+  searchParams: Promise<{ q?: string }>;
 }
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
@@ -16,7 +16,6 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
 export default async function SearchPage({ searchParams }: Props) {
   const params = await searchParams;
   const query = params.q?.trim() ?? "";
-  const page = Number(params.page ?? 1);
 
   if (!query) {
     return (
@@ -42,7 +41,7 @@ export default async function SearchPage({ searchParams }: Props) {
     );
   }
 
-  const data = await searchMulti(query, page).catch(() => ({ results: [], total_pages: 0, total_results: 0, page: 1 }));
+  const data = await searchMulti(query, 1).catch(() => ({ results: [], total_pages: 0, total_results: 0, page: 1 }));
   const items = data.results.filter((item) => item.poster_path && (item.media_type === "movie" || item.media_type === "tv"));
 
   return (
@@ -58,42 +57,13 @@ export default async function SearchPage({ searchParams }: Props) {
         )}
       </div>
 
-      {items.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-24 rounded-2xl bg-[#0c0e17] border border-white/[0.08] text-center px-4">
-          <p className="text-base font-bold text-white mb-1">
-            No results found for &ldquo;{query}&rdquo;
-          </p>
-          <p className="text-xs text-zinc-400">
-            Please check your spelling or try different keywords.
-          </p>
-        </div>
-      ) : (
-        <MovieGrid items={items} />
-      )}
-
-      {data.total_pages > 1 && (
-        <div className="flex items-center justify-center gap-3 mt-12">
-          {page > 1 && (
-            <a
-              href={`/search?q=${encodeURIComponent(query)}&page=${page - 1}`}
-              className="px-5 py-2.5 rounded-full text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 border border-white/[0.08] hover:border-red-500/40 transition-all cursor-pointer"
-            >
-              &larr; Previous
-            </a>
-          )}
-          <span className="px-4 py-2 text-xs font-medium text-zinc-400 bg-black/40 rounded-full border border-white/[0.05]">
-            Page {page} of {Math.min(data.total_pages, 500)}
-          </span>
-          {page < data.total_pages && page < 500 && (
-            <a
-              href={`/search?q=${encodeURIComponent(query)}&page=${page + 1}`}
-              className="px-5 py-2.5 rounded-full text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 border border-white/[0.08] hover:border-red-500/40 transition-all cursor-pointer"
-            >
-              Next &rarr;
-            </a>
-          )}
-        </div>
-      )}
+      <InfiniteMovieGrid
+        initialItems={items}
+        totalPages={data.total_pages || 1}
+        catalogParams={{ type: "search", q: query }}
+        emptyTitle={`No results found for "${query}"`}
+        emptySubtitle="Please check your spelling or try different keywords."
+      />
     </div>
   );
 }

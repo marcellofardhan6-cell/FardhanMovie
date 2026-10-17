@@ -85,8 +85,8 @@ export default function MovieCard({ item, priority = false }: Props) {
               ? "bg-red-600 text-white border-red-500 shadow-red-900/40"
               : "bg-black/60 text-zinc-300 border-white/15 hover:text-white hover:bg-black/85"
           }`}
-          aria-label={fav ? "Hapus dari favorit" : "Tambah ke favorit"}
-          title={fav ? "Hapus dari favorit" : "Tambah ke favorit"}
+          aria-label={fav ? "Remove from favorites" : "Add to favorites"}
+          title={fav ? "Remove from favorites" : "Add to favorites"}
         >
           <svg
             width="12"
@@ -110,8 +110,8 @@ export default function MovieCard({ item, priority = false }: Props) {
             type="button"
             onClick={handlePlayClick}
             className="w-11 h-11 rounded-full flex items-center justify-center bg-red-600 text-white shadow-[0_0_25px_rgba(229,9,20,0.8)] transform scale-90 group-hover:scale-100 hover:scale-110 hover:bg-red-500 transition-all duration-200 cursor-pointer pointer-events-auto"
-            aria-label="Putar film langsung"
-            title="Putar Sekarang"
+            aria-label="Play movie directly"
+            title="Play Now"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" className="ml-0.5" aria-hidden>
               <path d="M5 3l14 9-14 9V3z" />

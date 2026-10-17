@@ -105,8 +105,8 @@ export default function Top10Card({ item, rank, priority = false }: Props) {
               ? "bg-red-600 text-white border-red-500 shadow-red-900/40"
               : "bg-black/60 text-zinc-300 border-white/15 hover:text-white hover:bg-black/85"
           }`}
-          aria-label={fav ? "Hapus dari favorit" : "Tambah ke favorit"}
-          title={fav ? "Hapus dari favorit" : "Tambah ke favorit"}
+          aria-label={fav ? "Remove from favorites" : "Add to favorites"}
+          title={fav ? "Remove from favorites" : "Add to favorites"}
         >
           <svg
             width="12"

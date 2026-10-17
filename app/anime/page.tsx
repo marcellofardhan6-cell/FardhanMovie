@@ -9,7 +9,7 @@ import {
 } from "@/lib/tmdb";
 import Hero from "@/components/Hero";
 import Carousel from "@/components/Carousel";
-import MovieGrid from "@/components/MovieGrid";
+import InfiniteMovieGrid from "@/components/InfiniteMovieGrid";
 import AnimeSchedule from "@/components/AnimeSchedule";
 import AnimeGenreExplorer from "@/components/AnimeGenreExplorer";
 import Link from "next/link";
@@ -182,32 +182,13 @@ export default async function AnimePage({ searchParams }: Props) {
                 </p>
               </div>
 
-              <MovieGrid items={catalogList} />
-
-              {/* Pagination */}
-              {catalog.total_pages > 1 && (
-                <div className="flex items-center justify-center gap-3 mt-12">
-                  {page > 1 && (
-                    <Link
-                      href={`/anime?page=${page - 1}`}
-                      className="px-5 py-2.5 rounded-full text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 border border-white/[0.08] hover:border-[#FF6400]/40 transition-all cursor-pointer"
-                    >
-                      &larr; Previous Page
-                    </Link>
-                  )}
-                  <span className="px-4 py-2 text-xs font-bold text-[#FF6400] bg-[#FF6400]/10 rounded-full border border-[#FF6400]/25">
-                    Page {page} of {Math.min(catalog.total_pages, 500)}
-                  </span>
-                  {page < catalog.total_pages && page < 500 && (
-                    <Link
-                      href={`/anime?page=${page + 1}`}
-                      className="px-5 py-2.5 rounded-full text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 border border-white/[0.08] hover:border-[#FF6400]/40 transition-all cursor-pointer"
-                    >
-                      Next Page &rarr;
-                    </Link>
-                  )}
-                </div>
-              )}
+              <InfiniteMovieGrid
+                initialItems={catalogList}
+                totalPages={catalog.total_pages || 1}
+                catalogParams={{ type: "anime", genre: selectedGenre, sort: sortBy }}
+                emptyTitle="No anime found"
+                emptySubtitle="Try adjusting your genre or sort criteria."
+              />
             </div>
           </>
         ) : (
@@ -257,40 +238,13 @@ export default async function AnimePage({ searchParams }: Props) {
               </div>
             </div>
 
-            <MovieGrid items={catalogList} />
-
-            {/* Pagination */}
-            {catalog.total_pages > 1 && (
-              <div className="flex items-center justify-center gap-3 mt-12">
-                {page > 1 && (
-                  <Link
-                    href={`/anime?${new URLSearchParams({
-                      ...(selectedGenre ? { genre: selectedGenre } : {}),
-                      ...(sortBy !== "popularity.desc" ? { sort: sortBy } : {}),
-                      page: String(page - 1),
-                    }).toString()}`}
-                    className="px-5 py-2.5 rounded-full text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 border border-white/[0.08] hover:border-[#FF6400]/40 transition-all cursor-pointer"
-                  >
-                    &larr; Previous Page
-                  </Link>
-                )}
-                <span className="px-4 py-2 text-xs font-bold text-[#FF6400] bg-[#FF6400]/10 rounded-full border border-[#FF6400]/25">
-                  Page {page} of {Math.min(catalog.total_pages, 500)}
-                </span>
-                {page < catalog.total_pages && page < 500 && (
-                  <Link
-                    href={`/anime?${new URLSearchParams({
-                      ...(selectedGenre ? { genre: selectedGenre } : {}),
-                      ...(sortBy !== "popularity.desc" ? { sort: sortBy } : {}),
-                      page: String(page + 1),
-                    }).toString()}`}
-                    className="px-5 py-2.5 rounded-full text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 border border-white/[0.08] hover:border-[#FF6400]/40 transition-all cursor-pointer"
-                  >
-                    Next Page &rarr;
-                  </Link>
-                )}
-              </div>
-            )}
+            <InfiniteMovieGrid
+              initialItems={catalogList}
+              totalPages={catalog.total_pages || 1}
+              catalogParams={{ type: "anime", genre: selectedGenre, sort: sortBy }}
+              emptyTitle="No anime found"
+              emptySubtitle="Try adjusting your genre or sort criteria."
+            />
           </div>
         )}
       </div>

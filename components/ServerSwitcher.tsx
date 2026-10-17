@@ -45,7 +45,7 @@ function buildServerUrl(server: Server, props: Props, isAnimeTheme?: boolean, st
 }
 
 const SERVERS: Server[] = [
-  { id: 1, name: "CineSrc", key: "cinesrc", badge: "Utama" },
+  { id: 1, name: "CineSrc", key: "cinesrc", badge: "Primary" },
   { id: 2, name: "VidSrc Wiki", key: "vidsrcwiki", badge: "Server 2" },
 ];
 

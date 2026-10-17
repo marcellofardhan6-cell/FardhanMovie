@@ -623,8 +623,8 @@ export default function NetflixPreviewModal() {
                 type="button"
                 onClick={handleExitTheater}
                 className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-white/10 hover:bg-white/20 active:bg-white/30 text-white flex items-center justify-center transition-all cursor-pointer shrink-0 shadow-md active:scale-95"
-                title="Keluar dari pemutar (Esc)"
-                aria-label="Kembali"
+                title="Exit player (Esc)"
+                aria-label="Back"
               >
                 <svg width="16" height="16" className="sm:w-[20px] sm:h-[20px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M19 12H5M12 19l-7-7 7-7" />
@@ -656,7 +656,7 @@ export default function NetflixPreviewModal() {
                   }`}
                 >
                   <span>CineSrc</span>
-                  <span className="hidden sm:inline"> (Utama)</span>
+                  <span className="hidden sm:inline"> (Primary)</span>
                 </button>
                 <button
                   type="button"
@@ -720,8 +720,8 @@ export default function NetflixPreviewModal() {
           <button
             onClick={closePreview}
             className="absolute top-4 right-4 z-30 w-9 h-9 rounded-full flex items-center justify-center bg-[#181818] hover:bg-[#2a2a2a] text-white transition-all cursor-pointer shadow-xl active:scale-95"
-            aria-label="Tutup"
-            title="Tutup (Esc)"
+            aria-label="Close"
+            title="Close (Esc)"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
               <path d="M18 6 6 18M6 6l12 12" />
@@ -741,7 +741,7 @@ export default function NetflixPreviewModal() {
               />
             ) : (
               <div className="w-full h-full bg-[#12141a] flex items-center justify-center text-zinc-500 text-sm">
-                Tidak ada pratinjau
+                No preview available
               </div>
             )}
 
@@ -763,12 +763,12 @@ export default function NetflixPreviewModal() {
                   type="button"
                   onClick={() => handleStartPlay()}
                   className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-2.5 sm:py-3 rounded bg-white hover:bg-white/80 text-black font-extrabold text-sm sm:text-base transition-all cursor-pointer shadow-xl active:scale-95"
-                  title="Putar Layar Penuh"
+                  title="Play Fullscreen"
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M5 3l14 9-14 9V3z" />
                   </svg>
-                  <span>Putar</span>
+                  <span>Play</span>
                 </button>
 
                 {/* Favorite / Love Button */}
@@ -780,8 +780,8 @@ export default function NetflixPreviewModal() {
                       ? "bg-red-600/20 text-red-500 border-red-500/80 shadow-red-500/30"
                       : "bg-black/60 hover:bg-black/80 text-white hover:text-red-400 border-white/40 hover:border-white"
                   }`}
-                  title={fav ? "Hapus dari Favorit" : "Tambah ke Favorit"}
-                  aria-label={fav ? "Hapus dari Favorit" : "Tambah ke Favorit"}
+                  title={fav ? "Remove from Favorites" : "Add to Favorites"}
+                  aria-label={fav ? "Remove from Favorites" : "Add to Favorites"}
                 >
                   <svg
                     width="20"
@@ -807,7 +807,7 @@ export default function NetflixPreviewModal() {
               <div className="md:col-span-2 space-y-4">
                 {/* Netflix Metadata Row */}
                 <div className="flex flex-wrap items-center gap-2.5 text-xs sm:text-sm font-semibold">
-                  <span className="text-[#46d369] font-bold">{matchPercent}% Cocok</span>
+                  <span className="text-[#46d369] font-bold">{matchPercent}% Match</span>
                   {year && <span className="text-zinc-300">{year}</span>}
                   <span className="border border-white/40 px-1.5 py-0.2 rounded text-[10px] text-zinc-300 uppercase">
                     16+
@@ -825,7 +825,7 @@ export default function NetflixPreviewModal() {
 
                 {/* Synopsis Paragraph */}
                 <p className="text-sm sm:text-base text-zinc-200 leading-relaxed font-normal">
-                  {overview || "Sinopsis belum tersedia untuk judul ini."}
+                  {overview || "No synopsis available for this title."}
                 </p>
               </div>
 
@@ -833,7 +833,7 @@ export default function NetflixPreviewModal() {
               <div className="space-y-3.5 text-xs sm:text-sm text-zinc-400">
                 {detailData?.cast && detailData.cast.length > 0 && (
                   <div>
-                    <span className="text-zinc-500 font-normal">Pemeran: </span>
+                    <span className="text-zinc-500 font-normal">Cast: </span>
                     <span className="text-white font-medium">
                       {detailData.cast.slice(0, 4).map((c) => c.name).join(", ")}
                     </span>
@@ -842,7 +842,7 @@ export default function NetflixPreviewModal() {
 
                 {genres.length > 0 && (
                   <div>
-                    <span className="text-zinc-500 font-normal">Genre: </span>
+                    <span className="text-zinc-500 font-normal">Genres: </span>
                     <span className="text-white font-medium">
                       {genres.map((g) => g.name).join(", ")}
                     </span>
@@ -850,8 +850,8 @@ export default function NetflixPreviewModal() {
                 )}
 
                 <div>
-                  <span className="text-zinc-500 font-normal">Acara ini: </span>
-                  <span className="text-white font-medium">Mendebarkan, Populer, Seru</span>
+                  <span className="text-zinc-500 font-normal">This show is: </span>
+                  <span className="text-white font-medium">Suspenseful, Exciting, Highly Rated</span>
                 </div>
               </div>
             </div>
@@ -907,7 +907,7 @@ export default function NetflixPreviewModal() {
             {detailData?.cast && detailData.cast.length > 0 && (
               <div className="pt-6 border-t border-white/10">
                 <h3 className="text-xs font-bold tracking-[0.2em] text-zinc-400 uppercase mb-4">
-                  Pemeran
+                  Cast
                 </h3>
 
                 <div className="flex items-start gap-4 sm:gap-5 overflow-x-auto pb-2 scroll-snap-x scrollbar-none" role="list">
@@ -941,11 +941,11 @@ export default function NetflixPreviewModal() {
               </div>
             )}
 
-            {/* Konten Serupa (More Like This) */}
+            {/* More Like This */}
             {detailData?.recommendations && detailData.recommendations.length > 0 && (
               <div className="pt-6 border-t border-white/10">
                 <h3 className="text-base font-bold text-white mb-4">
-                  Konten Serupa
+                  More Like This
                 </h3>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -984,8 +984,8 @@ export default function NetflixPreviewModal() {
                           {displayTitle(rec)}
                         </span>
                         <div className="flex items-center gap-2 mt-1 text-[11px] text-zinc-400">
-                          <span className="text-[#46d369] font-bold">95% Cocok</span>
-                          <span>{displayYear(rec) || "Film"}</span>
+                          <span className="text-[#46d369] font-bold">95% Match</span>
+                          <span>{displayYear(rec) || "Movie"}</span>
                         </div>
                       </div>
                     </button>

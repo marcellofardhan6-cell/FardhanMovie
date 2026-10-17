@@ -1,5 +1,5 @@
 import { discoverMovies, discoverTV, getMovieGenres, getTVGenres, POPULAR_COUNTRIES } from "@/lib/tmdb";
-import MovieGrid from "@/components/MovieGrid";
+import InfiniteMovieGrid from "@/components/InfiniteMovieGrid";
 import FilterBar from "@/components/FilterBar";
 import { Suspense } from "react";
 import Link from "next/link";
@@ -184,56 +184,20 @@ export default async function CountryPage({ searchParams }: Props) {
         />
       </Suspense>
 
-      {/* Results */}
-      {items.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-24 rounded-2xl bg-[#0c0e17] border border-white/[0.08]">
-          <p className="text-lg font-bold text-white mb-2">
-            No titles found for {selectedCountry.name}
-          </p>
-          <p className="text-xs text-zinc-400">Try selecting another genre or release year.</p>
-        </div>
-      ) : (
-        <MovieGrid items={items} />
-      )}
-
-      {/* Luxury Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-3 mt-12">
-          {page > 1 && (
-            <a
-              href={`/country?${new URLSearchParams({
-                code: activeCode,
-                ...(type !== "all" ? { type } : {}),
-                ...(genre ? { genre } : {}),
-                ...(year ? { year } : {}),
-                ...(sortParam ? { sort: sortParam } : {}),
-                page: String(page - 1),
-              }).toString()}`}
-              className="px-5 py-2.5 rounded-full text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 border border-white/[0.08] hover:border-red-500/40 transition-all cursor-pointer"
-            >
-              &larr; Previous
-            </a>
-          )}
-          <span className="px-4 py-2 text-xs font-medium text-zinc-400 bg-black/40 rounded-full border border-white/[0.05]">
-            Page {page} of {Math.min(totalPages, 500)}
-          </span>
-          {page < totalPages && page < 500 && (
-            <a
-              href={`/country?${new URLSearchParams({
-                code: activeCode,
-                ...(type !== "all" ? { type } : {}),
-                ...(genre ? { genre } : {}),
-                ...(year ? { year } : {}),
-                ...(sortParam ? { sort: sortParam } : {}),
-                page: String(page + 1),
-              }).toString()}`}
-              className="px-5 py-2.5 rounded-full text-xs font-semibold bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 border border-white/[0.08] hover:border-red-500/40 transition-all cursor-pointer"
-            >
-              Next &rarr;
-            </a>
-          )}
-        </div>
-      )}
+      <InfiniteMovieGrid
+        initialItems={items}
+        totalPages={totalPages}
+        catalogParams={{
+          type: "country",
+          country: activeCode,
+          mode: type,
+          genre,
+          year,
+          sort: sortParam,
+        }}
+        emptyTitle={`No titles found for ${selectedCountry.name}`}
+        emptySubtitle="Try selecting another genre or release year."
+      />
     </div>
   );
 }
