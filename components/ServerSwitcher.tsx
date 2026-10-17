@@ -29,24 +29,24 @@ function buildServerUrl(server: Server, props: Props, isAnimeTheme?: boolean, st
   const id = String(tmdbId);
 
   switch (server.key) {
-    case "cinesrc":
-      return type === "movie"
-        ? `https://cinesrc.st/embed/movie/${id}`
-        : `https://cinesrc.st/embed/tv/${id}?s=${season}&e=${episode}`;
     case "vidsrcwiki":
       return type === "movie"
         ? `https://vidsrc.wiki/embed/movie/${id}`
         : `https://vidsrc.wiki/embed/tv/${id}/${season}/${episode}`;
-    default:
+    case "cinesrc":
       return type === "movie"
         ? `https://cinesrc.st/embed/movie/${id}`
         : `https://cinesrc.st/embed/tv/${id}?s=${season}&e=${episode}`;
+    default:
+      return type === "movie"
+        ? `https://vidsrc.wiki/embed/movie/${id}`
+        : `https://vidsrc.wiki/embed/tv/${id}/${season}/${episode}`;
   }
 }
 
 const SERVERS: Server[] = [
-  { id: 1, name: "CineSrc", key: "cinesrc", badge: "Primary" },
-  { id: 2, name: "VidSrc Wiki", key: "vidsrcwiki", badge: "HD" },
+  { id: 1, name: "VidSrc Wiki", key: "vidsrcwiki", badge: "Utama" },
+  { id: 2, name: "CineSrc", key: "cinesrc", badge: "Server 2" },
 ];
 
 export default function ServerSwitcher(props: Props) {

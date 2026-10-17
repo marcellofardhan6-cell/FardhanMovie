@@ -40,7 +40,7 @@ export default function NetflixPreviewModal() {
   const [selectedSeason, setSelectedSeason] = useState(1);
   const [selectedEpisode, setSelectedEpisode] = useState(1);
   const [isTheaterOpen, setIsTheaterOpen] = useState(false);
-  const [activeServer, setActiveServer] = useState<"cinesrc" | "vidsrcwiki">("cinesrc");
+  const [activeServer, setActiveServer] = useState<"vidsrcwiki" | "cinesrc">("vidsrcwiki");
   const [controlsVisible, setControlsVisible] = useState(true);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -132,7 +132,7 @@ export default function NetflixPreviewModal() {
       setSelectedSeason(1);
       setSelectedEpisode(1);
       setIsTheaterOpen(false);
-      setActiveServer("cinesrc");
+      setActiveServer("vidsrcwiki");
       fetchDetail(activeItem.id, resolvedType);
       document.body.style.overflow = "hidden";
 
@@ -178,16 +178,16 @@ export default function NetflixPreviewModal() {
   const episodeCount = currentSeasonObj?.episode_count || 10;
   const matchPercent = Math.min(99, Math.max(85, Math.round((rating || 7.5) * 10) + 12));
 
-  // Build stream URL for the 2 active servers
+  // Build stream URL for the 2 active servers (VidSrc Wiki as primary)
   const idStr = String(activeItem.id);
   const streamUrl =
-    activeServer === "cinesrc"
+    activeServer === "vidsrcwiki"
       ? resolvedType === "tv"
-        ? `https://cinesrc.st/embed/tv/${idStr}?s=${selectedSeason}&e=${selectedEpisode}`
-        : `https://cinesrc.st/embed/movie/${idStr}`
+        ? `https://vidsrc.wiki/embed/tv/${idStr}/${selectedSeason}/${selectedEpisode}`
+        : `https://vidsrc.wiki/embed/movie/${idStr}`
       : resolvedType === "tv"
-      ? `https://vidsrc.wiki/embed/tv/${idStr}/${selectedSeason}/${selectedEpisode}`
-      : `https://vidsrc.wiki/embed/movie/${idStr}`;
+      ? `https://cinesrc.st/embed/tv/${idStr}?s=${selectedSeason}&e=${selectedEpisode}`
+      : `https://cinesrc.st/embed/movie/${idStr}`;
 
   return (
     <>
@@ -235,17 +235,6 @@ export default function NetflixPreviewModal() {
               <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/60 border border-white/10 backdrop-blur-md">
                 <button
                   type="button"
-                  onClick={() => setActiveServer("cinesrc")}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                    activeServer === "cinesrc"
-                      ? "bg-red-600 text-white shadow-md"
-                      : "text-zinc-300 hover:text-white"
-                  }`}
-                >
-                  CineSrc
-                </button>
-                <button
-                  type="button"
                   onClick={() => setActiveServer("vidsrcwiki")}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     activeServer === "vidsrcwiki"
@@ -253,7 +242,18 @@ export default function NetflixPreviewModal() {
                       : "text-zinc-300 hover:text-white"
                   }`}
                 >
-                  VidSrc Wiki
+                  VidSrc Wiki (Utama)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveServer("cinesrc")}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeServer === "cinesrc"
+                      ? "bg-red-600 text-white shadow-md"
+                      : "text-zinc-300 hover:text-white"
+                  }`}
+                >
+                  CineSrc (Server 2)
                 </button>
               </div>
 
@@ -277,6 +277,7 @@ export default function NetflixPreviewModal() {
             src={streamUrl}
             title={title}
             className="w-full h-full border-0"
+            referrerPolicy="origin"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen *"
             allowFullScreen
           />

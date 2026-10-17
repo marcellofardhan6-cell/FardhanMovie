@@ -61,34 +61,31 @@ export default function MovieCard({ item, priority = false }: Props) {
         {/* Ambient Dark Gradient on Poster Base */}
         <div className="absolute inset-0 bg-gradient-to-t from-[#06070a] via-transparent to-black/30 opacity-70 group-hover:opacity-40 transition-opacity duration-300" />
 
-        {/* Floating Top Rating Badge */}
-        {rating && (
+        {/* Floating Saved Heart Badge if Favorited */}
+        {fav && (
           <div
-            className="absolute top-2.5 left-2.5 flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold tracking-tight backdrop-blur-md shadow-md bg-black/70 text-zinc-100 border border-white/10"
-            aria-label={`Rating ${rating}`}
-          >
-            <span className="text-red-500 text-xs">★</span>
-            <span>{rating}</span>
-          </div>
-        )}
-
-        {/* Floating Type Pill or Saved Heart Badge */}
-        {fav ? (
-          <div
-            className="absolute top-2.5 right-2.5 z-10 flex items-center justify-center w-6 h-6 rounded-full bg-red-600/90 text-white shadow-md border border-red-400/40 group-hover:opacity-0 transition-opacity"
-            title="Saved in Favorites"
+            className="absolute top-2 right-2 z-10 flex items-center justify-center w-6 h-6 rounded-full bg-red-600/90 text-white shadow-md border border-red-400/40 group-hover:opacity-0 transition-opacity"
+            title="Tersimpan di Favorit"
           >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
               <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
             </svg>
           </div>
-        ) : type === "series" ? (
-          <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase backdrop-blur-md bg-black/70 text-zinc-200 border border-white/10">
-            Series
-          </div>
-        ) : (
-          <div className="absolute top-2.5 right-2.5 px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase backdrop-blur-md bg-black/70 text-zinc-300 border border-white/10">
-            HD
+        )}
+
+        {/* Tiny Non-Intrusive Rating & Year Badge */}
+        {(rating || year) && (
+          <div
+            className="absolute bottom-2 left-2 z-10 flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold tracking-tight backdrop-blur-md bg-black/75 text-zinc-300 border border-white/10"
+          >
+            {rating && (
+              <span className="flex items-center gap-0.5 text-amber-400 font-bold">
+                <span className="text-[9px]">★</span>
+                <span>{rating}</span>
+              </span>
+            )}
+            {rating && year && <span className="text-zinc-600">•</span>}
+            {year && <span className="text-zinc-400">{year}</span>}
           </div>
         )}
 
@@ -120,8 +117,8 @@ export default function MovieCard({ item, priority = false }: Props) {
                 ? "bg-red-600 text-white border-red-500 shadow-[0_0_20px_rgba(229,9,20,0.8)]"
                 : "bg-black/60 text-white hover:text-red-400 border-white/20 hover:border-red-500/50 hover:bg-black/80"
             }`}
-            aria-label={fav ? "Remove from favorites" : "Add to favorites"}
-            title={fav ? "Remove from favorites" : "Add to favorites"}
+            aria-label={fav ? "Hapus dari favorit" : "Tambah ke favorit"}
+            title={fav ? "Hapus dari favorit" : "Tambah ke favorit"}
           >
             <svg
               width="18"
@@ -138,19 +135,6 @@ export default function MovieCard({ item, priority = false }: Props) {
               <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
             </svg>
           </button>
-        </div>
-      </div>
-
-      {/* Movie Information Footer */}
-      <div className="p-3.5 bg-gradient-to-b from-[#0e1017] to-[#0a0b10] border-t border-white/[0.05]">
-        <h3 className="text-xs sm:text-sm font-semibold line-clamp-1 leading-snug mb-1 text-zinc-100 group-hover:text-red-500 transition-colors duration-200">
-          {title}
-        </h3>
-        <div className="flex items-center justify-between text-xs text-zinc-400">
-          {year ? <span>{year}</span> : <span />}
-          <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-medium group-hover:text-red-400/80 transition-colors">
-            {type === "movie" ? "Movie" : "TV"}
-          </span>
         </div>
       </div>
     </Link>
