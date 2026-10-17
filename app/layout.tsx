@@ -10,6 +10,7 @@ import { PreviewModalProvider } from "@/context/PreviewModalContext";
 import { SupportModalProvider } from "@/context/SupportModalContext";
 import NetflixPreviewModal from "@/components/NetflixPreviewModal";
 import SupportModal from "@/components/SupportModal";
+import FloatingSupportButton from "@/components/FloatingSupportButton";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -48,6 +49,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   <Footer />
                   <NetflixPreviewModal />
                   <SupportModal />
+                  <FloatingSupportButton />
                 </SupportModalProvider>
               </PreviewModalProvider>
             </WatchHistoryProvider>

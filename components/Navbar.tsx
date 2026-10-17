@@ -526,31 +526,32 @@ export default function Navbar() {
               )}
             </Link>
 
-            {/* Support Creator Button (Desktop) */}
+            {/* Support Creator Button - Ultra-compact and eye-catching */}
             <button
               type="button"
               onClick={openSupport}
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-red-600/90 hover:bg-red-600 transition-all shadow-sm active:scale-95 cursor-pointer"
+              className="relative inline-flex items-center gap-1.5 p-2 sm:px-2.5 sm:py-1.5 rounded-lg text-xs font-bold text-white bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 border border-red-400/40 shadow-md shadow-red-950/60 transition-all active:scale-95 cursor-pointer group"
               aria-label="Support FardTV"
-              title="Support FardTV"
+              title="Support FardTV (QRIS)"
             >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              {/* Eye-catching pulsing amber beacon */}
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-300 opacity-80"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400"></span>
+              </span>
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className="text-white group-hover:scale-110 transition-transform"
+                aria-hidden="true"
+              >
                 <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
               </svg>
-              <span>Support</span>
-            </button>
-
-            {/* Support Creator Icon Button (Mobile) */}
-            <button
-              type="button"
-              onClick={openSupport}
-              className="sm:hidden p-2 rounded-lg text-zinc-400 hover:text-red-400 hover:bg-white/[0.05] transition-colors"
-              aria-label="Support FardTV"
-              title="Support FardTV"
-            >
-              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-              </svg>
+              <span className="hidden xl:inline text-[11px] font-bold tracking-tight">
+                Support
+              </span>
             </button>
 
             {/* Mobile Hamburger Button */}
