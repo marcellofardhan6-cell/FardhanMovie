@@ -15,6 +15,16 @@ export interface CastMember {
   profile_path: string | null;
 }
 
+export interface EpisodeItem {
+  id: number;
+  episode_number: number;
+  name: string;
+  overview: string | null;
+  still_path: string | null;
+  runtime: number | null;
+  air_date: string | null;
+}
+
 interface DetailApiResponse {
   id: number;
   title: string;
@@ -27,7 +37,8 @@ interface DetailApiResponse {
   genres: Genre[];
   overview: string | null;
   isAnime: boolean;
-  seasons: { id: number; name: string; season_number: number; episode_count: number }[];
+  seasons: { id: number; name: string; season_number: number; episode_count: number; poster_path?: string | null }[];
+  episodes?: EpisodeItem[];
   recommendations: Movie[];
   cast: CastMember[];
 }
@@ -159,19 +170,51 @@ export default function NetflixPreviewModal() {
 
   const fav = activeItem ? isFavorite(activeItem.id) : false;
 
+  const [seasonEpisodesMap, setSeasonEpisodesMap] = useState<Record<number, EpisodeItem[]>>({});
+  const [loadingSeasonEpisodes, setLoadingSeasonEpisodes] = useState(false);
+
   // Fetch full details when modal opens
-  const fetchDetail = useCallback(async (id: number, type: "movie" | "tv") => {
+  const fetchDetail = useCallback(async (id: number, type: "movie" | "tv", season: number = 1) => {
     try {
-      const res = await fetch(`/api/detail?id=${id}&type=${type}`);
+      const res = await fetch(`/api/detail?id=${id}&type=${type}&season=${season}`);
       if (!res.ok) return;
       const data: DetailApiResponse = await res.json();
       setDetailData(data);
+      if (data.episodes && data.episodes.length > 0) {
+        setSeasonEpisodesMap((prev) => ({ ...prev, [season]: data.episodes! }));
+      }
       if (data.seasons && data.seasons.length > 0) {
         const validSeason = data.seasons.find((s) => s.season_number > 0);
-        if (validSeason) setSelectedSeason(validSeason.season_number);
+        if (validSeason && season === 1 && validSeason.season_number !== 1) {
+          setSelectedSeason(validSeason.season_number);
+        }
       }
     } catch {}
   }, []);
+
+  const handleSeasonChange = useCallback(
+    async (newSeason: number) => {
+      setSelectedSeason(newSeason);
+      setSelectedEpisode(1);
+      if (!seasonEpisodesMap[newSeason] && activeItem) {
+        setLoadingSeasonEpisodes(true);
+        try {
+          const res = await fetch(`/api/episodes?id=${activeItem.id}&season=${newSeason}`);
+          if (res.ok) {
+            const json = await res.json();
+            if (json.episodes && json.episodes.length > 0) {
+              setSeasonEpisodesMap((prev) => ({ ...prev, [newSeason]: json.episodes }));
+            }
+          }
+        } catch (err) {
+          console.error("Failed to load season episodes:", err);
+        } finally {
+          setLoadingSeasonEpisodes(false);
+        }
+      }
+    },
+    [seasonEpisodesMap, activeItem]
+  );
 
   // Request browser fullscreen synchronously on user click and auto lock landscape
   const handleStartPlay = useCallback(
@@ -482,32 +525,46 @@ export default function NetflixPreviewModal() {
     };
   }, [isTheaterOpen, isOpen]);
 
+  const handleStartPlayRef = useRef(handleStartPlay);
+  useEffect(() => {
+    handleStartPlayRef.current = handleStartPlay;
+  }, [handleStartPlay]);
+
+  const lastProcessedIdRef = useRef<number | null>(null);
+
   useEffect(() => {
     if (isOpen && activeItem) {
-      setDetailData(null);
-      setSelectedSeason(initialSeason || 1);
-      setSelectedEpisode(initialEpisode || 1);
-      setIsTheaterOpen(false);
-      setActiveServer("cinesrc");
-      fetchDetail(activeItem.id, resolvedType);
+      if (lastProcessedIdRef.current !== activeItem.id) {
+        lastProcessedIdRef.current = activeItem.id;
+        setDetailData(null);
+        setSeasonEpisodesMap({});
+        setSelectedSeason(initialSeason || 1);
+        setSelectedEpisode(initialEpisode || 1);
+        setIsTheaterOpen(false);
+        setActiveServer("cinesrc");
+        fetchDetail(activeItem.id, resolvedType, initialSeason || 1);
+
+        if (autoPlay) {
+          handleStartPlayRef.current(initialSeason || 1, initialEpisode || 1);
+        }
+      }
       document.documentElement.style.overflow = "hidden";
       document.body.style.overflow = "hidden";
-
-      if (autoPlay) {
-        handleStartPlay(initialSeason || 1, initialEpisode || 1);
-      }
-    } else {
+    } else if (!isOpen) {
+      lastProcessedIdRef.current = null;
       setDetailData(null);
+      setSeasonEpisodesMap({});
       setIsTheaterOpen(false);
       document.documentElement.style.overflow = "";
       document.body.style.overflow = "";
     }
+
     return () => {
       document.documentElement.style.overflow = "";
       document.body.style.overflow = "";
       if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
     };
-  }, [isOpen, activeItem, resolvedType, autoPlay, initialSeason, initialEpisode, fetchDetail, handleStartPlay]);
+  }, [isOpen, activeItem?.id, resolvedType, autoPlay, initialSeason, initialEpisode, fetchDetail]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -541,6 +598,7 @@ export default function NetflixPreviewModal() {
   const validSeasons = (detailData?.seasons || []).filter((s) => s.season_number > 0);
   const currentSeasonObj = validSeasons.find((s) => s.season_number === selectedSeason) || validSeasons[0];
   const episodeCount = currentSeasonObj?.episode_count || 10;
+  const seasonEpisodes = seasonEpisodesMap[selectedSeason] || [];
   const matchPercent = Math.min(99, Math.max(85, Math.round((rating || 7.5) * 10) + 12));
 
   // Build stream URL for the 2 active servers (CineSrc as primary)
@@ -602,7 +660,7 @@ export default function NetflixPreviewModal() {
               onClick={handleUserActivity}
               onTouchStart={handleUserActivity}
               onMouseMove={handleUserActivity}
-              aria-label="Tampilkan Kontrol"
+              aria-label="Show Controls"
             />
           )}
 
@@ -676,8 +734,8 @@ export default function NetflixPreviewModal() {
                 type="button"
                 onClick={toggleFullscreen}
                 className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all cursor-pointer shrink-0 shadow-md"
-                title="Toggle Layar Penuh"
-                aria-label="Layar Penuh"
+                title="Toggle Fullscreen"
+                aria-label="Fullscreen"
               >
                 <svg width="14" height="14" className="sm:w-[17px] sm:h-[17px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
@@ -856,50 +914,172 @@ export default function NetflixPreviewModal() {
               </div>
             </div>
 
-            {/* TV Series Episode Selector (if applicable) */}
+            {/* TV Series Episodes Section - Authentic Netflix Style */}
             {resolvedType === "tv" && validSeasons.length > 0 && (
-              <div className="pt-6 border-t border-white/10">
-                <div className="flex items-center justify-between gap-4 mb-4">
-                  <h3 className="text-lg font-bold text-white">Episode</h3>
+              <div className="pt-8 border-t border-white/10">
+                {/* Header: Title + Season Selector Dropdown */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+                  <div>
+                    <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                      Episodes
+                    </h3>
+                    {currentSeasonObj?.name && (
+                      <p className="text-xs text-zinc-400 mt-0.5">
+                        {currentSeasonObj.name} ({currentSeasonObj.episode_count || seasonEpisodes.length} Episodes)
+                      </p>
+                    )}
+                  </div>
 
                   {validSeasons.length > 1 && (
-                    <select
-                      value={selectedSeason}
-                      onChange={(e) => {
-                        setSelectedSeason(Number(e.target.value));
-                        setSelectedEpisode(1);
-                      }}
-                      className="bg-[#242424] border border-white/20 text-white text-xs font-semibold px-3 py-1.5 rounded outline-none cursor-pointer"
-                    >
-                      {validSeasons.map((s) => (
-                        <option key={s.season_number} value={s.season_number}>
-                          {s.name || `Season ${s.season_number}`}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="relative inline-block">
+                      <select
+                        value={selectedSeason}
+                        onChange={(e) => handleSeasonChange(Number(e.target.value))}
+                        className="appearance-none bg-[#242424] hover:bg-[#2e2e2e] border border-white/20 text-white text-xs sm:text-sm font-semibold pl-4 pr-9 py-2 rounded-lg outline-none cursor-pointer transition-colors shadow-md"
+                        aria-label="Select season"
+                      >
+                        {validSeasons.map((s) => (
+                          <option key={s.season_number} value={s.season_number} className="bg-[#1e1e1e] text-white">
+                            {s.name || `Season ${s.season_number}`}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-zinc-400">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                          <polyline points="6 9 12 15 18 9" />
+                        </svg>
+                      </div>
+                    </div>
                   )}
                 </div>
 
-                {/* Episode Rows */}
-                <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
-                  {Array.from({ length: Math.min(episodeCount, 40) }, (_, i) => i + 1).map((ep) => {
-                    const isActive = selectedEpisode === ep;
-                    return (
-                      <button
-                        key={ep}
-                        type="button"
-                        onClick={() => handleStartPlay(selectedSeason, ep)}
-                        className={`py-2 rounded text-xs font-bold transition-all cursor-pointer ${
-                          isActive
-                            ? "bg-red-600 text-white shadow-md scale-105"
-                            : "bg-[#282828] hover:bg-[#383838] text-zinc-300 hover:text-white"
-                        }`}
-                      >
-                        EP {ep}
-                      </button>
-                    );
-                  })}
-                </div>
+                {/* Episodes List */}
+                {loadingSeasonEpisodes ? (
+                  <div className="space-y-4">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div key={i} className="flex items-start gap-4 p-4 rounded-xl bg-white/[0.02] border border-white/[0.05] animate-pulse">
+                        <div className="w-6 h-6 rounded bg-zinc-800 shrink-0 mt-3" />
+                        <div className="w-28 sm:w-36 aspect-video rounded-lg bg-zinc-800 shrink-0" />
+                        <div className="flex-1 space-y-2 py-1">
+                          <div className="w-1/3 h-4 bg-zinc-800 rounded" />
+                          <div className="w-full h-3 bg-zinc-800/60 rounded" />
+                          <div className="w-2/3 h-3 bg-zinc-800/40 rounded" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : seasonEpisodes.length > 0 ? (
+                  <div className="flex flex-col gap-3">
+                    {seasonEpisodes.map((ep) => {
+                      const isActive = selectedEpisode === ep.episode_number;
+                      const thumb = ep.still_path
+                        ? `https://image.tmdb.org/t/p/w300${ep.still_path}`
+                        : backdropUrl
+                        ? `https://image.tmdb.org/t/p/w300${backdropUrl}`
+                        : null;
+
+                      return (
+                        <div
+                          key={ep.id || ep.episode_number}
+                          onClick={() => handleStartPlay(selectedSeason, ep.episode_number)}
+                          className={`group flex items-start gap-3.5 sm:gap-4 p-3 sm:p-4 rounded-xl border transition-all cursor-pointer ${
+                            isActive
+                              ? "bg-white/[0.08] border-red-500/70 shadow-lg shadow-red-950/30"
+                              : "bg-white/[0.02] hover:bg-white/[0.06] border-white/[0.06] hover:border-white/[0.16]"
+                          }`}
+                        >
+                          {/* Episode Index */}
+                          <span
+                            className={`text-base sm:text-xl font-bold shrink-0 w-6 sm:w-8 text-center pt-2 sm:pt-3 transition-colors ${
+                              isActive ? "text-red-500" : "text-zinc-500 group-hover:text-zinc-300"
+                            }`}
+                          >
+                            {ep.episode_number}
+                          </span>
+
+                          {/* 16:9 Thumbnail with Hover Play Button */}
+                          <div className="relative w-28 sm:w-36 aspect-video shrink-0 rounded-lg overflow-hidden bg-zinc-900 border border-white/10 shadow-md">
+                            {thumb ? (
+                              <Image
+                                src={thumb}
+                                alt={ep.name || `Episode ${ep.episode_number}`}
+                                fill
+                                sizes="(max-width: 640px) 112px, 144px"
+                                className="object-cover group-hover:scale-105 transition-transform duration-300"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-[10px] text-zinc-500 uppercase font-bold">
+                                Episode {ep.episode_number}
+                              </div>
+                            )}
+
+                            {/* Play Overlay */}
+                            <div
+                              className={`absolute inset-0 flex items-center justify-center bg-black/40 transition-opacity ${
+                                isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                              }`}
+                            >
+                              <div className="w-8 h-8 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                  <path d="M5 3l14 9-14 9V3z" />
+                                </svg>
+                              </div>
+                            </div>
+
+                            {/* Runtime badge on thumbnail */}
+                            {ep.runtime && (
+                              <div className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-black/80 text-zinc-200">
+                                {ep.runtime}m
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Episode Details */}
+                          <div className="flex-1 min-w-0 pt-0.5">
+                            <div className="flex items-center justify-between gap-2 mb-1.5">
+                              <h4
+                                className={`text-sm sm:text-base font-bold truncate transition-colors ${
+                                  isActive ? "text-red-400" : "text-white group-hover:text-red-300"
+                                }`}
+                              >
+                                {ep.name || `Episode ${ep.episode_number}`}
+                              </h4>
+                              {ep.air_date && (
+                                <span className="text-[11px] text-zinc-500 font-medium shrink-0 hidden sm:inline">
+                                  {ep.air_date.split("-")[0]}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs sm:text-sm text-zinc-400 line-clamp-2 leading-relaxed">
+                              {ep.overview || "No description available for this episode."}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  /* Fallback to numbered episodes if TMDB season detail was not yet loaded */
+                  <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
+                    {Array.from({ length: Math.min(episodeCount, 40) }, (_, i) => i + 1).map((ep) => {
+                      const isActive = selectedEpisode === ep;
+                      return (
+                        <button
+                          key={ep}
+                          type="button"
+                          onClick={() => handleStartPlay(selectedSeason, ep)}
+                          className={`py-2 rounded text-xs font-bold transition-all cursor-pointer ${
+                            isActive
+                              ? "bg-red-600 text-white shadow-md scale-105"
+                              : "bg-[#282828] hover:bg-[#383838] text-zinc-300 hover:text-white"
+                          }`}
+                        >
+                          EP {ep}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
 

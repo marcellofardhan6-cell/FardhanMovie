@@ -6,6 +6,7 @@ import {
   getTVCredits,
   getMovieRecommendations,
   getTVRecommendations,
+  getSeasonEpisodes,
   displayYear,
   Genre,
 } from "@/lib/tmdb";
@@ -14,16 +15,18 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
   const type = searchParams.get("type") === "tv" ? "tv" : "movie";
+  const requestedSeason = parseInt(searchParams.get("season") || "1", 10) || 1;
 
   if (!id) {
     return NextResponse.json({ error: "Missing id parameter" }, { status: 400 });
   }
 
   try {
-    const [detail, credits, recs]: [any, any, any] = await Promise.all([
+    const [detail, credits, recs, episodes]: [any, any, any, any] = await Promise.all([
       type === "tv" ? getTVDetail(id) : getMovieDetail(id),
       type === "tv" ? getTVCredits(id) : getMovieCredits(id),
       (type === "tv" ? getTVRecommendations(id) : getMovieRecommendations(id)).catch(() => ({ results: [] })),
+      type === "tv" ? getSeasonEpisodes(id, requestedSeason).catch(() => []) : Promise.resolve([]),
     ]);
 
     const runtime =
@@ -55,6 +58,15 @@ export async function GET(req: NextRequest) {
         overview: detail.overview,
         isAnime,
         seasons: detail.seasons || [],
+        episodes: (episodes || []).map((ep: any) => ({
+          id: ep.id,
+          episode_number: ep.episode_number,
+          name: ep.name,
+          overview: ep.overview,
+          still_path: ep.still_path,
+          runtime: ep.runtime,
+          air_date: ep.air_date,
+        })),
         recommendations: (recs.results || []).slice(0, 6),
         cast: (credits.cast || []).slice(0, 15).map((c: any) => ({
           id: c.id,
