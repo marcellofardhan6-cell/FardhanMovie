@@ -786,15 +786,15 @@ export default function NetflixPreviewModal() {
             </svg>
           </button>
 
-          {/* Cinematic 16:9 Backdrop Header */}
-          <div className="relative w-full aspect-video min-h-[260px] sm:min-h-[420px] overflow-hidden bg-black">
+          {/* Cinematic Backdrop Header (Compact & balanced so content and episodes are visible) */}
+          <div className="relative w-full h-[210px] sm:h-[280px] md:h-[320px] overflow-hidden bg-black">
             {backdropUrl ? (
               <Image
                 src={`https://image.tmdb.org/t/p/w1280${backdropUrl}`}
                 alt={title}
                 fill
                 priority
-                className="object-cover object-center"
+                className="object-cover object-top sm:object-center"
                 sizes="(max-width: 1024px) 100vw, 900px"
               />
             ) : (
@@ -804,26 +804,26 @@ export default function NetflixPreviewModal() {
             )}
 
             {/* Seamless Netflix Gradient Overlays */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#181818] via-[#181818]/30 via-60% to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#181818] via-[#181818]/40 via-50% to-transparent pointer-events-none" />
             <div className="absolute inset-0 bg-gradient-to-r from-[#181818]/80 via-transparent to-transparent pointer-events-none" />
 
             {/* Bottom Content on Backdrop */}
-            <div className="absolute bottom-6 left-6 right-6 sm:bottom-8 sm:left-10 sm:right-10 z-20">
+            <div className="absolute bottom-4 left-4 right-4 sm:bottom-5 sm:left-8 sm:right-8 z-20">
               {/* Title in Clean Modern Sans */}
-              <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-tight mb-4 drop-shadow-2xl">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-tight leading-snug mb-2.5 drop-shadow-2xl max-w-2xl">
                 {title}
               </h1>
 
               {/* Action Buttons */}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5">
                 {/* Large White Play Button */}
                 <button
                   type="button"
                   onClick={() => handleStartPlay()}
-                  className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-2.5 sm:py-3 rounded bg-white hover:bg-white/80 text-black font-extrabold text-sm sm:text-base transition-all cursor-pointer shadow-xl active:scale-95"
+                  className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-2 sm:py-2.5 rounded bg-white hover:bg-white/80 text-black font-extrabold text-xs sm:text-sm transition-all cursor-pointer shadow-xl active:scale-95"
                   title="Play Fullscreen"
                 >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M5 3l14 9-14 9V3z" />
                   </svg>
                   <span>Play</span>
@@ -833,7 +833,7 @@ export default function NetflixPreviewModal() {
                 <button
                   type="button"
                   onClick={() => toggleFavorite(activeItem)}
-                  className={`inline-flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border transition-all cursor-pointer shadow-lg active:scale-95 ${
+                  className={`inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full border transition-all cursor-pointer shadow-lg active:scale-95 ${
                     fav
                       ? "bg-red-600/20 text-red-500 border-red-500/80 shadow-red-500/30"
                       : "bg-black/60 hover:bg-black/80 text-white hover:text-red-400 border-white/40 hover:border-white"
@@ -842,8 +842,8 @@ export default function NetflixPreviewModal() {
                   aria-label={fav ? "Remove from Favorites" : "Add to Favorites"}
                 >
                   <svg
-                    width="20"
-                    height="20"
+                    width="18"
+                    height="18"
                     viewBox="0 0 24 24"
                     fill={fav ? "currentColor" : "none"}
                     stroke="currentColor"
@@ -859,12 +859,12 @@ export default function NetflixPreviewModal() {
           </div>
 
           {/* Netflix Two-Column Detail Body */}
-          <div className="p-6 sm:p-10 space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+          <div className="p-4 sm:p-7 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-7">
               {/* Left Column (Metadata & Synopsis) */}
-              <div className="md:col-span-2 space-y-4">
+              <div className="md:col-span-2 space-y-3.5">
                 {/* Netflix Metadata Row */}
-                <div className="flex flex-wrap items-center gap-2.5 text-xs sm:text-sm font-semibold">
+                <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm font-semibold">
                   <span className="text-[#46d369] font-bold">{matchPercent}% Match</span>
                   {year && <span className="text-zinc-300">{year}</span>}
                   <span className="border border-white/40 px-1.5 py-0.2 rounded text-[10px] text-zinc-300 uppercase">
@@ -882,13 +882,13 @@ export default function NetflixPreviewModal() {
                 </div>
 
                 {/* Synopsis Paragraph */}
-                <p className="text-sm sm:text-base text-zinc-200 leading-relaxed font-normal">
+                <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed font-normal">
                   {overview || "No synopsis available for this title."}
                 </p>
               </div>
 
               {/* Right Column (Cast & Genres) */}
-              <div className="space-y-3.5 text-xs sm:text-sm text-zinc-400">
+              <div className="space-y-2.5 text-xs text-zinc-400">
                 {detailData?.cast && detailData.cast.length > 0 && (
                   <div>
                     <span className="text-zinc-500 font-normal">Cast: </span>
@@ -916,11 +916,11 @@ export default function NetflixPreviewModal() {
 
             {/* TV Series Episodes Section - Authentic Netflix Style */}
             {resolvedType === "tv" && validSeasons.length > 0 && (
-              <div className="pt-8 border-t border-white/10">
+              <div className="pt-6 border-t border-white/10">
                 {/* Header: Title + Season Selector Dropdown */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                   <div>
-                    <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                    <h3 className="text-lg sm:text-xl font-black text-white tracking-tight">
                       Episodes
                     </h3>
                     {currentSeasonObj?.name && (
@@ -935,7 +935,7 @@ export default function NetflixPreviewModal() {
                       <select
                         value={selectedSeason}
                         onChange={(e) => handleSeasonChange(Number(e.target.value))}
-                        className="appearance-none bg-[#242424] hover:bg-[#2e2e2e] border border-white/20 text-white text-xs sm:text-sm font-semibold pl-4 pr-9 py-2 rounded-lg outline-none cursor-pointer transition-colors shadow-md"
+                        className="appearance-none bg-[#242424] hover:bg-[#2e2e2e] border border-white/20 text-white text-xs sm:text-sm font-semibold pl-3.5 pr-8 py-1.5 rounded-lg outline-none cursor-pointer transition-colors shadow-md"
                         aria-label="Select season"
                       >
                         {validSeasons.map((s) => (
@@ -944,7 +944,7 @@ export default function NetflixPreviewModal() {
                           </option>
                         ))}
                       </select>
-                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-zinc-400">
+                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-zinc-400">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                           <polyline points="6 9 12 15 18 9" />
                         </svg>
@@ -955,21 +955,21 @@ export default function NetflixPreviewModal() {
 
                 {/* Episodes List */}
                 {loadingSeasonEpisodes ? (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {[1, 2, 3, 4].map((i) => (
-                      <div key={i} className="flex items-start gap-4 p-4 rounded-xl bg-white/[0.02] border border-white/[0.05] animate-pulse">
-                        <div className="w-6 h-6 rounded bg-zinc-800 shrink-0 mt-3" />
-                        <div className="w-28 sm:w-36 aspect-video rounded-lg bg-zinc-800 shrink-0" />
+                      <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-white/[0.02] border border-white/[0.05] animate-pulse">
+                        <div className="w-5 h-5 rounded bg-zinc-800 shrink-0 mt-2" />
+                        <div className="w-24 sm:w-28 aspect-video rounded-md bg-zinc-800 shrink-0" />
                         <div className="flex-1 space-y-2 py-1">
-                          <div className="w-1/3 h-4 bg-zinc-800 rounded" />
-                          <div className="w-full h-3 bg-zinc-800/60 rounded" />
-                          <div className="w-2/3 h-3 bg-zinc-800/40 rounded" />
+                          <div className="w-1/3 h-3.5 bg-zinc-800 rounded" />
+                          <div className="w-full h-2.5 bg-zinc-800/60 rounded" />
+                          <div className="w-2/3 h-2.5 bg-zinc-800/40 rounded" />
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : seasonEpisodes.length > 0 ? (
-                  <div className="flex flex-col gap-3">
+                  <div className="flex flex-col gap-2 sm:gap-2.5">
                     {seasonEpisodes.map((ep) => {
                       const isActive = selectedEpisode === ep.episode_number;
                       const thumb = ep.still_path
@@ -982,7 +982,7 @@ export default function NetflixPreviewModal() {
                         <div
                           key={ep.id || ep.episode_number}
                           onClick={() => handleStartPlay(selectedSeason, ep.episode_number)}
-                          className={`group flex items-start gap-3.5 sm:gap-4 p-3 sm:p-4 rounded-xl border transition-all cursor-pointer ${
+                          className={`group flex items-start gap-3 sm:gap-3.5 p-2.5 sm:p-3 rounded-lg sm:rounded-xl border transition-all cursor-pointer ${
                             isActive
                               ? "bg-white/[0.08] border-red-500/70 shadow-lg shadow-red-950/30"
                               : "bg-white/[0.02] hover:bg-white/[0.06] border-white/[0.06] hover:border-white/[0.16]"
@@ -990,7 +990,7 @@ export default function NetflixPreviewModal() {
                         >
                           {/* Episode Index */}
                           <span
-                            className={`text-base sm:text-xl font-bold shrink-0 w-6 sm:w-8 text-center pt-2 sm:pt-3 transition-colors ${
+                            className={`text-sm sm:text-base font-bold shrink-0 w-5 sm:w-7 text-center pt-1.5 sm:pt-2 transition-colors ${
                               isActive ? "text-red-500" : "text-zinc-500 group-hover:text-zinc-300"
                             }`}
                           >
@@ -998,13 +998,13 @@ export default function NetflixPreviewModal() {
                           </span>
 
                           {/* 16:9 Thumbnail with Hover Play Button */}
-                          <div className="relative w-28 sm:w-36 aspect-video shrink-0 rounded-lg overflow-hidden bg-zinc-900 border border-white/10 shadow-md">
+                          <div className="relative w-24 sm:w-32 aspect-video shrink-0 rounded-md sm:rounded-lg overflow-hidden bg-zinc-900 border border-white/10 shadow-sm">
                             {thumb ? (
                               <Image
                                 src={thumb}
                                 alt={ep.name || `Episode ${ep.episode_number}`}
                                 fill
-                                sizes="(max-width: 640px) 112px, 144px"
+                                sizes="(max-width: 640px) 96px, 128px"
                                 className="object-cover group-hover:scale-105 transition-transform duration-300"
                               />
                             ) : (
@@ -1019,8 +1019,8 @@ export default function NetflixPreviewModal() {
                                 isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
                               }`}
                             >
-                              <div className="w-8 h-8 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                              <div className="w-7 h-7 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                                   <path d="M5 3l14 9-14 9V3z" />
                                 </svg>
                               </div>
@@ -1028,7 +1028,7 @@ export default function NetflixPreviewModal() {
 
                             {/* Runtime badge on thumbnail */}
                             {ep.runtime && (
-                              <div className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-black/80 text-zinc-200">
+                              <div className="absolute bottom-1 right-1 px-1 py-0.2 rounded text-[9px] font-bold bg-black/85 text-zinc-200">
                                 {ep.runtime}m
                               </div>
                             )}
@@ -1036,21 +1036,21 @@ export default function NetflixPreviewModal() {
 
                           {/* Episode Details */}
                           <div className="flex-1 min-w-0 pt-0.5">
-                            <div className="flex items-center justify-between gap-2 mb-1.5">
+                            <div className="flex items-center justify-between gap-2 mb-1">
                               <h4
-                                className={`text-sm sm:text-base font-bold truncate transition-colors ${
+                                className={`text-xs sm:text-sm font-bold truncate transition-colors ${
                                   isActive ? "text-red-400" : "text-white group-hover:text-red-300"
                                 }`}
                               >
                                 {ep.name || `Episode ${ep.episode_number}`}
                               </h4>
                               {ep.air_date && (
-                                <span className="text-[11px] text-zinc-500 font-medium shrink-0 hidden sm:inline">
+                                <span className="text-[10px] text-zinc-500 font-medium shrink-0 hidden sm:inline">
                                   {ep.air_date.split("-")[0]}
                                 </span>
                               )}
                             </div>
-                            <p className="text-xs sm:text-sm text-zinc-400 line-clamp-2 leading-relaxed">
+                            <p className="text-xs text-zinc-400 line-clamp-2 leading-relaxed">
                               {ep.overview || "No description available for this episode."}
                             </p>
                           </div>
