@@ -8,7 +8,9 @@ interface PreviewModalContextValue {
   activeItem: Movie | null;
   autoPlay: boolean;
   isPlaying: boolean;
-  openPreview: (item: Movie, autoPlay?: boolean) => void;
+  initialSeason: number;
+  initialEpisode: number;
+  openPreview: (item: Movie, autoPlay?: boolean, season?: number, episode?: number) => void;
   closePreview: () => void;
   setIsPlaying: (playing: boolean) => void;
 }
@@ -20,11 +22,17 @@ export function PreviewModalProvider({ children }: { children: ReactNode }) {
   const [activeItem, setActiveItem] = useState<Movie | null>(null);
   const [autoPlay, setAutoPlay] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [initialSeason, setInitialSeason] = useState(1);
+  const [initialEpisode, setInitialEpisode] = useState(1);
 
-  const openPreview = useCallback((item: Movie, autoPlayFlag: boolean = false) => {
+  const openPreview = useCallback((item: Movie, autoPlayFlag: boolean = false, season?: number, episode?: number) => {
     setActiveItem(item);
     setAutoPlay(autoPlayFlag);
     setIsPlaying(autoPlayFlag);
+    if (season !== undefined) setInitialSeason(season);
+    else setInitialSeason(1);
+    if (episode !== undefined) setInitialEpisode(episode);
+    else setInitialEpisode(1);
     setIsOpen(true);
   }, []);
 
@@ -33,6 +41,8 @@ export function PreviewModalProvider({ children }: { children: ReactNode }) {
     setIsPlaying(false);
     setAutoPlay(false);
     setActiveItem(null);
+    setInitialSeason(1);
+    setInitialEpisode(1);
   }, []);
 
   return (
@@ -42,6 +52,8 @@ export function PreviewModalProvider({ children }: { children: ReactNode }) {
         activeItem,
         autoPlay,
         isPlaying,
+        initialSeason,
+        initialEpisode,
         openPreview,
         closePreview,
         setIsPlaying,

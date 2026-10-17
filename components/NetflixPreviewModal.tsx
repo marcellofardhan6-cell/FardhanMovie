@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, Suspense } from "react";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 import { usePreviewModal } from "@/context/PreviewModalContext";
 import { useFavorites } from "@/context/FavoritesContext";
 import { img, displayTitle, displayYear, isTV, Genre, Movie } from "@/lib/tmdb";
@@ -31,8 +32,72 @@ interface DetailApiResponse {
   cast: CastMember[];
 }
 
+function UrlPreviewListener() {
+  const searchParams = useSearchParams();
+  const { openPreview, isOpen } = usePreviewModal();
+
+  useEffect(() => {
+    const movieId = searchParams.get("movie");
+    const seriesId = searchParams.get("series");
+    const playParam = searchParams.get("play");
+    const seasonParam = searchParams.get("season");
+    const episodeParam = searchParams.get("episode");
+
+    if ((movieId || seriesId) && !isOpen) {
+      const id = movieId || seriesId;
+      const type = seriesId ? "tv" : "movie";
+      const season = seasonParam ? parseInt(seasonParam, 10) : 1;
+      const episode = episodeParam ? parseInt(episodeParam, 10) : 1;
+      const shouldPlay = playParam === "1";
+
+      fetch(`/api/detail?id=${id}&type=${type}`)
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data) {
+            const movieItem: Movie = {
+              id: data.id,
+              title: data.title || data.name || "Movie",
+              name: data.name || data.title,
+              poster_path: data.poster_path ?? null,
+              backdrop_path: data.backdrop_path ?? null,
+              media_type: type,
+              vote_average: data.vote_average ?? 0,
+              vote_count: data.vote_count ?? 0,
+              overview: data.overview || "",
+              release_date: data.year ?? "",
+              first_air_date: data.year ?? "",
+            };
+            openPreview(movieItem, shouldPlay, season, episode);
+
+            if (typeof window !== "undefined") {
+              const url = new URL(window.location.href);
+              url.searchParams.delete("movie");
+              url.searchParams.delete("series");
+              url.searchParams.delete("play");
+              url.searchParams.delete("season");
+              url.searchParams.delete("episode");
+              url.searchParams.delete("startAt");
+              window.history.replaceState({}, "", url.pathname + (url.search ? url.search : ""));
+            }
+          }
+        })
+        .catch(() => {});
+    }
+  }, [searchParams, isOpen, openPreview]);
+
+  return null;
+}
+
 export default function NetflixPreviewModal() {
-  const { isOpen, activeItem, autoPlay, closePreview, openPreview } = usePreviewModal();
+  const {
+    isOpen,
+    activeItem,
+    autoPlay,
+    initialSeason,
+    initialEpisode,
+    closePreview,
+    openPreview,
+  } = usePreviewModal();
   const { isFavorite, toggleFavorite } = useFavorites();
 
   const [detailData, setDetailData] = useState<DetailApiResponse | null>(null);
@@ -248,8 +313,8 @@ export default function NetflixPreviewModal() {
   useEffect(() => {
     if (isOpen && activeItem) {
       setDetailData(null);
-      setSelectedSeason(1);
-      setSelectedEpisode(1);
+      setSelectedSeason(initialSeason || 1);
+      setSelectedEpisode(initialEpisode || 1);
       setIsTheaterOpen(false);
       setActiveServer("cinesrc");
       fetchDetail(activeItem.id, resolvedType);
@@ -257,7 +322,7 @@ export default function NetflixPreviewModal() {
       document.body.style.overflow = "hidden";
 
       if (autoPlay) {
-        handleStartPlay();
+        handleStartPlay(initialSeason || 1, initialEpisode || 1);
       }
     } else {
       setDetailData(null);
@@ -270,7 +335,7 @@ export default function NetflixPreviewModal() {
       document.body.style.overflow = "";
       if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
     };
-  }, [isOpen, activeItem, resolvedType, autoPlay, fetchDetail, handleStartPlay]);
+  }, [isOpen, activeItem, resolvedType, autoPlay, initialSeason, initialEpisode, fetchDetail, handleStartPlay]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -287,7 +352,13 @@ export default function NetflixPreviewModal() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, isTheaterOpen, closePreview, handleExitTheater]);
 
-  if (!isOpen || !activeItem) return null;
+  if (!isOpen || !activeItem) {
+    return (
+      <Suspense fallback={null}>
+        <UrlPreviewListener />
+      </Suspense>
+    );
+  }
 
   const title = detailData?.title || displayTitle(activeItem);
   const year = detailData?.year || displayYear(activeItem);
@@ -313,6 +384,9 @@ export default function NetflixPreviewModal() {
 
   return (
     <>
+      <Suspense fallback={null}>
+        <UrlPreviewListener />
+      </Suspense>
       {/* 1. TRUE FULLSCREEN THEATER PLAYER OVERLAY */}
       {isTheaterOpen && (
         <div

@@ -3,7 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useWatchHistory } from "@/context/WatchHistoryContext";
-import { img, backdrop } from "@/lib/tmdb";
+import { usePreviewModal } from "@/context/PreviewModalContext";
+import { img, backdrop, Movie } from "@/lib/tmdb";
 
 function formatMinutes(seconds?: number): string {
   if (!seconds || seconds <= 0) return "0m";
@@ -18,6 +19,7 @@ function formatMinutes(seconds?: number): string {
 
 export default function ContinueWatching() {
   const { history, removeHistory, isLoaded } = useWatchHistory();
+  const { openPreview } = usePreviewModal();
 
   if (!isLoaded || history.length === 0) return null;
 
@@ -75,13 +77,35 @@ export default function ContinueWatching() {
                 : `${Math.floor(currentSec / 60)}m`
               : "Start watching";
 
+          const handleResume = (e: React.MouseEvent) => {
+            if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+            e.preventDefault();
+            const movieItem: Movie = {
+              id: item.id,
+              title: item.title,
+              name: item.title,
+              poster_path: item.poster_path ?? null,
+              backdrop_path: item.backdrop_path ?? null,
+              media_type: item.type === "tv" ? "tv" : "movie",
+              vote_average: item.vote_average ?? 0,
+              vote_count: 0,
+              overview: "",
+              genre_ids: [],
+            };
+            openPreview(movieItem, true, item.season || 1, item.episode || 1);
+          };
+
           return (
             <div
               key={`${item.type}-${item.id}`}
-              className="relative shrink-0 scroll-snap-item group w-[220px] sm:w-[260px] rounded-xl overflow-hidden bg-[#0e1017] border border-white/[0.08] hover:border-white/20 transition-all shadow-xl"
+              className="relative shrink-0 scroll-snap-item group w-[220px] sm:w-[260px] rounded-xl overflow-hidden bg-[#0e1017] border border-white/[0.08] hover:border-white/20 transition-all shadow-xl select-none"
               role="listitem"
             >
-              <Link href={href} className="block relative aspect-video bg-zinc-900 overflow-hidden">
+              <Link
+                href={href}
+                onClick={handleResume}
+                className="block relative aspect-video bg-zinc-900 overflow-hidden cursor-pointer"
+              >
                 <Image
                   src={imageSrc}
                   alt={item.title}
@@ -149,7 +173,7 @@ export default function ContinueWatching() {
 
               {/* Card Title & Real Watch Minutes */}
               <div className="p-3">
-                <Link href={href} className="block">
+                <Link href={href} onClick={handleResume} className="block cursor-pointer">
                   <h3 className="text-xs sm:text-sm font-semibold text-white group-hover:text-red-400 transition-colors truncate">
                     {item.title}
                   </h3>
