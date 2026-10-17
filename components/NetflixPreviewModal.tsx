@@ -45,6 +45,7 @@ export default function NetflixPreviewModal() {
   const [isForcedLandscape, setIsForcedLandscape] = useState(false);
   const [isMobilePortrait, setIsMobilePortrait] = useState(false);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const theaterContainerRef = useRef<HTMLDivElement | null>(null);
 
   // Detect mobile portrait orientation
   useEffect(() => {
@@ -219,6 +220,31 @@ export default function NetflixPreviewModal() {
     };
   }, [isTheaterOpen]);
 
+  // Lock both html and body scrolling and hide scrollbars completely in theater mode
+  useEffect(() => {
+    if (isTheaterOpen) {
+      document.documentElement.classList.add("theater-active");
+      document.body.classList.add("theater-active");
+      document.documentElement.style.overflow = "hidden";
+      document.body.style.overflow = "hidden";
+    } else {
+      document.documentElement.classList.remove("theater-active");
+      document.body.classList.remove("theater-active");
+      if (isOpen) {
+        document.documentElement.style.overflow = "hidden";
+        document.body.style.overflow = "hidden";
+      } else {
+        document.documentElement.style.overflow = "";
+        document.body.style.overflow = "";
+      }
+    }
+
+    return () => {
+      document.documentElement.classList.remove("theater-active");
+      document.body.classList.remove("theater-active");
+    };
+  }, [isTheaterOpen, isOpen]);
+
   useEffect(() => {
     if (isOpen && activeItem) {
       setDetailData(null);
@@ -227,6 +253,7 @@ export default function NetflixPreviewModal() {
       setIsTheaterOpen(false);
       setActiveServer("cinesrc");
       fetchDetail(activeItem.id, resolvedType);
+      document.documentElement.style.overflow = "hidden";
       document.body.style.overflow = "hidden";
 
       if (autoPlay) {
@@ -235,9 +262,11 @@ export default function NetflixPreviewModal() {
     } else {
       setDetailData(null);
       setIsTheaterOpen(false);
+      document.documentElement.style.overflow = "";
       document.body.style.overflow = "";
     }
     return () => {
+      document.documentElement.style.overflow = "";
       document.body.style.overflow = "";
       if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
     };
@@ -287,7 +316,8 @@ export default function NetflixPreviewModal() {
       {/* 1. TRUE FULLSCREEN THEATER PLAYER OVERLAY */}
       {isTheaterOpen && (
         <div
-          className="fixed z-[9999] bg-black overflow-hidden flex flex-col select-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden transition-all duration-300"
+          ref={theaterContainerRef}
+          className="fixed inset-0 w-screen h-screen z-[9999] bg-black overflow-hidden flex flex-col select-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden transition-all duration-300"
           style={
             isForcedLandscape && isMobilePortrait
               ? {
@@ -304,8 +334,8 @@ export default function NetflixPreviewModal() {
                   left: 0,
                   right: 0,
                   bottom: 0,
-                  width: "100%",
-                  height: "100%",
+                  width: "100vw",
+                  height: "100vh",
                 }
           }
           onMouseMove={handleUserActivity}
@@ -415,16 +445,18 @@ export default function NetflixPreviewModal() {
           </div>
 
           {/* 100% Screen Video Stream */}
-          <iframe
-            key={`${streamUrl}-${activeServer}`}
-            src={streamUrl}
-            title={title}
-            className="w-full h-full border-0 overflow-hidden"
-            scrolling="no"
-            referrerPolicy="origin"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen *"
-            allowFullScreen
-          />
+          <div className="absolute inset-0 w-full h-full bg-black overflow-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            <iframe
+              key={`${streamUrl}-${activeServer}`}
+              src={streamUrl}
+              title={title}
+              className="w-full h-full border-0 block"
+              scrolling="no"
+              referrerPolicy="origin"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen *"
+              allowFullScreen
+            />
+          </div>
         </div>
       )}
 

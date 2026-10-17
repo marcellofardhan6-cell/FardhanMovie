@@ -50,6 +50,31 @@ body {
   background: #2a3044;
 }
 
+/* Eliminate scrollbars in fullscreen and theater player modes */
+:fullscreen,
+:-webkit-full-screen,
+:-moz-full-screen,
+html:fullscreen,
+body:fullscreen,
+html.theater-active,
+body.theater-active {
+  overflow: hidden !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+:fullscreen::-webkit-scrollbar,
+:-webkit-full-screen::-webkit-scrollbar,
+:-moz-full-screen::-webkit-scrollbar,
+html:fullscreen::-webkit-scrollbar,
+body:fullscreen::-webkit-scrollbar,
+html.theater-active::-webkit-scrollbar,
+body.theater-active::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
 /* Focus visible */
 :focus-visible {
   outline: 2px solid var(--accent);
