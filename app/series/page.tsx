@@ -4,7 +4,22 @@ import FilterBar from "@/components/FilterBar";
 import { Suspense } from "react";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "TV Series" };
+export const metadata: Metadata = {
+  title: "TV Series",
+  description:
+    "Stream full seasons and episodes of top-rated TV series and drama shows online with high quality multi-server streaming on FardTV.",
+  alternates: {
+    canonical: "/series",
+  },
+  openGraph: {
+    title: "TV Series | FardTV",
+    description:
+      "Stream full seasons and episodes of top-rated TV series and drama shows online with high quality multi-server streaming on FardTV.",
+    url: "https://fardtv.my.id/series",
+    siteName: "FardTV",
+    type: "website",
+  },
+};
 export const revalidate = 3600;
 
 interface Props {

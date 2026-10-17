@@ -4,7 +4,22 @@ import FilterBar from "@/components/FilterBar";
 import { Suspense } from "react";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Movies" };
+export const metadata: Metadata = {
+  title: "Movies",
+  description:
+    "Explore and watch free HD movies online with clean genre filters, latest box office releases, and fast streaming on FardTV.",
+  alternates: {
+    canonical: "/films",
+  },
+  openGraph: {
+    title: "Movies | FardTV",
+    description:
+      "Explore and watch free HD movies online with clean genre filters, latest box office releases, and fast streaming on FardTV.",
+    url: "https://fardtv.my.id/films",
+    siteName: "FardTV",
+    type: "website",
+  },
+};
 export const revalidate = 3600;
 
 interface Props {

@@ -3,8 +3,20 @@ import { POPULAR_GENRES } from "@/lib/tmdb";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Browse by Genre",
-  description: "Explore movies and TV series by genre.",
+  title: "Genres",
+  description:
+    "Explore full catalog of movies, anime, and TV series categorized by genre including Action, Comedy, Drama, Horror, Sci-Fi, and Romance on FardTV.",
+  alternates: {
+    canonical: "/genres",
+  },
+  openGraph: {
+    title: "Genres | FardTV",
+    description:
+      "Explore full catalog of movies, anime, and TV series categorized by genre including Action, Comedy, Drama, Horror, Sci-Fi, and Romance on FardTV.",
+    url: "https://fardtv.my.id/genres",
+    siteName: "FardTV",
+    type: "website",
+  },
 };
 
 function GenreIcon({ id }: { id: number }) {

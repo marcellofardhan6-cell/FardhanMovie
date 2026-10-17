@@ -33,13 +33,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${baseUrl}/country`,
       lastModified: now,
       changeFrequency: "weekly",
-      priority: 0.7,
+      priority: 0.8,
     },
     {
       url: `${baseUrl}/genres`,
       lastModified: now,
       changeFrequency: "weekly",
-      priority: 0.7,
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/favorites`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.8,
     },
   ];
 }

@@ -27,11 +27,71 @@ const fraunces = Fraunces({
 
 const jsonLd = {
   "@context": "https://schema.org",
-  "@type": "WebSite",
-  name: "FardTV",
-  alternateName: ["FardhanTV", "Fard TV", "Fardhan TV", "fardtv.my.id", "fardhantv.web.id"],
-  url: "https://fardtv.my.id/",
-  description: "FardTV (FardhanTV) adalah platform nonton streaming film, anime, dan TV series sub Indo gratis tanpa iklan mengganggu.",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://fardtv.my.id/#website",
+      name: "FardTV",
+      alternateName: ["FardhanTV", "Fard TV", "Fardhan TV", "fardtv.my.id", "fardhantv.web.id"],
+      url: "https://fardtv.my.id/",
+      description: "FardTV (FardhanTV) adalah platform nonton streaming film, anime, dan TV series sub Indo gratis tanpa iklan mengganggu.",
+      inLanguage: "id-ID",
+      potentialAction: {
+        "@type": "SearchAction",
+        target: "https://fardtv.my.id/search?q={search_term_string}",
+        "query-input": "required name=search_term_string",
+      },
+    },
+    {
+      "@type": "ItemList",
+      "@id": "https://fardtv.my.id/#navigation",
+      name: "FardTV Navigation Menu",
+      itemListElement: [
+        {
+          "@type": "SiteNavigationElement",
+          position: 1,
+          name: "Movies",
+          description: "Streaming film bioskop box office terbaru gratis sub Indo dengan kualitas HD dan server cepat di FardTV.",
+          url: "https://fardtv.my.id/films",
+        },
+        {
+          "@type": "SiteNavigationElement",
+          position: 2,
+          name: "Anime",
+          description: "Streaming anime sub Indo terlengkap, serial shonen populer, movie animasi Jepang, dan jadwal rilis mingguan.",
+          url: "https://fardtv.my.id/anime",
+        },
+        {
+          "@type": "SiteNavigationElement",
+          position: 3,
+          name: "TV Series",
+          description: "Binge watch serial TV dan drama series terpopuler lengkap dengan pemilih season dan episode.",
+          url: "https://fardtv.my.id/series",
+        },
+        {
+          "@type": "SiteNavigationElement",
+          position: 4,
+          name: "Genres",
+          description: "Jelajahi koleksi film dan serial berdasarkan genre favorit seperti Action, Comedy, Drama, Horror, Romance, dan Sci-Fi.",
+          url: "https://fardtv.my.id/genres",
+        },
+        {
+          "@type": "SiteNavigationElement",
+          position: 5,
+          name: "Country",
+          description: "Temukan film dan serial terbaik berdasarkan negara asal seperti Indonesia, Korea Selatan, Jepang, dan Amerika Serikat.",
+          url: "https://fardtv.my.id/country",
+        },
+        {
+          "@type": "SiteNavigationElement",
+          position: 6,
+          name: "Favorites",
+          description: "Daftar tontonan pribadi dan koleksi film atau anime favorit yang Anda simpan di FardTV.",
+          url: "https://fardtv.my.id/favorites",
+        },
+      ],
+    },
+  ],
 };
 
 export const metadata: Metadata = {

@@ -6,8 +6,20 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Browse by Country",
-  description: "Discover top movies and TV series by origin country.",
+  title: "Country",
+  description:
+    "Discover top movies, anime, and drama TV series categorized by country including Indonesia, South Korea, Japan, United States, and more on FardTV.",
+  alternates: {
+    canonical: "/country",
+  },
+  openGraph: {
+    title: "Country | FardTV",
+    description:
+      "Discover top movies, anime, and drama TV series categorized by country including Indonesia, South Korea, Japan, United States, and more on FardTV.",
+    url: "https://fardtv.my.id/country",
+    siteName: "FardTV",
+    type: "website",
+  },
 };
 
 export const revalidate = 3600;

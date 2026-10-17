@@ -16,8 +16,20 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Anime - FardTV",
-  description: "Watch popular anime series, Japanese theatrical animated movies, explore genres, and follow weekly release schedules on FardTV.",
+  title: "Anime",
+  description:
+    "Watch popular anime series, Japanese theatrical animated movies, explore genres, and follow weekly release schedules on FardTV.",
+  alternates: {
+    canonical: "/anime",
+  },
+  openGraph: {
+    title: "Anime | FardTV",
+    description:
+      "Watch popular anime series, Japanese theatrical animated movies, explore genres, and follow weekly release schedules on FardTV.",
+    url: "https://fardtv.my.id/anime",
+    siteName: "FardTV",
+    type: "website",
+  },
 };
 
 export const revalidate = 3600;
