@@ -6,7 +6,6 @@ import { useSearchParams } from "next/navigation";
 import { usePreviewModal } from "@/context/PreviewModalContext";
 import { useFavorites } from "@/context/FavoritesContext";
 import { img, displayTitle, displayYear, isTV, Genre, Movie } from "@/lib/tmdb";
-import DownloadModal from "@/components/DownloadModal";
 
 export interface CastMember {
   id: number;
@@ -101,7 +100,6 @@ export default function NetflixPreviewModal() {
   const { isFavorite, toggleFavorite } = useFavorites();
 
   const [detailData, setDetailData] = useState<DetailApiResponse | null>(null);
-  const [downloadOpen, setDownloadOpen] = useState(false);
   const [selectedSeason, setSelectedSeason] = useState(1);
   const [selectedEpisode, setSelectedEpisode] = useState(1);
   const [isTheaterOpen, setIsTheaterOpen] = useState(false);
@@ -628,40 +626,29 @@ export default function NetflixPreviewModal() {
                   <span>Putar</span>
                 </button>
 
-                {/* My List / Favorite Button */}
+                {/* Favorite / Love Button */}
                 <button
                   type="button"
                   onClick={() => toggleFavorite(activeItem)}
-                  className={`inline-flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-white/40 hover:border-white transition-all cursor-pointer shadow-lg active:scale-95 ${
-                    fav ? "bg-white text-black border-white" : "bg-black/60 hover:bg-black/80 text-white"
+                  className={`inline-flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border transition-all cursor-pointer shadow-lg active:scale-95 ${
+                    fav
+                      ? "bg-red-600/20 text-red-500 border-red-500/80 shadow-red-500/30"
+                      : "bg-black/60 hover:bg-black/80 text-white hover:text-red-400 border-white/40 hover:border-white"
                   }`}
-                  title={fav ? "Hapus dari Daftar Saya" : "Tambah ke Daftar Saya"}
-                  aria-label={fav ? "Hapus dari Daftar Saya" : "Tambah ke Daftar Saya"}
+                  title={fav ? "Hapus dari Favorit" : "Tambah ke Favorit"}
+                  aria-label={fav ? "Hapus dari Favorit" : "Tambah ke Favorit"}
                 >
-                  {fav ? (
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                  ) : (
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="12" y1="5" x2="12" y2="19" />
-                      <line x1="5" y1="12" x2="19" y2="12" />
-                    </svg>
-                  )}
-                </button>
-
-                {/* Download Button */}
-                <button
-                  type="button"
-                  onClick={() => setDownloadOpen(true)}
-                  className="inline-flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-white/40 hover:border-white bg-black/60 hover:bg-black/80 text-white transition-all cursor-pointer shadow-lg active:scale-95"
-                  title="Unduh Film & Subtitle"
-                  aria-label="Unduh"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                    <polyline points="7 10 12 15 17 10" />
-                    <line x1="12" y1="15" x2="12" y2="3" />
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill={fav ? "currentColor" : "none"}
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                   </svg>
                 </button>
               </div>
@@ -863,15 +850,6 @@ export default function NetflixPreviewModal() {
             )}
           </div>
         </div>
-
-        <DownloadModal
-          isOpen={downloadOpen}
-          onClose={() => setDownloadOpen(false)}
-          tmdbId={activeItem.id}
-          type={resolvedType}
-          title={title}
-          posterPath={activeItem.poster_path}
-        />
       </div>
     </>
   );
