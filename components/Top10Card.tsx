@@ -92,7 +92,7 @@ export default function Top10Card({ item, rank, priority = false }: Props) {
           </div>
         )}
 
-        {/* Floating Favorite Heart Icon */}
+        {/* Floating Favorite Heart Icon Top-Right (Always Visible & Clickable) */}
         <button
           type="button"
           onClick={(e) => {
@@ -100,23 +100,25 @@ export default function Top10Card({ item, rank, priority = false }: Props) {
             e.stopPropagation();
             toggleFavorite(item);
           }}
-          className={`absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center backdrop-blur-md border transition-all duration-200 cursor-pointer ${
+          className={`absolute top-2 right-2 z-20 w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center backdrop-blur-md border transition-all duration-200 cursor-pointer shadow-md active:scale-90 hover:scale-110 ${
             fav
-              ? "bg-red-600/90 text-white border-red-500 shadow-md"
-              : "bg-black/60 text-zinc-300 border-white/10 opacity-0 group-hover:opacity-100 hover:text-white hover:bg-black/90"
+              ? "bg-red-600 text-white border-red-500 shadow-red-900/40"
+              : "bg-black/60 text-zinc-300 border-white/15 hover:text-white hover:bg-black/85"
           }`}
-          aria-label={fav ? "Remove from favorites" : "Add to favorites"}
-          title={fav ? "Remove from favorites" : "Add to favorites"}
+          aria-label={fav ? "Hapus dari favorit" : "Tambah ke favorit"}
+          title={fav ? "Hapus dari favorit" : "Tambah ke favorit"}
         >
           <svg
-            width="13"
-            height="13"
+            width="12"
+            height="12"
             viewBox="0 0 24 24"
             fill={fav ? "currentColor" : "none"}
             stroke="currentColor"
-            strokeWidth="2.2"
+            strokeWidth="2.4"
             strokeLinecap="round"
             strokeLinejoin="round"
+            className={`transition-transform duration-200 ${fav ? "scale-105" : ""}`}
+            aria-hidden
           >
             <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
           </svg>

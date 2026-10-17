@@ -61,11 +61,11 @@ export default function LandscapeCard({ item, priority = false }: Props) {
         <div className="absolute inset-0 bg-gradient-to-t from-[#0c0e15] via-transparent to-black/30 opacity-80 group-hover:opacity-40 transition-opacity" />
 
         {/* Center Play Button Overlay on Hover */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10">
           <button
             type="button"
             onClick={handlePlayClick}
-            className="w-11 h-11 rounded-full bg-red-600 text-white flex items-center justify-center shadow-xl transform scale-90 group-hover:scale-100 hover:scale-110 transition-transform cursor-pointer"
+            className="w-11 h-11 rounded-full bg-red-600 text-white flex items-center justify-center shadow-xl transform scale-90 group-hover:scale-100 hover:scale-110 transition-transform cursor-pointer pointer-events-auto"
             aria-label="Putar film langsung"
             title="Putar Sekarang"
           >
@@ -77,13 +77,13 @@ export default function LandscapeCard({ item, priority = false }: Props) {
 
         {/* Rating Badge Top-Left */}
         {rating && (
-          <div className="absolute top-2.5 left-2.5 flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold tracking-tight backdrop-blur-md bg-black/75 text-zinc-100 border border-white/10">
+          <div className="absolute top-2.5 left-2.5 z-10 flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold tracking-tight backdrop-blur-md bg-black/75 text-zinc-100 border border-white/10">
             <span className="text-red-500 text-xs">★</span>
             <span>{rating}</span>
           </div>
         )}
 
-        {/* Favorite Button Top-Right */}
+        {/* Favorite Button Top-Right (Always Visible & Clickable) */}
         <button
           type="button"
           onClick={(e) => {
@@ -91,21 +91,25 @@ export default function LandscapeCard({ item, priority = false }: Props) {
             e.stopPropagation();
             toggleFavorite(item);
           }}
-          className={`absolute top-2.5 right-2.5 w-7 h-7 rounded-full flex items-center justify-center backdrop-blur-md border transition-all duration-200 cursor-pointer ${
+          className={`absolute top-2.5 right-2.5 z-20 w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center backdrop-blur-md border transition-all duration-200 cursor-pointer shadow-md active:scale-90 hover:scale-110 ${
             fav
-              ? "bg-red-600 text-white border-red-500 shadow-md"
-              : "bg-black/60 text-zinc-300 border-white/10 opacity-0 group-hover:opacity-100 hover:text-white hover:bg-black/90"
+              ? "bg-red-600 text-white border-red-500 shadow-red-900/40"
+              : "bg-black/60 text-zinc-300 border-white/15 hover:text-white hover:bg-black/85"
           }`}
-          aria-label={fav ? "Remove from favorites" : "Add to favorites"}
+          aria-label={fav ? "Hapus dari favorit" : "Tambah ke favorit"}
+          title={fav ? "Hapus dari favorit" : "Tambah ke favorit"}
         >
           <svg
-            width="13"
-            height="13"
+            width="12"
+            height="12"
             viewBox="0 0 24 24"
             fill={fav ? "currentColor" : "none"}
             stroke="currentColor"
-            strokeWidth="2.2"
+            strokeWidth="2.4"
             strokeLinecap="round"
+            strokeLinejoin="round"
+            className={`transition-transform duration-200 ${fav ? "scale-105" : ""}`}
+            aria-hidden
           >
             <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
           </svg>

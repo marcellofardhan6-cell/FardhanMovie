@@ -72,7 +72,7 @@ export default function MovieCard({ item, priority = false }: Props) {
           </div>
         )}
 
-        {/* Floating Favorite Heart Icon Top-Right */}
+        {/* Floating Favorite Heart Icon Top-Right (Always Visible & Clickable) */}
         <button
           type="button"
           onClick={(e) => {
@@ -80,34 +80,36 @@ export default function MovieCard({ item, priority = false }: Props) {
             e.stopPropagation();
             toggleFavorite(item);
           }}
-          className={`absolute top-2 right-2 z-10 w-7 h-7 rounded-full flex items-center justify-center backdrop-blur-md border transition-all duration-200 cursor-pointer ${
+          className={`absolute top-2 right-2 z-20 w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center backdrop-blur-md border transition-all duration-200 cursor-pointer shadow-md active:scale-90 hover:scale-110 ${
             fav
-              ? "bg-red-600/90 text-white border-red-500 shadow-md"
-              : "bg-black/60 text-zinc-300 border-white/10 opacity-0 group-hover:opacity-100 hover:text-white hover:bg-black/90"
+              ? "bg-red-600 text-white border-red-500 shadow-red-900/40"
+              : "bg-black/60 text-zinc-300 border-white/15 hover:text-white hover:bg-black/85"
           }`}
           aria-label={fav ? "Hapus dari favorit" : "Tambah ke favorit"}
           title={fav ? "Hapus dari favorit" : "Tambah ke favorit"}
         >
           <svg
-            width="13"
-            height="13"
+            width="12"
+            height="12"
             viewBox="0 0 24 24"
             fill={fav ? "currentColor" : "none"}
             stroke="currentColor"
-            strokeWidth="2.2"
+            strokeWidth="2.4"
             strokeLinecap="round"
             strokeLinejoin="round"
+            className={`transition-transform duration-200 ${fav ? "scale-105" : ""}`}
+            aria-hidden
           >
             <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
           </svg>
         </button>
 
         {/* Center Play Button Reveal on Hover */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/40 backdrop-blur-[1px] z-10">
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/40 backdrop-blur-[1px] z-10 pointer-events-none">
           <button
             type="button"
             onClick={handlePlayClick}
-            className="w-11 h-11 rounded-full flex items-center justify-center bg-red-600 text-white shadow-[0_0_25px_rgba(229,9,20,0.8)] transform scale-90 group-hover:scale-100 hover:scale-110 hover:bg-red-500 transition-all duration-200 cursor-pointer"
+            className="w-11 h-11 rounded-full flex items-center justify-center bg-red-600 text-white shadow-[0_0_25px_rgba(229,9,20,0.8)] transform scale-90 group-hover:scale-100 hover:scale-110 hover:bg-red-500 transition-all duration-200 cursor-pointer pointer-events-auto"
             aria-label="Putar film langsung"
             title="Putar Sekarang"
           >
