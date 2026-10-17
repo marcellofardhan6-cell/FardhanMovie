@@ -7,7 +7,9 @@ import { FavoritesProvider } from "@/context/FavoritesContext";
 import { WatchHistoryProvider } from "@/context/WatchHistoryContext";
 import { AnimeThemeProvider } from "@/context/AnimeThemeContext";
 import { PreviewModalProvider } from "@/context/PreviewModalContext";
+import { SupportModalProvider } from "@/context/SupportModalContext";
 import NetflixPreviewModal from "@/components/NetflixPreviewModal";
+import SupportModal from "@/components/SupportModal";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -40,10 +42,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <FavoritesProvider>
             <WatchHistoryProvider>
               <PreviewModalProvider>
-                <Navbar />
-                <main className="min-h-screen">{children}</main>
-                <Footer />
-                <NetflixPreviewModal />
+                <SupportModalProvider>
+                  <Navbar />
+                  <main className="min-h-screen">{children}</main>
+                  <Footer />
+                  <NetflixPreviewModal />
+                  <SupportModal />
+                </SupportModalProvider>
               </PreviewModalProvider>
             </WatchHistoryProvider>
           </FavoritesProvider>
