@@ -120,9 +120,11 @@ export default function NetflixPreviewModal() {
   const [controlsVisible, setControlsVisible] = useState(true);
   const [isForcedLandscape, setIsForcedLandscape] = useState(false);
   const [isMobilePortrait, setIsMobilePortrait] = useState(false);
+  const [isNativeFullscreen, setIsNativeFullscreen] = useState(false);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const theaterContainerRef = useRef<HTMLDivElement | null>(null);
   const currentTimeRef = useRef<number>(0);
+  const theaterPushedRef = useRef<boolean>(false);
 
   // Detect mobile portrait orientation
   useEffect(() => {
@@ -278,50 +280,64 @@ export default function NetflixPreviewModal() {
       try {
         if (typeof window !== "undefined") {
           window.history.pushState({ fardTvTheater: true }, "");
+          theaterPushedRef.current = true;
         }
       } catch {}
     },
     [activeItem, detailData, resolvedType, selectedSeason, selectedEpisode, addHistory, getHistoryItem]
   );
 
-  const handleExitTheater = useCallback(() => {
-    if (activeItem && currentTimeRef.current > 0) {
-      const itemTitle = detailData?.title || displayTitle(activeItem);
-      const estDuration =
-        detailData?.runtime && detailData.runtime.includes("j")
-          ? 7200
-          : resolvedType === "tv"
-          ? 2700
-          : 7200;
+  const handleExitTheater = useCallback(
+    (fromPopState: boolean = false) => {
+      if (activeItem && currentTimeRef.current > 0) {
+        const itemTitle = detailData?.title || displayTitle(activeItem);
+        const estDuration =
+          detailData?.runtime && detailData.runtime.includes("j")
+            ? 7200
+            : resolvedType === "tv"
+            ? 2700
+            : 7200;
 
-      updateProgress(
-        activeItem.id,
-        resolvedType,
-        currentTimeRef.current,
-        estDuration,
-        {
-          title: itemTitle,
-          poster_path: activeItem.poster_path,
-          backdrop_path: detailData?.backdrop_path || activeItem.backdrop_path || null,
-          season: resolvedType === "tv" ? selectedSeason : undefined,
-          episode: resolvedType === "tv" ? selectedEpisode : undefined,
-        }
-      );
-    }
-    setIsTheaterOpen(false);
-    setIsForcedLandscape(false);
-    unlockOrientation();
-    closePreview();
-    try {
-      if (document.fullscreenElement) {
-        if (document.exitFullscreen) {
-          document.exitFullscreen().catch(() => {});
-        } else if ((document as any).webkitExitFullscreen) {
-          (document as any).webkitExitFullscreen();
-        }
+        updateProgress(
+          activeItem.id,
+          resolvedType,
+          currentTimeRef.current,
+          estDuration,
+          {
+            title: itemTitle,
+            poster_path: activeItem.poster_path,
+            backdrop_path: detailData?.backdrop_path || activeItem.backdrop_path || null,
+            season: resolvedType === "tv" ? selectedSeason : undefined,
+            episode: resolvedType === "tv" ? selectedEpisode : undefined,
+          }
+        );
       }
-    } catch {}
-  }, [activeItem, detailData, resolvedType, selectedSeason, selectedEpisode, updateProgress, closePreview]);
+      setIsTheaterOpen(false);
+      setIsForcedLandscape(false);
+      unlockOrientation();
+      try {
+        if (document.fullscreenElement) {
+          if (document.exitFullscreen) {
+            document.exitFullscreen().catch(() => {});
+          } else if ((document as any).webkitExitFullscreen) {
+            (document as any).webkitExitFullscreen();
+          }
+        }
+      } catch {}
+
+      if (!fromPopState && theaterPushedRef.current) {
+        theaterPushedRef.current = false;
+        try {
+          if (typeof window !== "undefined" && window.history.state?.fardTvTheater) {
+            window.history.back();
+          }
+        } catch {}
+      } else {
+        theaterPushedRef.current = false;
+      }
+    },
+    [activeItem, detailData, resolvedType, selectedSeason, selectedEpisode, updateProgress]
+  );
 
   // Active watch progress tracking in theater mode
   useEffect(() => {
@@ -411,14 +427,10 @@ export default function NetflixPreviewModal() {
     };
   }, [isTheaterOpen, activeItem, resolvedType, selectedSeason, selectedEpisode, detailData, updateProgress]);
 
-  // Cleanly exit theater mode if user exits fullscreen via system gesture or browser controls
+  // Sync native fullscreen state without terminating theater mode when fullscreen drops
   useEffect(() => {
-    if (!isTheaterOpen) return;
-
     const onFullscreenChange = () => {
-      if (!document.fullscreenElement && !(document as any).webkitFullscreenElement) {
-        handleExitTheater();
-      }
+      setIsNativeFullscreen(Boolean(document.fullscreenElement || (document as any).webkitFullscreenElement));
     };
 
     document.addEventListener("fullscreenchange", onFullscreenChange);
@@ -428,14 +440,14 @@ export default function NetflixPreviewModal() {
       document.removeEventListener("fullscreenchange", onFullscreenChange);
       document.removeEventListener("webkitfullscreenchange", onFullscreenChange);
     };
-  }, [isTheaterOpen, handleExitTheater]);
+  }, []);
 
-  // Handle mobile / browser back button or swipe gesture
+  // Handle mobile / browser back button or swipe gesture safely
   useEffect(() => {
     if (!isTheaterOpen) return;
 
     const onPopState = () => {
-      handleExitTheater();
+      handleExitTheater(true);
     };
 
     window.addEventListener("popstate", onPopState);
@@ -576,6 +588,13 @@ export default function NetflixPreviewModal() {
           closePreview();
         }
       }
+      if (e.key === "Backspace" && (isTheaterOpen || isOpen)) {
+        const target = e.target as HTMLElement | null;
+        const isInput = target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable);
+        if (!isInput) {
+          e.preventDefault();
+        }
+      }
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
@@ -621,7 +640,7 @@ export default function NetflixPreviewModal() {
       {isTheaterOpen && (
         <div
           ref={theaterContainerRef}
-          className="fixed inset-0 w-screen h-screen z-[9999] bg-black overflow-hidden flex flex-col select-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden transition-all duration-300"
+          className="fixed inset-0 w-screen h-screen z-[9999] bg-black overflow-hidden flex flex-col select-none overscroll-none touch-manipulation [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden transition-all duration-300"
           style={
             isForcedLandscape && isMobilePortrait
               ? {
@@ -632,6 +651,7 @@ export default function NetflixPreviewModal() {
                   height: "100vw",
                   transform: "translate(-50%, -50%) rotate(90deg)",
                   transformOrigin: "center center",
+                  overscrollBehavior: "none",
                 }
               : {
                   top: 0,
@@ -640,6 +660,7 @@ export default function NetflixPreviewModal() {
                   bottom: 0,
                   width: "100vw",
                   height: "100vh",
+                  overscrollBehavior: "none",
                 }
           }
           onMouseMove={handleUserActivity}
@@ -648,21 +669,10 @@ export default function NetflixPreviewModal() {
         >
           {/* Top Hover Detection Sensor on Desktop */}
           <div
-            className="absolute top-0 inset-x-0 h-16 sm:h-20 z-30 pointer-events-none md:pointer-events-auto"
+            className="absolute top-0 inset-x-0 h-16 sm:h-20 z-30 pointer-events-auto"
             onMouseEnter={handleUserActivity}
             onMouseMove={handleUserActivity}
           />
-
-          {/* Full Screen Tap & Activity Sensor: Tapping or moving cursor anywhere brings controls back */}
-          {!controlsVisible && (
-            <div
-              className="absolute inset-0 z-30 bg-transparent cursor-pointer"
-              onClick={handleUserActivity}
-              onTouchStart={handleUserActivity}
-              onMouseMove={handleUserActivity}
-              aria-label="Show Controls"
-            />
-          )}
 
           {/* Floating Top Control Bar (Scaled down for mobile, clean and compact) */}
           <div
@@ -679,7 +689,7 @@ export default function NetflixPreviewModal() {
             <div className="flex items-center gap-2 sm:gap-3.5 min-w-0">
               <button
                 type="button"
-                onClick={handleExitTheater}
+                onClick={() => handleExitTheater(false)}
                 className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-white/10 hover:bg-white/20 active:bg-white/30 text-white flex items-center justify-center transition-all cursor-pointer shrink-0 shadow-md active:scale-95"
                 title="Exit player (Esc)"
                 aria-label="Back"
@@ -734,7 +744,7 @@ export default function NetflixPreviewModal() {
                 type="button"
                 onClick={toggleFullscreen}
                 className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all cursor-pointer shrink-0 shadow-md"
-                title="Toggle Fullscreen"
+                title={isNativeFullscreen ? "Exit Fullscreen" : "Toggle Fullscreen"}
                 aria-label="Fullscreen"
               >
                 <svg width="14" height="14" className="sm:w-[17px] sm:h-[17px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -745,7 +755,7 @@ export default function NetflixPreviewModal() {
           </div>
 
           {/* 100% Screen Video Stream */}
-          <div className="absolute inset-0 w-full h-full bg-black overflow-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          <div className="absolute inset-0 w-full h-full bg-black overflow-hidden overscroll-none touch-manipulation [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             <iframe
               key={`${streamUrl}-${activeServer}`}
               src={streamUrl}
@@ -753,6 +763,7 @@ export default function NetflixPreviewModal() {
               className="w-full h-full border-0 block"
               scrolling="no"
               referrerPolicy="origin"
+              sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-downloads"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen *"
               allowFullScreen
             />

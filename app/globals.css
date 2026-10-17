@@ -21,6 +21,8 @@
 html {
   scroll-behavior: smooth;
   color-scheme: dark;
+  overscroll-behavior: none;
+  overscroll-behavior-x: none;
 }
 
 body {
@@ -31,6 +33,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  overscroll-behavior: none;
+  overscroll-behavior-x: none;
 }
 
 /* Custom Scrollbar */
@@ -59,6 +63,8 @@ body:fullscreen,
 html.theater-active,
 body.theater-active {
   overflow: hidden !important;
+  overscroll-behavior: none !important;
+  overscroll-behavior-x: none !important;
   scrollbar-width: none !important;
   -ms-overflow-style: none !important;
 }
