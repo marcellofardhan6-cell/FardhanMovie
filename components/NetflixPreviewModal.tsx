@@ -763,7 +763,6 @@ export default function NetflixPreviewModal() {
               className="w-full h-full border-0 block"
               scrolling="no"
               referrerPolicy="origin"
-              sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-downloads"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen *"
               allowFullScreen
             />
