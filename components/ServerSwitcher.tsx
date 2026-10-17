@@ -250,7 +250,17 @@ export default function ServerSwitcher(props: Props) {
       } else if ((el as any).webkitRequestFullscreen) {
         (el as any).webkitRequestFullscreen();
       }
+      try {
+        if (typeof screen !== "undefined" && screen.orientation && typeof (screen.orientation as any).lock === "function") {
+          (screen.orientation as any).lock("landscape").catch(() => {});
+        }
+      } catch {}
     } else {
+      try {
+        if (typeof screen !== "undefined" && screen.orientation && typeof (screen.orientation as any).unlock === "function") {
+          (screen.orientation as any).unlock();
+        }
+      } catch {}
       if (document.exitFullscreen) {
         document.exitFullscreen().catch(() => {});
       } else if ((document as any).webkitExitFullscreen) {

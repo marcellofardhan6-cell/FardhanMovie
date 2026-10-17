@@ -42,7 +42,47 @@ export default function NetflixPreviewModal() {
   const [isTheaterOpen, setIsTheaterOpen] = useState(false);
   const [activeServer, setActiveServer] = useState<"cinesrc" | "vidsrcwiki">("cinesrc");
   const [controlsVisible, setControlsVisible] = useState(true);
+  const [isForcedLandscape, setIsForcedLandscape] = useState(false);
+  const [isMobilePortrait, setIsMobilePortrait] = useState(false);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Detect mobile portrait orientation
+  useEffect(() => {
+    const checkOrientation = () => {
+      if (typeof window !== "undefined") {
+        setIsMobilePortrait(window.innerWidth < 768 && window.innerHeight > window.innerWidth);
+      }
+    };
+    checkOrientation();
+    window.addEventListener("resize", checkOrientation);
+    window.addEventListener("orientationchange", checkOrientation);
+    return () => {
+      window.removeEventListener("resize", checkOrientation);
+      window.removeEventListener("orientationchange", checkOrientation);
+    };
+  }, []);
+
+  const lockLandscape = async () => {
+    try {
+      if (typeof screen !== "undefined" && screen.orientation && typeof (screen.orientation as any).lock === "function") {
+        await (screen.orientation as any).lock("landscape");
+        return true;
+      } else if (typeof screen !== "undefined" && (screen as any).lockOrientation) {
+        return (screen as any).lockOrientation("landscape");
+      }
+    } catch {}
+    return false;
+  };
+
+  const unlockOrientation = () => {
+    try {
+      if (typeof screen !== "undefined" && screen.orientation && typeof (screen.orientation as any).unlock === "function") {
+        (screen.orientation as any).unlock();
+      } else if (typeof screen !== "undefined" && (screen as any).unlockOrientation) {
+        (screen as any).unlockOrientation();
+      }
+    } catch {}
+  };
 
   const resolvedType = activeItem
     ? activeItem.media_type === "tv" || isTV(activeItem)
@@ -66,27 +106,36 @@ export default function NetflixPreviewModal() {
     } catch {}
   }, []);
 
-  // Request browser fullscreen synchronously on user click
+  // Request browser fullscreen synchronously on user click and auto lock landscape
   const handleStartPlay = useCallback(
-    (seasonNum?: number, episodeNum?: number) => {
+    async (seasonNum?: number, episodeNum?: number) => {
       if (seasonNum !== undefined) setSelectedSeason(seasonNum);
       if (episodeNum !== undefined) setSelectedEpisode(episodeNum);
       setIsTheaterOpen(true);
 
+      const isMobile = typeof window !== "undefined" && window.innerWidth < 768 && window.innerHeight > window.innerWidth;
+
       try {
         const docEl = document.documentElement;
         if (docEl.requestFullscreen) {
-          docEl.requestFullscreen().catch(() => {});
+          await docEl.requestFullscreen().catch(() => {});
         } else if ((docEl as any).webkitRequestFullscreen) {
           (docEl as any).webkitRequestFullscreen();
         }
       } catch {}
+
+      const locked = await lockLandscape();
+      if (!locked && isMobile) {
+        setIsForcedLandscape(true);
+      }
     },
     []
   );
 
   const handleExitTheater = useCallback(() => {
     setIsTheaterOpen(false);
+    setIsForcedLandscape(false);
+    unlockOrientation();
     try {
       if (document.fullscreenElement) {
         if (document.exitFullscreen) {
@@ -98,16 +147,34 @@ export default function NetflixPreviewModal() {
     } catch {}
   }, []);
 
-  const toggleFullscreen = useCallback(() => {
+  const toggleOrientation = useCallback(async () => {
+    if (isForcedLandscape) {
+      setIsForcedLandscape(false);
+      unlockOrientation();
+    } else {
+      const locked = await lockLandscape();
+      if (!locked) {
+        setIsForcedLandscape(true);
+      }
+    }
+  }, [isForcedLandscape]);
+
+  const toggleFullscreen = useCallback(async () => {
     try {
       if (!document.fullscreenElement) {
         const docEl = document.documentElement;
         if (docEl.requestFullscreen) {
-          docEl.requestFullscreen().catch(() => {});
+          await docEl.requestFullscreen().catch(() => {});
         } else if ((docEl as any).webkitRequestFullscreen) {
           (docEl as any).webkitRequestFullscreen();
         }
+        const locked = await lockLandscape();
+        if (!locked && isMobilePortrait) {
+          setIsForcedLandscape(true);
+        }
       } else {
+        setIsForcedLandscape(false);
+        unlockOrientation();
         if (document.exitFullscreen) {
           document.exitFullscreen().catch(() => {});
         } else if ((document as any).webkitExitFullscreen) {
@@ -115,7 +182,7 @@ export default function NetflixPreviewModal() {
         }
       }
     } catch {}
-  }, []);
+  }, [isMobilePortrait]);
 
   // Show / hide floating controls on mouse movement in theater mode
   const handleUserActivity = useCallback(() => {
@@ -215,7 +282,27 @@ export default function NetflixPreviewModal() {
       {/* 1. TRUE FULLSCREEN THEATER PLAYER OVERLAY */}
       {isTheaterOpen && (
         <div
-          className="fixed inset-0 z-[9999] w-full h-full bg-black overflow-hidden flex flex-col select-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+          className="fixed z-[9999] bg-black overflow-hidden flex flex-col select-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden transition-all duration-300"
+          style={
+            isForcedLandscape && isMobilePortrait
+              ? {
+                  position: "fixed",
+                  top: "50%",
+                  left: "50%",
+                  width: "100vh",
+                  height: "100vw",
+                  transform: "translate(-50%, -50%) rotate(90deg)",
+                  transformOrigin: "center center",
+                }
+              : {
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  width: "100%",
+                  height: "100%",
+                }
+          }
           onMouseMove={handleUserActivity}
           onClick={handleUserActivity}
         >
@@ -315,6 +402,23 @@ export default function NetflixPreviewModal() {
                   VidSrc Wiki (Server 2)
                 </button>
               </div>
+
+              <button
+                type="button"
+                onClick={toggleOrientation}
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer shrink-0 shadow-lg ${
+                  isForcedLandscape ? "bg-red-600 text-white shadow-red-900/50" : "bg-white/10 hover:bg-white/20 text-white"
+                }`}
+                title={isForcedLandscape ? "Kembalikan Orientasi Layar" : "Putar Layar ke Landscape"}
+                aria-label="Mode Landscape"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                  <path d="M3 3v5h5" />
+                  <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+                  <path d="M16 21h5v-5" />
+                </svg>
+              </button>
 
               <button
                 type="button"
