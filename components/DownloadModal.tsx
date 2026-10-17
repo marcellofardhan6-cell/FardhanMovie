@@ -297,37 +297,11 @@ export default function DownloadModal({
             </div>
 
             <div className="space-y-2">
-              {/* CineSrc */}
-              <div className="p-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-between gap-2">
-                <div className="min-w-0">
-                  <span className="font-bold text-white text-xs block truncate">CineSrc</span>
-                  <span className="text-[10px] text-emerald-400">Server Utama (Fast &amp; Minimal Ads)</span>
-                </div>
-
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <a
-                    href={cinesrcUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="py-1 px-2.5 rounded-md text-[11px] font-bold bg-white/[0.08] hover:bg-white/[0.15] text-white transition-colors"
-                  >
-                    Open Player
-                  </a>
-                  <button
-                    type="button"
-                    onClick={() => copyToClipboard(cinesrcUrl, "cinesrc")}
-                    className="py-1 px-2.5 rounded-md text-[11px] font-semibold bg-red-600/20 hover:bg-red-600 text-red-300 hover:text-white border border-red-500/30 transition-colors"
-                  >
-                    {copiedKey === "cinesrc" ? "Copied!" : "Copy Link"}
-                  </button>
-                </div>
-              </div>
-
               {/* VidLink */}
               <div className="p-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-between gap-2">
                 <div className="min-w-0">
                   <span className="font-bold text-white text-xs block truncate">VidLink</span>
-                  <span className="text-[10px] text-zinc-400">Server 2 (Fast Stream &amp; Autoplay)</span>
+                  <span className="text-[10px] text-emerald-400">Server Utama (Fast Stream &amp; Autoplay)</span>
                 </div>
 
                 <div className="flex items-center gap-1.5 shrink-0">
@@ -342,9 +316,35 @@ export default function DownloadModal({
                   <button
                     type="button"
                     onClick={() => copyToClipboard(vidlinkUrl, "vidlink")}
-                    className="py-1 px-2.5 rounded-md text-[11px] font-semibold bg-white/[0.06] hover:bg-white/[0.12] text-zinc-300 hover:text-white border border-white/10 transition-colors"
+                    className="py-1 px-2.5 rounded-md text-[11px] font-semibold bg-red-600/20 hover:bg-red-600 text-red-300 hover:text-white border border-red-500/30 transition-colors"
                   >
                     {copiedKey === "vidlink" ? "Copied!" : "Copy Link"}
+                  </button>
+                </div>
+              </div>
+
+              {/* CineSrc */}
+              <div className="p-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <span className="font-bold text-white text-xs block truncate">CineSrc</span>
+                  <span className="text-[10px] text-zinc-400">Server 2 (Backup Stream / Fast)</span>
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <a
+                    href={cinesrcUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="py-1 px-2.5 rounded-md text-[11px] font-bold bg-white/[0.08] hover:bg-white/[0.15] text-white transition-colors"
+                  >
+                    Open Player
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => copyToClipboard(cinesrcUrl, "cinesrc")}
+                    className="py-1 px-2.5 rounded-md text-[11px] font-semibold bg-white/[0.06] hover:bg-white/[0.12] text-zinc-300 hover:text-white border border-white/10 transition-colors"
+                  >
+                    {copiedKey === "cinesrc" ? "Copied!" : "Copy Link"}
                   </button>
                 </div>
               </div>

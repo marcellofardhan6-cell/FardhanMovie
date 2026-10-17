@@ -116,7 +116,7 @@ export default function NetflixPreviewModal() {
   const [selectedSeason, setSelectedSeason] = useState(1);
   const [selectedEpisode, setSelectedEpisode] = useState(1);
   const [isTheaterOpen, setIsTheaterOpen] = useState(false);
-  const [activeServer, setActiveServer] = useState<"cinesrc" | "vidlink" | "vidsrcwiki">("cinesrc");
+  const [activeServer, setActiveServer] = useState<"vidlink" | "cinesrc" | "vidsrcwiki">("vidlink");
   const [controlsVisible, setControlsVisible] = useState(true);
   const [isForcedLandscape, setIsForcedLandscape] = useState(false);
   const [isMobilePortrait, setIsMobilePortrait] = useState(false);
@@ -553,7 +553,7 @@ export default function NetflixPreviewModal() {
         setSelectedSeason(initialSeason || 1);
         setSelectedEpisode(initialEpisode || 1);
         setIsTheaterOpen(false);
-        setActiveServer("cinesrc");
+        setActiveServer("vidlink");
         fetchDetail(activeItem.id, resolvedType, initialSeason || 1);
 
         if (autoPlay) {
@@ -620,17 +620,17 @@ export default function NetflixPreviewModal() {
   const seasonEpisodes = seasonEpisodesMap[selectedSeason] || [];
   const matchPercent = Math.min(99, Math.max(85, Math.round((rating || 7.5) * 10) + 12));
 
-  // Build stream URL for active servers (CineSrc as primary, VidLink as server 2)
+  // Build stream URL for active servers (VidLink as primary, CineSrc as server 2)
   const idStr = String(activeItem.id);
   const streamUrl =
-    activeServer === "cinesrc"
-      ? resolvedType === "tv"
-        ? `https://cinesrc.st/embed/tv/${idStr}?s=${selectedSeason}&e=${selectedEpisode}`
-        : `https://cinesrc.st/embed/movie/${idStr}`
-      : activeServer === "vidlink"
+    activeServer === "vidlink"
       ? resolvedType === "tv"
         ? `https://vidlink.pro/tv/${idStr}/${selectedSeason}/${selectedEpisode}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914`
         : `https://vidlink.pro/movie/${idStr}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914`
+      : activeServer === "cinesrc"
+      ? resolvedType === "tv"
+        ? `https://cinesrc.st/embed/tv/${idStr}?s=${selectedSeason}&e=${selectedEpisode}`
+        : `https://cinesrc.st/embed/movie/${idStr}`
       : resolvedType === "tv"
       ? `https://vidsrc.wiki/embed/tv/${idStr}/${selectedSeason}/${selectedEpisode}`
       : `https://vidsrc.wiki/embed/movie/${idStr}`;
@@ -720,18 +720,6 @@ export default function NetflixPreviewModal() {
               <div className="flex items-center gap-1 p-0.5 sm:p-1 rounded-lg sm:rounded-xl bg-black/60 border border-white/10 backdrop-blur-md">
                 <button
                   type="button"
-                  onClick={() => setActiveServer("cinesrc")}
-                  className={`px-2 py-1 sm:px-3 sm:py-1.5 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-bold transition-all cursor-pointer ${
-                    activeServer === "cinesrc"
-                      ? "bg-red-600 text-white shadow-md"
-                      : "text-zinc-300 hover:text-white"
-                  }`}
-                >
-                  <span>CineSrc</span>
-                  <span className="hidden sm:inline"> (Primary)</span>
-                </button>
-                <button
-                  type="button"
                   onClick={() => setActiveServer("vidlink")}
                   className={`px-2 py-1 sm:px-3 sm:py-1.5 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-bold transition-all cursor-pointer ${
                     activeServer === "vidlink"
@@ -740,6 +728,18 @@ export default function NetflixPreviewModal() {
                   }`}
                 >
                   <span>VidLink</span>
+                  <span className="hidden sm:inline"> (Primary)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveServer("cinesrc")}
+                  className={`px-2 py-1 sm:px-3 sm:py-1.5 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-bold transition-all cursor-pointer ${
+                    activeServer === "cinesrc"
+                      ? "bg-red-600 text-white shadow-md"
+                      : "text-zinc-300 hover:text-white"
+                  }`}
+                >
+                  <span>CineSrc</span>
                   <span className="hidden sm:inline"> (Server 2)</span>
                 </button>
                 <button
