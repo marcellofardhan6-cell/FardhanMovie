@@ -73,9 +73,6 @@ export default function AnimeSchedule({ items }: Props) {
           <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
             Anime Release Schedule
           </h2>
-          <p className="text-xs text-zinc-400 mt-1">
-            New episodes streaming weekly
-          </p>
         </div>
       </div>
 

@@ -126,11 +126,6 @@ export default async function CountryPage({ searchParams }: Props) {
         <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
           Browse by Country
         </h1>
-        <p className="text-xs sm:text-sm text-zinc-400 mt-1">
-          {isAll
-            ? "Explore popular films and television shows from all countries worldwide."
-            : `Explore films and television shows from ${selectedCountry.name} and across the world.`}
-        </p>
       </div>
 
       {/* Country Pills Horizontal Scroll with 'All Countries' to the left of United States */}

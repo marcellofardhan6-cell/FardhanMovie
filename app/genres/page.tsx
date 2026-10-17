@@ -165,9 +165,6 @@ export default function GenresPage() {
         <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
           Browse by Genre
         </h1>
-        <p className="text-xs sm:text-sm text-zinc-400 mt-2 max-w-xl">
-          Pick your favorite vibe — from heart-pounding action to thrilling mysteries and comedies.
-        </p>
       </div>
 
       {/* Genres Grid */}

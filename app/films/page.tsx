@@ -59,9 +59,6 @@ export default async function FilmsPage({ searchParams }: Props) {
         <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
           Movies
         </h1>
-        <p className="text-xs sm:text-sm text-zinc-400 mt-1">
-          Explore popular, box office hits, and newly released films.
-        </p>
       </div>
 
       <Suspense>

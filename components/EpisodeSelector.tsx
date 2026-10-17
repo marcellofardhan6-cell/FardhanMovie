@@ -50,7 +50,6 @@ export default function EpisodeSelector({
             <h3 className="text-base font-bold text-white tracking-tight" style={{ fontFamily: "var(--font-fraunces)" }}>
               Episodes List
             </h3>
-            <p className="text-[11px] text-zinc-400">Select season and episode number</p>
           </div>
         </div>
 

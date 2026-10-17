@@ -68,7 +68,6 @@ export default async function HomePage() {
           title="Top 10 Today"
           items={trendingList}
           variant="top10"
-          subtitle="Most watched movies and series this week"
         />
 
         {/* 2. Popular Movies (Standard 2:3 Poster Cards) */}
@@ -84,7 +83,6 @@ export default async function HomePage() {
           items={animeList}
           seeAllHref="/anime"
           variant="backdrop"
-          subtitle="Top Japanese animation in cinematic format"
         />
 
         {/* 4. Popular TV Series (Standard 2:3 Poster Cards) */}

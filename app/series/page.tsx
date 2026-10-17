@@ -55,9 +55,6 @@ export default async function SeriesPage({ searchParams }: Props) {
         <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
           TV Series
         </h1>
-        <p className="text-xs sm:text-sm text-zinc-400 mt-1">
-          Explore drama, comedy, thriller, and full season series releases.
-        </p>
       </div>
 
       <Suspense>

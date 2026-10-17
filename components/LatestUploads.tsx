@@ -65,9 +65,6 @@ export default function LatestUploads({
               Latest Releases
             </h2>
           </div>
-          <p className="text-xs sm:text-sm text-zinc-400 mt-1 pl-4">
-            Latest official movies & TV series in HD / WEB-DL
-          </p>
         </div>
 
         {/* Filter Tabs */}

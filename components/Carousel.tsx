@@ -20,7 +20,6 @@ export default function Carousel({
   title,
   items,
   seeAllHref,
-  subtitle,
   variant = "standard",
 }: Props) {
   const pathname = usePathname();
@@ -68,9 +67,6 @@ export default function Carousel({
               {title}
             </h2>
           </div>
-          {subtitle && (
-            <p className="text-xs text-zinc-400 mt-0.5">{subtitle}</p>
-          )}
         </div>
 
         {/* Carousel Actions */}

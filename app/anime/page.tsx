@@ -120,7 +120,6 @@ export default async function AnimePage({ searchParams }: Props) {
             <div className="relative">
               <Carousel
                 title="Top 10 Anime Today"
-                subtitle="Most watched this week"
                 items={trendingAnimeList}
                 variant="top10"
               />
@@ -130,7 +129,6 @@ export default async function AnimePage({ searchParams }: Props) {
             <div className="relative">
               <Carousel
                 title="Action & Shonen"
-                subtitle="Epic battles and heroic adventures"
                 items={shonenAnimeList}
                 variant="backdrop"
               />
@@ -140,7 +138,6 @@ export default async function AnimePage({ searchParams }: Props) {
             <div className="relative">
               <Carousel
                 title="Anime Feature Films"
-                subtitle="Top cinematic animation from Japan"
                 items={movieAnimeList}
                 variant="standard"
               />
@@ -155,7 +152,6 @@ export default async function AnimePage({ searchParams }: Props) {
             <div className="relative">
               <Carousel
                 title="Fantasy & Isekai"
-                subtitle="Magical journeys and parallel worlds"
                 items={fantasyAnimeList}
                 variant="backdrop"
               />
@@ -165,7 +161,6 @@ export default async function AnimePage({ searchParams }: Props) {
             <div className="relative">
               <Carousel
                 title="Top Rated Anime"
-                subtitle="Highest user review scores"
                 items={topRatedAnimeList}
                 variant="standard"
               />
@@ -177,9 +172,6 @@ export default async function AnimePage({ searchParams }: Props) {
                 <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
                   All Anime
                 </h2>
-                <p className="text-xs text-zinc-400 mt-1">
-                  Complete collection of Japanese animated series & films
-                </p>
               </div>
 
               <InfiniteMovieGrid

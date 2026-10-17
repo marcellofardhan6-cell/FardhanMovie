@@ -36,9 +36,6 @@ export default function ContinueWatching() {
               Continue Watching
             </h2>
           </div>
-          <p className="text-xs text-zinc-400 mt-0.5 pl-4">
-            Pick up right where you left off
-          </p>
         </div>
       </div>
 
