@@ -418,85 +418,98 @@ export default function NetflixPreviewModal() {
         >
           {/* Top Hover Detection Sensor on Desktop */}
           <div
-            className="absolute top-0 inset-x-0 h-24 z-30 pointer-events-none md:pointer-events-auto"
+            className="absolute top-0 inset-x-0 h-16 sm:h-20 z-30 pointer-events-none md:pointer-events-auto"
             onMouseEnter={handleUserActivity}
             onMouseMove={handleUserActivity}
           />
 
-          {/* Floating Top Control Bar */}
+          {/* Full Screen Tap & Activity Sensor: Tapping or moving cursor anywhere brings controls back */}
+          {!controlsVisible && (
+            <div
+              className="absolute inset-0 z-30 bg-transparent cursor-pointer"
+              onClick={handleUserActivity}
+              onTouchStart={handleUserActivity}
+              onMouseMove={handleUserActivity}
+              aria-label="Tampilkan Kontrol"
+            />
+          )}
+
+          {/* Floating Top Control Bar (Scaled down for mobile, clean and compact) */}
           <div
             onMouseEnter={handleUserActivity}
             onMouseMove={handleUserActivity}
             onTouchStart={handleUserActivity}
-            className={`absolute top-0 inset-x-0 z-40 flex items-center justify-between p-4 sm:p-5 bg-gradient-to-b from-black/95 via-black/75 to-transparent transition-all duration-300 transform ${
+            className={`absolute top-0 inset-x-0 z-40 flex items-center justify-between px-2.5 py-2 sm:px-5 sm:py-3.5 bg-gradient-to-b from-black/90 via-black/60 to-transparent transition-all duration-300 transform ${
               controlsVisible
                 ? "opacity-100 translate-y-0 pointer-events-auto"
-                : "opacity-0 -translate-y-4 pointer-events-none"
+                : "opacity-0 -translate-y-3 pointer-events-none"
             }`}
           >
             {/* Left: Back Arrow + Movie/Episode Title */}
-            <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+            <div className="flex items-center gap-2 sm:gap-3.5 min-w-0">
               <button
                 type="button"
                 onClick={handleExitTheater}
-                className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all cursor-pointer shrink-0 shadow-lg active:scale-95"
+                className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-white/10 hover:bg-white/20 active:bg-white/30 text-white flex items-center justify-center transition-all cursor-pointer shrink-0 shadow-md active:scale-95"
                 title="Keluar dari pemutar (Esc)"
                 aria-label="Kembali"
               >
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="16" height="16" className="sm:w-[20px] sm:h-[20px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M19 12H5M12 19l-7-7 7-7" />
                 </svg>
               </button>
 
               <div className="min-w-0">
-                <h2 className="text-sm sm:text-base md:text-lg font-bold text-white truncate drop-shadow-md">
+                <h2 className="text-xs sm:text-base font-semibold sm:font-bold text-white truncate drop-shadow-md max-w-[120px] sm:max-w-xs md:max-w-md">
                   {title}
                 </h2>
                 {resolvedType === "tv" && (
-                  <p className="text-xs text-zinc-300 font-medium">
-                    Season {selectedSeason} • Episode {selectedEpisode}
+                  <p className="text-[10px] sm:text-xs text-zinc-300 font-medium leading-none mt-0.5">
+                    S{selectedSeason} • E{selectedEpisode}
                   </p>
                 )}
               </div>
             </div>
 
             {/* Right: Server Pills + Fullscreen Toggle */}
-            <div className="flex items-center gap-2 shrink-0">
-              <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/60 border border-white/10 backdrop-blur-md">
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+              <div className="flex items-center gap-1 p-0.5 sm:p-1 rounded-lg sm:rounded-xl bg-black/60 border border-white/10 backdrop-blur-md">
                 <button
                   type="button"
                   onClick={() => setActiveServer("cinesrc")}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  className={`px-2 py-1 sm:px-3 sm:py-1.5 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-bold transition-all cursor-pointer ${
                     activeServer === "cinesrc"
                       ? "bg-red-600 text-white shadow-md"
                       : "text-zinc-300 hover:text-white"
                   }`}
                 >
-                  CineSrc (Utama)
+                  <span>CineSrc</span>
+                  <span className="hidden sm:inline"> (Utama)</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveServer("vidsrcwiki")}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  className={`px-2 py-1 sm:px-3 sm:py-1.5 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-bold transition-all cursor-pointer ${
                     activeServer === "vidsrcwiki"
                       ? "bg-red-600 text-white shadow-md"
                       : "text-zinc-300 hover:text-white"
                   }`}
                 >
-                  VidSrc Wiki (Server 2)
+                  <span>VidSrc</span>
+                  <span className="hidden sm:inline"> (Server 2)</span>
                 </button>
               </div>
 
               <button
                 type="button"
                 onClick={toggleOrientation}
-                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all cursor-pointer shrink-0 shadow-lg ${
+                className={`w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-all cursor-pointer shrink-0 shadow-md ${
                   isForcedLandscape ? "bg-red-600 text-white shadow-red-900/50" : "bg-white/10 hover:bg-white/20 text-white"
                 }`}
                 title={isForcedLandscape ? "Kembalikan Orientasi Layar" : "Putar Layar ke Landscape"}
                 aria-label="Mode Landscape"
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="14" height="14" className="sm:w-[17px] sm:h-[17px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
                   <path d="M3 3v5h5" />
                   <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
@@ -507,11 +520,11 @@ export default function NetflixPreviewModal() {
               <button
                 type="button"
                 onClick={toggleFullscreen}
-                className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all cursor-pointer shrink-0 shadow-lg"
+                className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all cursor-pointer shrink-0 shadow-md"
                 title="Toggle Layar Penuh"
                 aria-label="Layar Penuh"
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="14" height="14" className="sm:w-[17px] sm:h-[17px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
                 </svg>
               </button>
