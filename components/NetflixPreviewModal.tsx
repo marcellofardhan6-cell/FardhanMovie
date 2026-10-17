@@ -199,6 +199,12 @@ export default function NetflixPreviewModal() {
       if (!locked && isMobile) {
         setIsForcedLandscape(true);
       }
+
+      try {
+        if (typeof window !== "undefined") {
+          window.history.pushState({ fardTvTheater: true }, "");
+        }
+      } catch {}
     },
     []
   );
@@ -207,6 +213,7 @@ export default function NetflixPreviewModal() {
     setIsTheaterOpen(false);
     setIsForcedLandscape(false);
     unlockOrientation();
+    closePreview();
     try {
       if (document.fullscreenElement) {
         if (document.exitFullscreen) {
@@ -216,19 +223,41 @@ export default function NetflixPreviewModal() {
         }
       }
     } catch {}
-  }, []);
+  }, [closePreview]);
 
-  const toggleOrientation = useCallback(async () => {
-    if (isForcedLandscape) {
-      setIsForcedLandscape(false);
-      unlockOrientation();
-    } else {
-      const locked = await lockLandscape();
-      if (!locked) {
-        setIsForcedLandscape(true);
+  // Cleanly exit theater mode if user exits fullscreen via system gesture or browser controls
+  useEffect(() => {
+    if (!isTheaterOpen) return;
+
+    const onFullscreenChange = () => {
+      if (!document.fullscreenElement && !(document as any).webkitFullscreenElement) {
+        handleExitTheater();
       }
-    }
-  }, [isForcedLandscape]);
+    };
+
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", onFullscreenChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", onFullscreenChange);
+      document.removeEventListener("webkitfullscreenchange", onFullscreenChange);
+    };
+  }, [isTheaterOpen, handleExitTheater]);
+
+  // Handle mobile / browser back button or swipe gesture
+  useEffect(() => {
+    if (!isTheaterOpen) return;
+
+    const onPopState = () => {
+      handleExitTheater();
+    };
+
+    window.addEventListener("popstate", onPopState);
+
+    return () => {
+      window.removeEventListener("popstate", onPopState);
+    };
+  }, [isTheaterOpen, handleExitTheater]);
 
   const toggleFullscreen = useCallback(async () => {
     try {
