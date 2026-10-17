@@ -59,13 +59,13 @@ export default function MovieCard({ item, priority = false }: Props) {
           onError={() => setImgSrc("/poster-placeholder.svg")}
         />
 
-        {/* Ambient Dark Gradient Base */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-90 group-hover:opacity-60 transition-opacity duration-300 pointer-events-none" />
+        {/* Ambient Dark Gradient Base (Reveals on Hover for Text Contrast) */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10" />
 
         {/* Floating Top Rating Badge */}
         {rating && (
           <div
-            className="absolute top-2 left-2 z-10 flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold tracking-tight backdrop-blur-md bg-black/75 text-zinc-100 border border-white/10"
+            className="absolute top-2 left-2 z-20 flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold tracking-tight backdrop-blur-md bg-black/75 text-zinc-100 border border-white/10"
           >
             <span className="text-red-500 text-[11px]">★</span>
             <span>{rating}</span>
@@ -80,7 +80,7 @@ export default function MovieCard({ item, priority = false }: Props) {
             e.stopPropagation();
             toggleFavorite(item);
           }}
-          className={`absolute top-2 right-2 z-20 w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center backdrop-blur-md border transition-all duration-200 cursor-pointer shadow-md active:scale-90 hover:scale-110 ${
+          className={`absolute top-2 right-2 z-30 w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center backdrop-blur-md border transition-all duration-200 cursor-pointer shadow-md active:scale-90 hover:scale-110 ${
             fav
               ? "bg-red-600 text-white border-red-500 shadow-red-900/40"
               : "bg-black/60 text-zinc-300 border-white/15 hover:text-white hover:bg-black/85"
@@ -105,7 +105,7 @@ export default function MovieCard({ item, priority = false }: Props) {
         </button>
 
         {/* Center Play Button Reveal on Hover */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/40 backdrop-blur-[1px] z-10 pointer-events-none">
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/40 backdrop-blur-[1px] z-20 pointer-events-none">
           <button
             type="button"
             onClick={handlePlayClick}
@@ -119,12 +119,12 @@ export default function MovieCard({ item, priority = false }: Props) {
           </button>
         </div>
 
-        {/* Bottom Title on Poster */}
-        <div className="absolute bottom-0 inset-x-0 p-2 sm:p-2.5 z-10 pointer-events-none">
+        {/* Bottom Title & Details on Poster (Reveals on Hover) */}
+        <div className="absolute bottom-0 inset-x-0 p-2 sm:p-2.5 z-20 pointer-events-none transform translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ease-out">
           <h3 className="text-xs font-bold text-white line-clamp-1 group-hover:text-red-400 transition-colors drop-shadow-md">
             {title}
           </h3>
-          <div className="flex items-center gap-1.5 text-[9px] text-zinc-400 font-medium">
+          <div className="flex items-center gap-1.5 text-[9px] text-zinc-300 font-medium drop-shadow-sm">
             <span>{type === "series" ? "Series" : "Movie"}</span>
             {year && <span>• {year}</span>}
           </div>
