@@ -125,11 +125,20 @@ export default function Navbar() {
     [searchQuery, router]
   );
 
-  const navLinks = [
+  const desktopNavLinks = [
     { href: "/", label: "Home" },
     { href: "/films", label: "Movies" },
     { href: "/anime", label: "Anime" },
-    { href: "/series", label: "TV Series" },
+    { href: "/series", label: "Series" },
+    { href: "/genres", label: "Genres" },
+    { href: "/country", label: "Country" },
+  ];
+
+  const mobileNavLinks = [
+    { href: "/", label: "Home" },
+    { href: "/films", label: "Movies" },
+    { href: "/anime", label: "Anime" },
+    { href: "/series", label: "Series" },
     { href: "/genres", label: "Genres" },
     { href: "/country", label: "Country" },
     { href: "/favorites", label: "Favorites" },
@@ -152,13 +161,13 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-18">
           {/* Left: Brand Wordmark + Nav Links */}
-          <div className="flex items-center gap-8 sm:gap-10">
+          <div className="flex items-center gap-5 lg:gap-8 min-w-0">
             {/* Bespoke Cinema Monogram & Wordmark Logo */}
-            <Logo size="md" />
+            <Logo size="md" className="shrink-0" />
 
             {/* Desktop Nav Links */}
-            <nav className="hidden md:flex items-center gap-6" aria-label="Main navigation">
-              {navLinks.map((link) => {
+            <nav className="hidden md:flex items-center gap-3.5 lg:gap-5.5 shrink-0" aria-label="Main navigation">
+              {desktopNavLinks.map((link) => {
                 const isAnimeActive = link.href === "/anime" && (pathname.startsWith("/anime") || isAnimeTheme);
                 const isFilmActive = !isAnimeTheme && (link.href === "/films" && (pathname.startsWith("/film") || pathname === "/films"));
                 const isSeriesActive = !isAnimeTheme && (link.href === "/series" && pathname.startsWith("/series"));
@@ -168,22 +177,21 @@ export default function Navbar() {
                   isSeriesActive ||
                   (link.href === "/" && pathname === "/") ||
                   (link.href === "/country" && pathname.startsWith("/country")) ||
-                  (link.href === "/genres" && pathname.startsWith("/genres")) ||
-                  (link.href === "/favorites" && pathname.startsWith("/favorites"));
+                  (link.href === "/genres" && pathname.startsWith("/genres"));
                 if (link.href === "/genres") {
                   const isAnimeMode = pathname.startsWith("/anime") || isAnimeTheme;
                   return (
-                    <div key={link.href} className="relative group">
+                    <div key={link.href} className="relative group shrink-0">
                       <Link
                         href={isAnimeMode ? "/anime" : "/genres"}
-                        className={`text-sm tracking-wide transition-colors flex items-center gap-1 ${
+                        className={`text-sm tracking-wide transition-colors flex items-center gap-1 whitespace-nowrap shrink-0 ${
                           isActive
                             ? "text-white font-medium"
                             : "text-zinc-400 hover:text-zinc-200"
                         }`}
                         aria-current={isActive ? "page" : undefined}
                       >
-                        {isAnimeMode ? "Anime Genres" : "Genres"}
+                        <span>Genres</span>
                         <svg
                           width="10"
                           height="10"
@@ -193,7 +201,7 @@ export default function Navbar() {
                           strokeWidth="2.5"
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          className="transition-transform duration-200 group-hover:rotate-180 text-zinc-500 group-hover:text-zinc-300"
+                          className="transition-transform duration-200 group-hover:rotate-180 text-zinc-500 group-hover:text-zinc-300 shrink-0"
                           aria-hidden
                         >
                           <path d="m6 9 6 6 6-6" />
@@ -242,17 +250,17 @@ export default function Navbar() {
                 }
                 if (link.href === "/country") {
                   return (
-                    <div key={link.href} className="relative group">
+                    <div key={link.href} className="relative group shrink-0">
                       <Link
                         href="/country"
-                        className={`text-sm tracking-wide transition-colors flex items-center gap-1 ${
+                        className={`text-sm tracking-wide transition-colors flex items-center gap-1 whitespace-nowrap shrink-0 ${
                           isActive
                             ? "text-white font-medium"
                             : "text-zinc-400 hover:text-zinc-200"
                         }`}
                         aria-current={isActive ? "page" : undefined}
                       >
-                        Country
+                        <span>Country</span>
                         <svg
                           width="10"
                           height="10"
@@ -262,7 +270,7 @@ export default function Navbar() {
                           strokeWidth="2.5"
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          className="transition-transform duration-200 group-hover:rotate-180 text-zinc-500 group-hover:text-zinc-300"
+                          className="transition-transform duration-200 group-hover:rotate-180 text-zinc-500 group-hover:text-zinc-300 shrink-0"
                           aria-hidden
                         >
                           <path d="m6 9 6 6 6-6" />
@@ -313,7 +321,7 @@ export default function Navbar() {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`text-sm tracking-wide transition-colors ${
+                    className={`text-sm tracking-wide transition-colors whitespace-nowrap shrink-0 ${
                       isActive
                         ? "text-white font-medium"
                         : "text-zinc-400 hover:text-zinc-200"
@@ -328,9 +336,9 @@ export default function Navbar() {
           </div>
 
           {/* Right: Search & Mobile Trigger */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
             {/* Desktop Search Input with Live Autocomplete */}
-            <div ref={desktopSearchContainerRef} className="relative hidden sm:block">
+            <div ref={desktopSearchContainerRef} className="relative hidden sm:block shrink-0">
               <form onSubmit={handleSearch} role="search" aria-label="Search movies or TV shows">
                 <div className="relative">
                   <label htmlFor="navbar-search" className="sr-only">Search movies or TV shows</label>
@@ -345,7 +353,7 @@ export default function Navbar() {
                     }}
                     placeholder="Search titles..."
                     autoComplete="off"
-                    className="w-36 sm:w-56 text-xs text-white bg-white/[0.05] focus:bg-[#0c0e15] border border-white/[0.08] focus:border-white/30 rounded-lg py-2 pl-8 pr-7 outline-none transition-all placeholder:text-zinc-500"
+                    className="w-32 sm:w-40 lg:w-52 text-xs text-white bg-white/[0.05] focus:bg-[#0c0e15] border border-white/[0.08] focus:border-white/30 rounded-lg py-2 pl-8 pr-7 outline-none transition-all placeholder:text-zinc-500"
                     aria-label="Search movies or TV series"
                   />
                   <svg
@@ -468,7 +476,7 @@ export default function Navbar() {
             {/* Favorites Icon Button */}
             <Link
               href="/favorites"
-              className={`relative p-2 rounded-lg transition-colors flex items-center justify-center ${
+              className={`relative p-2 rounded-lg transition-colors flex items-center justify-center shrink-0 ${
                 pathname === "/favorites"
                   ? "text-red-500 bg-red-500/10"
                   : "text-zinc-400 hover:text-white hover:bg-white/[0.05]"
@@ -501,7 +509,7 @@ export default function Navbar() {
             <button
               type="button"
               onClick={openSupport}
-              className="group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-white bg-gradient-to-r from-red-600 to-[#d61f26] hover:from-red-500 hover:to-red-600 border border-white/20 shadow-sm shadow-red-950/50 transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer select-none"
+              className="group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-white bg-gradient-to-r from-red-600 to-[#d61f26] hover:from-red-500 hover:to-red-600 border border-white/20 shadow-sm shadow-red-950/50 transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer select-none shrink-0"
               aria-label="Support FardTV"
               title="Support FardTV"
             >
@@ -726,7 +734,7 @@ export default function Navbar() {
             className="md:hidden -mx-4 px-5 pt-3 pb-6 border-t border-white/[0.08] max-h-[80vh] overflow-y-auto animate-fade-in"
           >
             <nav className="flex flex-col space-y-1.5" aria-label="Mobile navigation">
-              {navLinks.map((link) => {
+              {mobileNavLinks.map((link) => {
                 const isAnimeActive = link.href === "/anime" && (pathname.startsWith("/anime") || isAnimeTheme);
                 const isFilmActive = !isAnimeTheme && (link.href === "/films" && (pathname.startsWith("/film") || pathname === "/films"));
                 const isSeriesActive = !isAnimeTheme && (link.href === "/series" && pathname.startsWith("/series"));
