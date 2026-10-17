@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { usePreviewModal } from "@/context/PreviewModalContext";
 import { useFavorites } from "@/context/FavoritesContext";
+import { useWatchHistory } from "@/context/WatchHistoryContext";
 import { img, displayTitle, displayYear, isTV, Genre, Movie } from "@/lib/tmdb";
 
 export interface CastMember {
@@ -98,6 +99,7 @@ export default function NetflixPreviewModal() {
     openPreview,
   } = usePreviewModal();
   const { isFavorite, toggleFavorite } = useFavorites();
+  const { addHistory, updateProgress, getHistoryItem } = useWatchHistory();
 
   const [detailData, setDetailData] = useState<DetailApiResponse | null>(null);
   const [selectedSeason, setSelectedSeason] = useState(1);
@@ -109,6 +111,7 @@ export default function NetflixPreviewModal() {
   const [isMobilePortrait, setIsMobilePortrait] = useState(false);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const theaterContainerRef = useRef<HTMLDivElement | null>(null);
+  const currentTimeRef = useRef<number>(0);
 
   // Detect mobile portrait orientation
   useEffect(() => {
@@ -173,6 +176,8 @@ export default function NetflixPreviewModal() {
   // Request browser fullscreen synchronously on user click and auto lock landscape
   const handleStartPlay = useCallback(
     async (seasonNum?: number, episodeNum?: number) => {
+      const sNum = seasonNum !== undefined ? seasonNum : selectedSeason;
+      const eNum = episodeNum !== undefined ? episodeNum : selectedEpisode;
       if (seasonNum !== undefined) setSelectedSeason(seasonNum);
       if (episodeNum !== undefined) setSelectedEpisode(episodeNum);
       setIsTheaterOpen(true);
@@ -181,6 +186,35 @@ export default function NetflixPreviewModal() {
       controlsTimeoutRef.current = setTimeout(() => {
         setControlsVisible(false);
       }, 3200);
+
+      // Record to Watch History immediately so Continue Watching reflects the new watch
+      if (activeItem) {
+        const itemTitle = detailData?.title || displayTitle(activeItem);
+        const estDuration =
+          detailData?.runtime && detailData.runtime.includes("j")
+            ? 7200
+            : resolvedType === "tv"
+            ? 2700
+            : 7200;
+
+        const existing = getHistoryItem(activeItem.id, resolvedType, sNum, eNum);
+        const startingTime = existing?.currentTime && existing.currentTime > 15 ? existing.currentTime : 10;
+        currentTimeRef.current = startingTime;
+
+        addHistory({
+          id: activeItem.id,
+          type: resolvedType,
+          title: itemTitle,
+          poster_path: activeItem.poster_path,
+          backdrop_path: detailData?.backdrop_path || activeItem.backdrop_path || null,
+          vote_average: activeItem.vote_average || detailData?.vote_average || 0,
+          season: resolvedType === "tv" ? sNum : undefined,
+          episode: resolvedType === "tv" ? eNum : undefined,
+          currentTime: startingTime,
+          duration: estDuration,
+          progress: existing?.progress || 5,
+        });
+      }
 
       const isMobile = typeof window !== "undefined" && window.innerWidth < 768 && window.innerHeight > window.innerWidth;
 
@@ -204,10 +238,33 @@ export default function NetflixPreviewModal() {
         }
       } catch {}
     },
-    []
+    [activeItem, detailData, resolvedType, selectedSeason, selectedEpisode, addHistory, getHistoryItem]
   );
 
   const handleExitTheater = useCallback(() => {
+    if (activeItem && currentTimeRef.current > 0) {
+      const itemTitle = detailData?.title || displayTitle(activeItem);
+      const estDuration =
+        detailData?.runtime && detailData.runtime.includes("j")
+          ? 7200
+          : resolvedType === "tv"
+          ? 2700
+          : 7200;
+
+      updateProgress(
+        activeItem.id,
+        resolvedType,
+        currentTimeRef.current,
+        estDuration,
+        {
+          title: itemTitle,
+          poster_path: activeItem.poster_path,
+          backdrop_path: detailData?.backdrop_path || activeItem.backdrop_path || null,
+          season: resolvedType === "tv" ? selectedSeason : undefined,
+          episode: resolvedType === "tv" ? selectedEpisode : undefined,
+        }
+      );
+    }
     setIsTheaterOpen(false);
     setIsForcedLandscape(false);
     unlockOrientation();
@@ -221,7 +278,95 @@ export default function NetflixPreviewModal() {
         }
       }
     } catch {}
-  }, [closePreview]);
+  }, [activeItem, detailData, resolvedType, selectedSeason, selectedEpisode, updateProgress, closePreview]);
+
+  // Active watch progress tracking in theater mode
+  useEffect(() => {
+    if (!isTheaterOpen || !activeItem) return;
+
+    const itemTitle = detailData?.title || displayTitle(activeItem);
+    const estDuration =
+      detailData?.runtime && detailData.runtime.includes("j")
+        ? 7200
+        : resolvedType === "tv"
+        ? 2700
+        : 7200;
+
+    const handleMessage = (event: MessageEvent) => {
+      try {
+        const data = event.data;
+        if (!data) return;
+
+        // VidLink / cinesrc PLAYER_EVENT
+        if (data.type === "PLAYER_EVENT" && data.data) {
+          const { currentTime, duration } = data.data;
+          if (typeof currentTime === "number" && currentTime > 0) {
+            currentTimeRef.current = Math.round(currentTime);
+            updateProgress(
+              activeItem.id,
+              resolvedType,
+              currentTimeRef.current,
+              typeof duration === "number" && duration > 0 ? duration : estDuration,
+              {
+                title: itemTitle,
+                poster_path: activeItem.poster_path,
+                backdrop_path: detailData?.backdrop_path || activeItem.backdrop_path || null,
+                season: resolvedType === "tv" ? selectedSeason : undefined,
+                episode: resolvedType === "tv" ? selectedEpisode : undefined,
+              }
+            );
+          }
+        }
+
+        // Generic timeupdate
+        if (data.event === "timeupdate" || data.type === "timeupdate") {
+          const time = Number(data.currentTime ?? data.time ?? data.data?.currentTime);
+          const dur = Number(data.duration ?? data.data?.duration ?? estDuration);
+          if (!isNaN(time) && time > 0) {
+            currentTimeRef.current = Math.round(time);
+            updateProgress(
+              activeItem.id,
+              resolvedType,
+              currentTimeRef.current,
+              dur,
+              {
+                title: itemTitle,
+                poster_path: activeItem.poster_path,
+                backdrop_path: detailData?.backdrop_path || activeItem.backdrop_path || null,
+                season: resolvedType === "tv" ? selectedSeason : undefined,
+                episode: resolvedType === "tv" ? selectedEpisode : undefined,
+              }
+            );
+          }
+        }
+      } catch {}
+    };
+
+    window.addEventListener("message", handleMessage);
+
+    const interval = setInterval(() => {
+      if (typeof document !== "undefined" && document.hidden) return;
+      currentTimeRef.current += 10;
+      updateProgress(
+        activeItem.id,
+        resolvedType,
+        currentTimeRef.current,
+        estDuration,
+        {
+          title: itemTitle,
+          poster_path: activeItem.poster_path,
+          backdrop_path: detailData?.backdrop_path || activeItem.backdrop_path || null,
+          season: resolvedType === "tv" ? selectedSeason : undefined,
+          episode: resolvedType === "tv" ? selectedEpisode : undefined,
+        }
+      );
+    }, 10000);
+
+    return () => {
+      window.removeEventListener("message", handleMessage);
+      clearInterval(interval);
+    };
+  }, [isTheaterOpen, activeItem, resolvedType, selectedSeason, selectedEpisode, detailData, updateProgress]);
 
   // Cleanly exit theater mode if user exits fullscreen via system gesture or browser controls
   useEffect(() => {

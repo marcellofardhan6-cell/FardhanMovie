@@ -62,50 +62,72 @@ export function WatchHistoryProvider({ children }: { children: React.ReactNode }
   const [history, setHistory] = useState<WatchHistoryItem[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  useEffect(() => {
+  // Sync helper: save to localStorage and broadcast sync event
+  const saveToStorage = useCallback((items: WatchHistoryItem[]) => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          setHistory(parsed);
+      if (typeof window !== "undefined") {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+        window.dispatchEvent(new Event("fardtv_history_sync"));
+      }
+    } catch (e) {
+      console.error("Failed to save watch history to localStorage:", e);
+    }
+  }, []);
+
+  const loadFromStorage = useCallback(() => {
+    try {
+      if (typeof window !== "undefined") {
+        const stored = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            setHistory(parsed);
+            return;
+          }
         }
       }
     } catch (e) {
       console.error("Failed to load watch history from localStorage:", e);
-    } finally {
-      setIsLoaded(true);
     }
   }, []);
 
   useEffect(() => {
-    if (!isLoaded) return;
-    const timer = setTimeout(() => {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
-      } catch (e) {
-        console.error("Failed to save watch history to localStorage:", e);
-      }
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, [history, isLoaded]);
+    loadFromStorage();
+    setIsLoaded(true);
 
-  const addHistory = useCallback((item: Omit<WatchHistoryItem, "updatedAt">) => {
-    setHistory((prev) => {
-      const existing = prev.find(
-        (e) => e.id === item.id && e.type === item.type
-      );
-      const filtered = prev.filter(
-        (e) => !(e.id === item.id && e.type === item.type)
-      );
-      const newItem: WatchHistoryItem = {
-        ...existing,
-        ...item,
-        updatedAt: Date.now(),
-      };
-      return [newItem, ...filtered].slice(0, MAX_HISTORY_ITEMS);
-    });
-  }, []);
+    const handleSync = () => {
+      loadFromStorage();
+    };
+
+    window.addEventListener("fardtv_history_sync", handleSync);
+    window.addEventListener("storage", handleSync);
+    return () => {
+      window.removeEventListener("fardtv_history_sync", handleSync);
+      window.removeEventListener("storage", handleSync);
+    };
+  }, [loadFromStorage]);
+
+  const addHistory = useCallback(
+    (item: Omit<WatchHistoryItem, "updatedAt">) => {
+      setHistory((prev) => {
+        const existing = prev.find(
+          (e) => e.id === item.id && e.type === item.type
+        );
+        const filtered = prev.filter(
+          (e) => !(e.id === item.id && e.type === item.type)
+        );
+        const newItem: WatchHistoryItem = {
+          ...existing,
+          ...item,
+          updatedAt: Date.now(),
+        };
+        const updated = [newItem, ...filtered].slice(0, MAX_HISTORY_ITEMS);
+        saveToStorage(updated);
+        return updated;
+      });
+    },
+    [saveToStorage]
+  );
 
   const updateProgress = useCallback(
     (
@@ -123,11 +145,11 @@ export function WatchHistoryProvider({ children }: { children: React.ReactNode }
     ) => {
       setHistory((prev) => {
         const existing = prev.find((e) => e.id === id && e.type === type);
-        // Throttle: don't re-render if difference is less than 8 seconds
+        // Throttle: don't re-render if difference is less than 4 seconds
         if (
           existing &&
           existing.currentTime !== undefined &&
-          Math.abs(currentTime - existing.currentTime) < 8
+          Math.abs(currentTime - existing.currentTime) < 4
         ) {
           return prev;
         }
@@ -153,10 +175,12 @@ export function WatchHistoryProvider({ children }: { children: React.ReactNode }
         };
 
         const filtered = prev.filter((e) => !(e.id === id && e.type === type));
-        return [updatedItem, ...filtered].slice(0, MAX_HISTORY_ITEMS);
+        const updated = [updatedItem, ...filtered].slice(0, MAX_HISTORY_ITEMS);
+        saveToStorage(updated);
+        return updated;
       });
     },
-    []
+    [saveToStorage]
   );
 
   const getHistoryItem = useCallback(
@@ -173,15 +197,21 @@ export function WatchHistoryProvider({ children }: { children: React.ReactNode }
     [history]
   );
 
-  const removeHistory = useCallback((id: number, type: "movie" | "tv") => {
-    setHistory((prev) =>
-      prev.filter((existing) => !(existing.id === id && existing.type === type))
-    );
-  }, []);
+  const removeHistory = useCallback(
+    (id: number, type: "movie" | "tv") => {
+      setHistory((prev) => {
+        const updated = prev.filter((existing) => !(existing.id === id && existing.type === type));
+        saveToStorage(updated);
+        return updated;
+      });
+    },
+    [saveToStorage]
+  );
 
   const clearHistory = useCallback(() => {
     setHistory([]);
-  }, []);
+    saveToStorage([]);
+  }, [saveToStorage]);
 
   return (
     <WatchHistoryContext.Provider
