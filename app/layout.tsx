@@ -36,6 +36,18 @@ const jsonLd = {
       url: "https://fardtv.my.id/",
       description: "FardTV (FardhanTV) adalah platform nonton streaming film, anime, dan TV series sub Indo gratis tanpa iklan mengganggu.",
       inLanguage: "id-ID",
+      image: "https://fardtv.my.id/icon-512.png",
+      publisher: {
+        "@type": "Organization",
+        name: "FardTV",
+        url: "https://fardtv.my.id/",
+        logo: {
+          "@type": "ImageObject",
+          url: "https://fardtv.my.id/icon-512.png",
+          width: 512,
+          height: 512,
+        },
+      },
       potentialAction: {
         "@type": "SearchAction",
         target: "https://fardtv.my.id/search?q={search_term_string}",
@@ -136,6 +148,19 @@ export const metadata: Metadata = {
     description:
       "Streaming film bioskop, anime, dan TV series favorit gratis dengan kualitas HD dan tanpa iklan pop-up di FardTV.",
   },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon-48.png", sizes: "48x48", type: "image/png" },
+      { url: "/icon-96.png", sizes: "96x96", type: "image/png" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
   verification: {
     google: [
       "L1xsmzaUQHcwSEskRrjWbDUPrD4UZxxzK6cfs-FvaG8",
@@ -149,6 +174,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="id" className={`${inter.variable} ${fraunces.variable}`}>
       <head>
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="48x48" href="/icon-48.png" />
+        <link rel="icon" type="image/png" sizes="96x96" href="/icon-96.png" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
