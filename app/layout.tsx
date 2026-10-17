@@ -25,18 +25,75 @@ const fraunces = Fraunces({
   style: ["normal", "italic"],
 });
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "FardTV",
+  alternateName: ["FardhanTV", "Fard TV", "Fardhan TV", "fardtv.my.id", "fardhantv.web.id"],
+  url: "https://fardtv.my.id/",
+  description: "FardTV (FardhanTV) adalah platform nonton streaming film, anime, dan TV series sub Indo gratis tanpa iklan mengganggu.",
+};
+
 export const metadata: Metadata = {
-  title: { default: "FardTV - Free Movies & TV Series Streaming", template: "%s | FardTV" },
-  description: "Watch trending movies, popular TV series, and anime online. Free HD streaming without ads.",
-  keywords: ["movies", "streaming", "tv series", "anime", "cinema", "watch online"],
+  metadataBase: new URL("https://fardtv.my.id"),
+  title: {
+    default: "FardTV (FardhanTV) - Nonton Movie, Anime & Series Streaming Gratis",
+    template: "%s | FardTV",
+  },
+  description:
+    "Streaming film bioskop, anime, dan TV series favorit gratis dengan kualitas HD dan tanpa iklan pop-up yang mengganggu di FardTV (fardtv.my.id / fardhantv.web.id).",
+  keywords: [
+    "fardtv",
+    "fardhantv",
+    "fard tv",
+    "fardhan tv",
+    "fardtv movie",
+    "fardtv anime",
+    "fardhantv web id",
+    "fardtv my id",
+    "nonton film gratis",
+    "streaming movie gratis",
+    "anime sub indo",
+  ],
+  authors: [{ name: "Fardhan Marcello" }],
+  creator: "Fardhan Marcello",
+  publisher: "FardTV",
+  alternates: {
+    canonical: "https://fardtv.my.id",
+  },
+  openGraph: {
+    title: "FardTV (FardhanTV) - Nonton Movie, Anime & Series Streaming Gratis",
+    description:
+      "Streaming film bioskop, anime, dan TV series favorit gratis dengan kualitas HD dan tanpa iklan pop-up di FardTV.",
+    url: "https://fardtv.my.id",
+    siteName: "FardTV",
+    locale: "id_ID",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "FardTV (FardhanTV) - Nonton Movie, Anime & Series Streaming Gratis",
+    description:
+      "Streaming film bioskop, anime, dan TV series favorit gratis dengan kualitas HD dan tanpa iklan pop-up di FardTV.",
+  },
   verification: {
-    google: "L1xsmzaUQHcwSEskRrjWbDUPrD4UZxxzK6cfs-FvaG8",
+    google: [
+      "L1xsmzaUQHcwSEskRrjWbDUPrD4UZxxzK6cfs-FvaG8",
+      "google691342f243dce899.html",
+      "google691342f243dce899",
+    ],
   },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${fraunces.variable}`}>
+    <html lang="id" className={`${inter.variable} ${fraunces.variable}`}>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body>
         <AnimeThemeProvider>
           <FavoritesProvider>
