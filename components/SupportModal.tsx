@@ -40,14 +40,14 @@ export default function SupportModal() {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/85 backdrop-blur-sm animate-fade-in overflow-y-auto"
       onClick={closeSupport}
       role="dialog"
       aria-modal="true"
       aria-labelledby="support-dialog-title"
     >
       <div
-        className="relative w-full max-w-[460px] sm:max-w-[500px] rounded-2xl bg-[#07080b] border border-white/[0.1] text-white p-2.5 sm:p-3.5 shadow-2xl my-auto animate-fade-in flex flex-col"
+        className="relative w-full max-w-[420px] sm:max-w-[460px] max-h-[94vh] rounded-2xl bg-[#07080b] border border-white/[0.1] text-white p-2.5 sm:p-3 shadow-2xl my-auto animate-fade-in flex flex-col justify-between"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Floating Close Button */}
@@ -66,20 +66,20 @@ export default function SupportModal() {
           Support FardTV via QRIS
         </h2>
 
-        {/* The Redesigned English QRIS Card */}
-        <div className="relative w-full rounded-xl overflow-hidden shadow-xl border border-white/[0.08] bg-[#07080b]">
+        {/* QRIS Donation Card Image - Constrained by viewport height so buttons are never cut off */}
+        <div className="relative w-full flex-1 min-h-0 flex items-center justify-center rounded-xl overflow-hidden shadow-xl border border-white/[0.08] bg-[#07080b]">
           <Image
-            src="/fardtv-support-card.png"
-            alt="FardTV QRIS Payment Card"
-            width={800}
-            height={980}
-            className="w-full h-auto object-contain block select-none"
+            src="/fardtv-qris-donation.png"
+            alt="FardTV QRIS Donation Card"
+            width={1145}
+            height={1374}
+            className="w-auto h-auto max-h-[70vh] sm:max-h-[74vh] max-w-full object-contain block select-none rounded-lg"
             priority
           />
         </div>
 
-        {/* Action Buttons Row */}
-        <div className="grid grid-cols-2 gap-2 mt-3">
+        {/* Action Buttons Row - Pinned with shrink-0 so it is always fully visible */}
+        <div className="grid grid-cols-2 gap-2 mt-2.5 shrink-0">
           <button
             type="button"
             onClick={handleCopyNMID}
@@ -104,16 +104,16 @@ export default function SupportModal() {
           </button>
 
           <a
-            href="/fardtv-support-card.png"
-            download="FardTV-Support-QRIS.png"
-            className="w-full py-2.5 px-3 rounded-xl bg-red-600 hover:bg-red-500 text-xs font-semibold text-white transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center active:scale-95"
+            href="/fardtv-qris-donation.png"
+            download="FARDTV-QRIS-Donation-Card.png"
+            className="w-full py-2.5 px-3 rounded-xl bg-red-600 hover:bg-red-500 text-xs font-semibold text-white transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center active:scale-95 shadow-md shadow-red-950/40"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
               <polyline points="7 10 12 15 17 10" />
               <line x1="12" y1="15" x2="3" />
             </svg>
-            <span>Download QR</span>
+            <span>Download QRIS</span>
           </a>
         </div>
       </div>
