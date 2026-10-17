@@ -123,8 +123,29 @@ export default function NetflixPreviewModal() {
     if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
     controlsTimeoutRef.current = setTimeout(() => {
       setControlsVisible(false);
-    }, 3500);
+    }, 4000);
   }, []);
+
+  // Listen for window-level mouse movement when theater is open
+  useEffect(() => {
+    if (!isTheaterOpen) return;
+
+    const onMove = () => {
+      setControlsVisible(true);
+      if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+      controlsTimeoutRef.current = setTimeout(() => {
+        setControlsVisible(false);
+      }, 4000);
+    };
+
+    window.addEventListener("mousemove", onMove, { passive: true });
+    window.addEventListener("touchstart", onMove, { passive: true });
+
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("touchstart", onMove);
+    };
+  }, [isTheaterOpen]);
 
   useEffect(() => {
     if (isOpen && activeItem) {
@@ -198,10 +219,48 @@ export default function NetflixPreviewModal() {
           onMouseMove={handleUserActivity}
           onClick={handleUserActivity}
         >
+          {/* Top Hover Detection Sensor (triggers controls when mouse moves into top area) */}
+          <div
+            className="absolute top-0 inset-x-0 h-28 z-30 pointer-events-auto"
+            onMouseEnter={handleUserActivity}
+            onMouseMove={handleUserActivity}
+          />
+
+          {/* Minimal Persistent Undo/Back Pill when controls are hidden */}
+          {!controlsVisible && (
+            <button
+              type="button"
+              onClick={handleExitTheater}
+              onMouseEnter={handleUserActivity}
+              className="absolute top-4 left-4 z-40 flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/75 hover:bg-black/95 text-white/90 hover:text-white border border-white/20 backdrop-blur-md transition-all duration-200 cursor-pointer shadow-xl hover:scale-105 active:scale-95 animate-fadeIn"
+              title="Keluar dari pemutar (Esc)"
+              aria-label="Kembali"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+              <span className="text-xs font-semibold">Kembali</span>
+            </button>
+          )}
+
           {/* Floating Top Control Bar */}
           <div
-            className={`absolute top-0 inset-x-0 z-40 flex items-center justify-between p-4 sm:p-5 bg-gradient-to-b from-black/95 via-black/60 to-transparent transition-opacity duration-300 ${
-              controlsVisible ? "opacity-100" : "opacity-0 pointer-events-none"
+            onMouseEnter={() => {
+              setControlsVisible(true);
+              if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+            }}
+            onMouseMove={() => {
+              setControlsVisible(true);
+              if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+            }}
+            onMouseLeave={() => {
+              if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+              controlsTimeoutRef.current = setTimeout(() => {
+                setControlsVisible(false);
+              }, 3000);
+            }}
+            className={`absolute top-0 inset-x-0 z-40 flex items-center justify-between p-4 sm:p-5 bg-gradient-to-b from-black/95 via-black/75 to-transparent transition-all duration-300 transform ${
+              controlsVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"
             }`}
           >
             {/* Left: Back Arrow + Movie/Episode Title */}
