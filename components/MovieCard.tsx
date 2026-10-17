@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -39,7 +40,7 @@ export default function MovieCard({ item, priority = false }: Props) {
     <Link
       href={href}
       onClick={handleCardClick}
-      className="group block relative rounded-xl overflow-hidden transition-all duration-300 ease-out hover:-translate-y-1.5 focus-visible:ring-2 focus-visible:ring-red-500 cursor-pointer"
+      className="group block relative rounded-xl overflow-hidden transition-all duration-300 ease-out hover:-translate-y-1.5 focus-visible:ring-2 focus-visible:ring-red-500 cursor-pointer select-none"
       style={{
         background: "var(--surface)",
         border: "1px solid rgba(255, 255, 255, 0.08)",
@@ -58,40 +59,51 @@ export default function MovieCard({ item, priority = false }: Props) {
           onError={() => setImgSrc("/poster-placeholder.svg")}
         />
 
-        {/* Ambient Dark Gradient on Poster Base */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#06070a] via-transparent to-black/30 opacity-70 group-hover:opacity-40 transition-opacity duration-300" />
+        {/* Ambient Dark Gradient Base */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-90 group-hover:opacity-60 transition-opacity duration-300 pointer-events-none" />
 
-        {/* Floating Saved Heart Badge if Favorited */}
-        {fav && (
+        {/* Floating Top Rating Badge */}
+        {rating && (
           <div
-            className="absolute top-2 right-2 z-10 flex items-center justify-center w-6 h-6 rounded-full bg-red-600/90 text-white shadow-md border border-red-400/40 group-hover:opacity-0 transition-opacity"
-            title="Tersimpan di Favorit"
+            className="absolute top-2 left-2 z-10 flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold tracking-tight backdrop-blur-md bg-black/75 text-zinc-100 border border-white/10"
           >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-              <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-            </svg>
+            <span className="text-red-500 text-[11px]">★</span>
+            <span>{rating}</span>
           </div>
         )}
 
-        {/* Tiny Non-Intrusive Rating & Year Badge */}
-        {(rating || year) && (
-          <div
-            className="absolute bottom-2 left-2 z-10 flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold tracking-tight backdrop-blur-md bg-black/75 text-zinc-300 border border-white/10"
+        {/* Floating Favorite Heart Icon Top-Right */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleFavorite(item);
+          }}
+          className={`absolute top-2 right-2 z-10 w-7 h-7 rounded-full flex items-center justify-center backdrop-blur-md border transition-all duration-200 cursor-pointer ${
+            fav
+              ? "bg-red-600/90 text-white border-red-500 shadow-md"
+              : "bg-black/60 text-zinc-300 border-white/10 opacity-0 group-hover:opacity-100 hover:text-white hover:bg-black/90"
+          }`}
+          aria-label={fav ? "Hapus dari favorit" : "Tambah ke favorit"}
+          title={fav ? "Hapus dari favorit" : "Tambah ke favorit"}
+        >
+          <svg
+            width="13"
+            height="13"
+            viewBox="0 0 24 24"
+            fill={fav ? "currentColor" : "none"}
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           >
-            {rating && (
-              <span className="flex items-center gap-0.5 text-amber-400 font-bold">
-                <span className="text-[9px]">★</span>
-                <span>{rating}</span>
-              </span>
-            )}
-            {rating && year && <span className="text-zinc-600">•</span>}
-            {year && <span className="text-zinc-400">{year}</span>}
-          </div>
-        )}
+            <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+          </svg>
+        </button>
 
-        {/* Play & Love Buttons Reveal on Hover */}
-        <div className="absolute inset-0 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/50 backdrop-blur-[2px]">
-          {/* Play Button */}
+        {/* Center Play Button Reveal on Hover */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/40 backdrop-blur-[1px] z-10">
           <button
             type="button"
             onClick={handlePlayClick}
@@ -103,38 +115,17 @@ export default function MovieCard({ item, priority = false }: Props) {
               <path d="M5 3l14 9-14 9V3z" />
             </svg>
           </button>
+        </div>
 
-          {/* Love / Favorite Button */}
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              toggleFavorite(item);
-            }}
-            className={`w-11 h-11 rounded-full flex items-center justify-center backdrop-blur-md border transform scale-90 group-hover:scale-100 hover:scale-110 transition-all duration-200 cursor-pointer ${
-              fav
-                ? "bg-red-600 text-white border-red-500 shadow-[0_0_20px_rgba(229,9,20,0.8)]"
-                : "bg-black/60 text-white hover:text-red-400 border-white/20 hover:border-red-500/50 hover:bg-black/80"
-            }`}
-            aria-label={fav ? "Hapus dari favorit" : "Tambah ke favorit"}
-            title={fav ? "Hapus dari favorit" : "Tambah ke favorit"}
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill={fav ? "currentColor" : "none"}
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className={`transition-transform duration-200 ${fav ? "scale-110" : ""}`}
-              aria-hidden
-            >
-              <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-            </svg>
-          </button>
+        {/* Bottom Title on Poster */}
+        <div className="absolute bottom-0 inset-x-0 p-2 sm:p-2.5 z-10 pointer-events-none">
+          <h3 className="text-xs font-bold text-white line-clamp-1 group-hover:text-red-400 transition-colors drop-shadow-md">
+            {title}
+          </h3>
+          <div className="flex items-center gap-1.5 text-[9px] text-zinc-400 font-medium">
+            <span>{type === "series" ? "Series" : "Movie"}</span>
+            {year && <span>• {year}</span>}
+          </div>
         </div>
       </div>
     </Link>
