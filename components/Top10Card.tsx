@@ -35,7 +35,7 @@ export default function Top10Card({ item, rank, priority = false }: Props) {
     <Link
       href={href}
       onClick={handleCardClick}
-      className="group flex items-end relative transition-all duration-300 ease-out hover:-translate-y-2 select-none cursor-pointer"
+      className="group flex items-end relative transition-all duration-300 ease-out hover:-translate-y-2 active:scale-[0.97] select-none cursor-pointer"
       aria-label={`Rank ${rank}: ${title}${year ? " (" + year + ")" : ""}`}
     >
       {/* Giant Stylized Rank Number */}

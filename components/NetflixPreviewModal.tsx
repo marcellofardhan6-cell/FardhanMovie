@@ -502,23 +502,6 @@ export default function NetflixPreviewModal() {
 
               <button
                 type="button"
-                onClick={toggleOrientation}
-                className={`w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-all cursor-pointer shrink-0 shadow-md ${
-                  isForcedLandscape ? "bg-red-600 text-white shadow-red-900/50" : "bg-white/10 hover:bg-white/20 text-white"
-                }`}
-                title={isForcedLandscape ? "Kembalikan Orientasi Layar" : "Putar Layar ke Landscape"}
-                aria-label="Mode Landscape"
-              >
-                <svg width="14" height="14" className="sm:w-[17px] sm:h-[17px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                  <path d="M3 3v5h5" />
-                  <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
-                  <path d="M16 21h5v-5" />
-                </svg>
-              </button>
-
-              <button
-                type="button"
                 onClick={toggleFullscreen}
                 className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all cursor-pointer shrink-0 shadow-md"
                 title="Toggle Layar Penuh"
@@ -549,7 +532,7 @@ export default function NetflixPreviewModal() {
 
       {/* 2. AUTHENTIC NETFLIX PREVIEW MODAL */}
       <div
-        className={`fixed inset-0 z-[120] items-center justify-center p-0 sm:p-4 md:p-6 bg-black/80 backdrop-blur-sm overflow-y-auto animate-fadeIn ${
+        className={`fixed inset-0 z-[120] items-center justify-center p-0 sm:p-4 md:p-6 bg-black/80 backdrop-blur-sm overflow-y-auto animate-netflix-backdrop ${
           isTheaterOpen ? "hidden" : "flex"
         }`}
         role="dialog"
@@ -558,7 +541,7 @@ export default function NetflixPreviewModal() {
         onClick={closePreview}
       >
         <div
-          className="relative w-full max-w-4xl max-h-[100vh] sm:max-h-[92vh] overflow-y-auto rounded-none sm:rounded-xl my-auto bg-[#181818] text-white shadow-[0_25px_80px_rgba(0,0,0,0.95)] select-none scrollbar-thin scrollbar-thumb-zinc-700"
+          className="relative w-full max-w-4xl max-h-[100vh] sm:max-h-[92vh] overflow-y-auto rounded-none sm:rounded-xl my-auto bg-[#181818] text-white shadow-[0_25px_80px_rgba(0,0,0,0.95)] select-none scrollbar-thin scrollbar-thumb-zinc-700 animate-netflix-modal"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Netflix Circular Close Button */}

@@ -40,7 +40,7 @@ export default function MovieCard({ item, priority = false }: Props) {
     <Link
       href={href}
       onClick={handleCardClick}
-      className="group block relative rounded-xl overflow-hidden transition-all duration-300 ease-out hover:-translate-y-1.5 focus-visible:ring-2 focus-visible:ring-red-500 cursor-pointer select-none"
+      className="group block relative rounded-xl overflow-hidden transition-all duration-300 ease-out hover:-translate-y-1.5 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-red-500 cursor-pointer select-none"
       style={{
         background: "var(--surface)",
         border: "1px solid rgba(255, 255, 255, 0.08)",

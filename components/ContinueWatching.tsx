@@ -98,7 +98,7 @@ export default function ContinueWatching() {
           return (
             <div
               key={`${item.type}-${item.id}`}
-              className="relative shrink-0 scroll-snap-item group w-[220px] sm:w-[260px] rounded-xl overflow-hidden bg-[#0e1017] border border-white/[0.08] hover:border-white/20 transition-all shadow-xl select-none"
+              className="relative shrink-0 scroll-snap-item group w-[220px] sm:w-[260px] rounded-xl overflow-hidden bg-[#0e1017] border border-white/[0.08] hover:border-white/20 active:scale-[0.97] transition-all duration-300 shadow-xl select-none"
               role="listitem"
             >
               <Link

@@ -42,7 +42,7 @@ export default function LandscapeCard({ item, priority = false }: Props) {
     <Link
       href={href}
       onClick={handleCardClick}
-      className="group block relative rounded-xl overflow-hidden bg-[#0c0e15] border border-white/[0.08] hover:border-red-500/40 transition-all duration-300 ease-out hover:-translate-y-1.5 focus-visible:ring-2 focus-visible:ring-red-500 shadow-lg select-none cursor-pointer"
+      className="group block relative rounded-xl overflow-hidden bg-[#0c0e15] border border-white/[0.08] hover:border-red-500/40 transition-all duration-300 ease-out hover:-translate-y-1.5 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-red-500 shadow-lg select-none cursor-pointer"
       aria-label={`${title}${year ? " (" + year + ")" : ""}`}
     >
       {/* 16:9 Backdrop Container */}
