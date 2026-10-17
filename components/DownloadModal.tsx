@@ -86,6 +86,11 @@ export default function DownloadModal({
       ? `https://cinesrc.st/embed/movie/${id}`
       : `https://cinesrc.st/embed/tv/${id}?s=${season}&e=${episode}`;
 
+  const vidlinkUrl =
+    type === "movie"
+      ? `https://vidlink.pro/movie/${id}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914`
+      : `https://vidlink.pro/tv/${id}/${season}/${episode}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914`;
+
   const vidsrcwikiUrl =
     type === "movie"
       ? `https://vidsrc.wiki/embed/movie/${id}`
@@ -314,6 +319,32 @@ export default function DownloadModal({
                     className="py-1 px-2.5 rounded-md text-[11px] font-semibold bg-red-600/20 hover:bg-red-600 text-red-300 hover:text-white border border-red-500/30 transition-colors"
                   >
                     {copiedKey === "cinesrc" ? "Copied!" : "Copy Link"}
+                  </button>
+                </div>
+              </div>
+
+              {/* VidLink */}
+              <div className="p-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <span className="font-bold text-white text-xs block truncate">VidLink</span>
+                  <span className="text-[10px] text-zinc-400">Server 2 (Fast Stream &amp; Autoplay)</span>
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <a
+                    href={vidlinkUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="py-1 px-2.5 rounded-md text-[11px] font-bold bg-white/[0.08] hover:bg-white/[0.15] text-white transition-colors"
+                  >
+                    Open Player
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => copyToClipboard(vidlinkUrl, "vidlink")}
+                    className="py-1 px-2.5 rounded-md text-[11px] font-semibold bg-white/[0.06] hover:bg-white/[0.12] text-zinc-300 hover:text-white border border-white/10 transition-colors"
+                  >
+                    {copiedKey === "vidlink" ? "Copied!" : "Copy Link"}
                   </button>
                 </div>
               </div>

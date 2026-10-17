@@ -116,7 +116,7 @@ export default function NetflixPreviewModal() {
   const [selectedSeason, setSelectedSeason] = useState(1);
   const [selectedEpisode, setSelectedEpisode] = useState(1);
   const [isTheaterOpen, setIsTheaterOpen] = useState(false);
-  const [activeServer, setActiveServer] = useState<"cinesrc" | "vidsrcwiki">("cinesrc");
+  const [activeServer, setActiveServer] = useState<"cinesrc" | "vidlink" | "vidsrcwiki">("cinesrc");
   const [controlsVisible, setControlsVisible] = useState(true);
   const [isForcedLandscape, setIsForcedLandscape] = useState(false);
   const [isMobilePortrait, setIsMobilePortrait] = useState(false);
@@ -620,13 +620,17 @@ export default function NetflixPreviewModal() {
   const seasonEpisodes = seasonEpisodesMap[selectedSeason] || [];
   const matchPercent = Math.min(99, Math.max(85, Math.round((rating || 7.5) * 10) + 12));
 
-  // Build stream URL for the 2 active servers (CineSrc as primary)
+  // Build stream URL for active servers (CineSrc as primary, VidLink as server 2)
   const idStr = String(activeItem.id);
   const streamUrl =
     activeServer === "cinesrc"
       ? resolvedType === "tv"
         ? `https://cinesrc.st/embed/tv/${idStr}?s=${selectedSeason}&e=${selectedEpisode}`
         : `https://cinesrc.st/embed/movie/${idStr}`
+      : activeServer === "vidlink"
+      ? resolvedType === "tv"
+        ? `https://vidlink.pro/tv/${idStr}/${selectedSeason}/${selectedEpisode}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914`
+        : `https://vidlink.pro/movie/${idStr}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914`
       : resolvedType === "tv"
       ? `https://vidsrc.wiki/embed/tv/${idStr}/${selectedSeason}/${selectedEpisode}`
       : `https://vidsrc.wiki/embed/movie/${idStr}`;
@@ -700,7 +704,7 @@ export default function NetflixPreviewModal() {
               </button>
 
               <div className="min-w-0">
-                <h2 className="text-xs sm:text-base font-semibold sm:font-bold text-white truncate drop-shadow-md max-w-[120px] sm:max-w-xs md:max-w-md">
+                <h2 className="text-xs sm:text-base font-semibold sm:font-bold text-white truncate drop-shadow-md max-w-[85px] sm:max-w-xs md:max-w-md">
                   {title}
                 </h2>
                 {resolvedType === "tv" && (
@@ -728,6 +732,18 @@ export default function NetflixPreviewModal() {
                 </button>
                 <button
                   type="button"
+                  onClick={() => setActiveServer("vidlink")}
+                  className={`px-2 py-1 sm:px-3 sm:py-1.5 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-bold transition-all cursor-pointer ${
+                    activeServer === "vidlink"
+                      ? "bg-red-600 text-white shadow-md"
+                      : "text-zinc-300 hover:text-white"
+                  }`}
+                >
+                  <span>VidLink</span>
+                  <span className="hidden sm:inline"> (Server 2)</span>
+                </button>
+                <button
+                  type="button"
                   onClick={() => setActiveServer("vidsrcwiki")}
                   className={`px-2 py-1 sm:px-3 sm:py-1.5 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-bold transition-all cursor-pointer ${
                     activeServer === "vidsrcwiki"
@@ -736,7 +752,7 @@ export default function NetflixPreviewModal() {
                   }`}
                 >
                   <span>VidSrc</span>
-                  <span className="hidden sm:inline"> (Server 2)</span>
+                  <span className="hidden sm:inline"> (Server 3)</span>
                 </button>
               </div>
 
