@@ -47,7 +47,7 @@ export default function SupportModal() {
       aria-labelledby="support-dialog-title"
     >
       <div
-        className="relative w-full max-w-[420px] rounded-2xl bg-[#07080b] border border-white/[0.1] text-white p-3 sm:p-4 shadow-2xl my-auto animate-fade-in flex flex-col"
+        className="relative w-full max-w-[460px] sm:max-w-[500px] rounded-2xl bg-[#07080b] border border-white/[0.1] text-white p-2.5 sm:p-3.5 shadow-2xl my-auto animate-fade-in flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Floating Close Button */}
