@@ -21,8 +21,8 @@ export default function AnimeGenreExplorer({ activeGenre = "", className = "" }:
         href="/anime"
         className={`px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all whitespace-nowrap shrink-0 cursor-pointer ${
           !activeGenre
-            ? "bg-[#FF6400] text-black font-bold shadow-md shadow-[#FF6400]/25"
-            : "bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 hover:text-white border border-white/[0.08] hover:border-[#FF6400]/40"
+            ? "bg-red-600 text-white font-bold shadow-md shadow-red-950/40"
+            : "bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 hover:text-white border border-white/[0.08] hover:border-red-500/40"
         }`}
       >
         All
@@ -35,8 +35,8 @@ export default function AnimeGenreExplorer({ activeGenre = "", className = "" }:
             href={`/anime?genre=${g.id}`}
             className={`px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all whitespace-nowrap shrink-0 cursor-pointer ${
               isActive
-                ? "bg-[#FF6400] text-black font-bold shadow-md shadow-[#FF6400]/25"
-                : "bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 hover:text-white border border-white/[0.08] hover:border-[#FF6400]/40"
+                ? "bg-red-600 text-white font-bold shadow-md shadow-red-950/40"
+                : "bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 hover:text-white border border-white/[0.08] hover:border-red-500/40"
             }`}
           >
             {g.name}

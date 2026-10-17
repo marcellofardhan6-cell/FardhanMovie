@@ -36,7 +36,7 @@ export default function Logo({
     lg: "text-2xl sm:text-3xl",
   }[size];
 
-  const accentColor = isAnime ? "#FF6400" : "#E50914";
+  const accentColor = "#E50914";
 
   const content = (
     <div className={`inline-flex items-center gap-2 group select-none transition-all duration-300 ${className}`}>
@@ -74,14 +74,11 @@ export default function Logo({
             </span>
           </div>
 
-          {/* Crunchyroll Style Anime Badge */}
+          {/* Clean Red & White Anime Badge */}
           {isAnime && (
-            <div className="flex items-center ml-2.5 gap-1.5 animate-fade-in">
-              <span className="px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-black tracking-wider bg-[#FF6400] text-black uppercase shadow-sm">
+            <div className="flex items-center ml-2 sm:ml-2.5 animate-fade-in">
+              <span className="px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-black tracking-wider bg-red-600 text-white uppercase shadow-sm">
                 ANIME
-              </span>
-              <span className="hidden sm:inline-block text-[11px] font-bold text-[#FF6400]">
-                アニメ
               </span>
             </div>
           )}
@@ -96,7 +93,7 @@ export default function Logo({
     <Link
       href={targetHref}
       aria-label={isAnime ? "FardTV Anime - Home" : "FardTV - Home"}
-      className="inline-block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6400] rounded"
+      className="inline-block focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 rounded"
     >
       {content}
     </Link>

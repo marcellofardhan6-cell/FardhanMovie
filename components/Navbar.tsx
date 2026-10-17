@@ -178,9 +178,7 @@ export default function Navbar() {
                         href={isAnimeMode ? "/anime" : "/genres"}
                         className={`text-sm tracking-wide transition-colors flex items-center gap-1 ${
                           isActive
-                            ? isAnimeMode
-                              ? "text-[#FF6400] font-bold"
-                              : "text-white font-medium"
+                            ? "text-white font-medium"
                             : "text-zinc-400 hover:text-zinc-200"
                         }`}
                         aria-current={isActive ? "page" : undefined}
@@ -211,9 +209,7 @@ export default function Navbar() {
                             </span>
                             <Link
                               href={isAnimeMode ? "/anime" : "/genres"}
-                              className={`text-[10px] font-bold transition-colors ${
-                                isAnimeMode ? "text-[#FF6400] hover:text-[#ff7b1a]" : "text-red-400 hover:text-red-300"
-                              }`}
+                              className="text-[10px] font-bold text-red-400 hover:text-red-300 transition-colors"
                             >
                               All &rarr;
                             </Link>
@@ -224,7 +220,7 @@ export default function Navbar() {
                                   <Link
                                     key={g.id}
                                     href={`/anime?genre=${g.id}`}
-                                    className="px-2.5 py-1.5 rounded-lg text-xs text-zinc-300 hover:text-[#FF6400] hover:bg-white/[0.06] transition-colors truncate"
+                                    className="px-2.5 py-1.5 rounded-lg text-xs text-zinc-300 hover:text-red-400 hover:bg-white/[0.06] transition-colors truncate"
                                   >
                                     {g.name}
                                   </Link>
@@ -311,31 +307,6 @@ export default function Navbar() {
                         </div>
                       </div>
                     </div>
-                  );
-                }
-                if (link.href === "/anime") {
-                  return (
-                    <Link
-                      key={link.href}
-                      href="/anime"
-                      className={`text-sm tracking-wide transition-all duration-200 flex items-center gap-1.5 ${
-                        isActive
-                          ? "text-[#FF6400] font-black"
-                          : "text-zinc-400 hover:text-[#FF6400]"
-                      }`}
-                      aria-current={isActive ? "page" : undefined}
-                    >
-                      <span>Anime</span>
-                      <span
-                        className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded transition-colors ${
-                          isActive
-                            ? "bg-[#FF6400] text-black"
-                            : "bg-white/[0.08] text-zinc-400 group-hover:text-white"
-                        }`}
-                      >
-                        JP
-                      </span>
-                    </Link>
                   );
                 }
                 return (
@@ -718,22 +689,13 @@ export default function Navbar() {
           </Link>
           <Link
             href="/anime"
-            className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
-              pathname.startsWith("/anime") || isAnimeTheme
-                ? "bg-[#FF6400] text-black font-black shadow-md shadow-[#FF6400]/25 ring-1 ring-[#FF6400]/50"
+            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 ${
+              pathname.startsWith("/anime")
+                ? "bg-white/20 text-white shadow-sm ring-1 ring-white/30 backdrop-blur-sm"
                 : "text-zinc-300 hover:text-white drop-shadow-sm"
             }`}
           >
-            <span>Anime</span>
-            <span
-              className={`text-[8px] px-1 py-0.2 rounded font-black ${
-                pathname.startsWith("/anime") || isAnimeTheme
-                  ? "bg-black text-[#FF6400]"
-                  : "bg-white/10 text-zinc-400"
-              }`}
-            >
-              JP
-            </span>
+            Anime
           </Link>
           <Link
             href="/series"
@@ -788,7 +750,7 @@ export default function Navbar() {
                         aria-current={isActive ? "page" : undefined}
                       >
                         <span>{isAnimeMode ? "Anime Genres" : "Genres"}</span>
-                        <span className={`text-[10px] font-bold uppercase tracking-wider ${isAnimeMode ? "text-[#FF6400]" : "text-zinc-500"}`}>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
                           All &rarr;
                         </span>
                       </Link>
@@ -799,7 +761,7 @@ export default function Navbar() {
                                 key={g.id}
                                 href={`/anime?genre=${g.id}`}
                                 onClick={() => setMenuOpen(false)}
-                                className="text-xs text-center py-2 px-1 rounded-lg bg-white/[0.04] hover:bg-[#FF6400]/20 text-zinc-300 hover:text-[#FF6400] border border-white/[0.08] truncate font-medium transition-colors"
+                                className="text-xs text-center py-2 px-1 rounded-lg bg-white/[0.04] hover:bg-red-600/20 text-zinc-300 hover:text-white border border-white/[0.08] truncate font-medium transition-colors"
                               >
                                 {g.name}
                               </Link>

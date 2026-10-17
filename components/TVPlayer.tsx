@@ -159,23 +159,15 @@ export default function TVPlayer({
 
       {/* Auto-Next Countdown Toast */}
       {autoNextToast && (
-        <div
-          className={`p-3 rounded-xl text-xs font-bold flex items-center justify-between shadow-2xl animate-fade-in backdrop-blur-md ${
-            isAnimeTheme
-              ? "bg-[#FF6400] text-black shadow-[#FF6400]/30"
-              : "bg-red-600/90 text-white"
-          }`}
-        >
+        <div className="p-3 rounded-xl text-xs font-bold flex items-center justify-between shadow-2xl animate-fade-in backdrop-blur-md bg-red-600/90 text-white shadow-red-950/40">
           <div className="flex items-center gap-2">
-            <span className={`w-2.5 h-2.5 rounded-full animate-ping ${isAnimeTheme ? "bg-black" : "bg-white"}`} />
+            <span className="w-2.5 h-2.5 rounded-full animate-ping bg-white" />
             <span>{autoNextToast}</span>
           </div>
           <button
             type="button"
             onClick={() => setAutoNextToast(null)}
-            className={`px-2 py-0.5 rounded text-[11px] font-bold ${
-              isAnimeTheme ? "bg-black/20 hover:bg-black/35 text-black" : "bg-black/30 hover:bg-black/50 text-white"
-            }`}
+            className="px-2 py-0.5 rounded text-[11px] font-bold bg-black/30 hover:bg-black/50 text-white"
           >
             Cancel
           </button>
@@ -212,13 +204,7 @@ export default function TVPlayer({
 
         {/* Center: Current Episode Status & Auto-Next Toggle */}
         <div className="flex items-center gap-2 text-center min-w-0 px-1">
-          <span
-            className={`px-2.5 py-1 rounded-md text-xs font-black tracking-wider shrink-0 ${
-              isAnimeTheme
-                ? "bg-[#FF6400]/20 text-[#FF6400] border border-[#FF6400]/30"
-                : "bg-red-600/20 text-red-400 border border-red-500/30"
-            }`}
-          >
+          <span className="px-2.5 py-1 rounded-md text-xs font-black tracking-wider shrink-0 bg-red-600/20 text-red-400 border border-red-500/30">
             S{currentSeason} : E{currentEpisode}
           </span>
           {currentEpisodeData?.name && (
@@ -245,11 +231,7 @@ export default function TVPlayer({
           type="button"
           onClick={handleNextEpisode}
           disabled={!canNext}
-          className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs font-bold transition-all disabled:opacity-30 disabled:pointer-events-none cursor-pointer ${
-            isAnimeTheme
-              ? "bg-[#FF6400] hover:bg-[#ff7b1a] text-black font-black shadow-lg shadow-[#FF6400]/30"
-              : "bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-600/30"
-          }`}
+          className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs font-bold transition-all disabled:opacity-30 disabled:pointer-events-none cursor-pointer bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-600/30"
           aria-label="Next Episode"
         >
           <span className="hidden xs:inline">Next Episode</span>

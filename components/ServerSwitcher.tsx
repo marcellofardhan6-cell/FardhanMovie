@@ -289,13 +289,7 @@ export default function ServerSwitcher(props: Props) {
   return (
     <section aria-label="Video player" className="relative w-full">
       {/* Ambient Cinema Theater Glow behind the player */}
-      <div
-        className={`absolute -inset-3 rounded-3xl blur-2xl opacity-50 pointer-events-none transition-all duration-500 ${
-          isAnimeTheme
-            ? "bg-gradient-to-r from-[#FF6400]/25 via-[#FF8C00]/15 to-[#FF4500]/20"
-            : "bg-gradient-to-r from-red-600/10 via-red-500/5 to-red-700/10"
-        }`}
-      />
+      <div className="absolute -inset-3 rounded-3xl blur-2xl opacity-50 pointer-events-none transition-all duration-500 bg-gradient-to-r from-red-600/15 via-red-500/10 to-red-700/15" />
 
       {/* Main Player Container */}
       <div className="relative rounded-2xl overflow-hidden border border-white/[0.08] bg-[#0c0e15] shadow-2xl">

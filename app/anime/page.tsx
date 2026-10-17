@@ -90,7 +90,7 @@ export default async function AnimePage({ searchParams }: Props) {
                   {currentGenreInfo?.name && (
                     <>
                       <span>/</span>
-                      <span className="text-[#FF6400] font-bold">{currentGenreInfo.name}</span>
+                      <span className="text-red-400 font-bold">{currentGenreInfo.name}</span>
                     </>
                   )}
                 </nav>
@@ -189,7 +189,7 @@ export default async function AnimePage({ searchParams }: Props) {
             {/* Filter Bar with Sort Selector */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-[#0c0e15] border border-white/[0.08]">
               <div className="flex items-center gap-3">
-                <span className="w-10 h-10 rounded-xl bg-[#FF6400]/15 border border-[#FF6400]/30 flex items-center justify-center text-[#FF6400] text-xs font-black font-mono shrink-0">
+                <span className="w-10 h-10 rounded-xl bg-red-600/15 border border-red-500/30 flex items-center justify-center text-red-400 text-xs font-black font-mono shrink-0">
                   {currentGenreInfo?.jpName || "ALL"}
                 </span>
                 <div>
@@ -219,7 +219,7 @@ export default async function AnimePage({ searchParams }: Props) {
                       href={`/anime?${queryParams.toString()}`}
                       className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap shrink-0 ${
                         isCurrentSort
-                          ? "bg-[#FF6400] text-black font-bold shadow-sm"
+                          ? "bg-red-600 text-white font-bold shadow-sm"
                           : "bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white border border-white/[0.06]"
                       }`}
                     >

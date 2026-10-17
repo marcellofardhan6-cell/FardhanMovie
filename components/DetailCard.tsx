@@ -85,7 +85,7 @@ export default function DetailCard({
                 {title}
               </h1>
               {isAnime && (
-                <span className="px-2.5 py-0.5 rounded text-[10px] sm:text-xs font-black tracking-wider bg-[#FF6400] text-black uppercase shadow-md shadow-[#FF6400]/25 shrink-0">
+                <span className="px-2.5 py-0.5 rounded text-[10px] sm:text-xs font-black tracking-wider bg-red-600 text-white uppercase shadow-md shadow-red-950/40 shrink-0">
                   ANIME
                 </span>
               )}
@@ -145,7 +145,7 @@ export default function DetailCard({
                       href={genreHref}
                       className={`px-3 py-1 rounded-full text-xs font-medium transition-colors cursor-pointer ${
                         isHighlight
-                          ? "bg-[#FF6400]/15 text-[#FF6400] border border-[#FF6400]/40 font-bold shadow-sm hover:bg-[#FF6400]/25"
+                          ? "bg-red-600/15 text-red-400 border border-red-500/40 font-bold shadow-sm hover:bg-red-600/25"
                           : "text-zinc-300 bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 hover:border-white/20 hover:text-white"
                       }`}
                     >
@@ -164,11 +164,7 @@ export default function DetailCard({
                 <Link
                   href={resolvedWatchHref}
                   onClick={handleWatchClick}
-                  className={`inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base font-extrabold transition-all shadow-xl active:scale-95 cursor-pointer ${
-                    isAnime
-                      ? "bg-[#FF6400] hover:bg-[#ff7b1a] text-black shadow-[#FF6400]/30"
-                      : "bg-white hover:bg-zinc-200 text-black shadow-white/10"
-                  }`}
+                  className="inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base font-extrabold transition-all shadow-xl active:scale-95 cursor-pointer bg-white hover:bg-zinc-200 text-black shadow-white/10"
                   title="Watch Now"
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>

@@ -88,7 +88,7 @@ export default function AnimeSchedule({ items }: Props) {
               onClick={() => setActiveDay(d.key)}
               className={`px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 flex items-center gap-1.5 cursor-pointer ${
                 isSelected
-                  ? "bg-[#FF6400] text-black shadow-md shadow-[#FF6400]/25 font-black"
+                  ? "bg-red-600 text-white shadow-md shadow-red-950/40 font-black"
                   : "bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white border border-white/[0.06]"
               }`}
             >
@@ -96,7 +96,7 @@ export default function AnimeSchedule({ items }: Props) {
               {isToday && (
                 <span
                   className={`text-[9px] px-1.5 py-0.2 rounded-full font-black uppercase tracking-wider ${
-                    isSelected ? "bg-black text-[#FF6400]" : "bg-[#FF6400]/20 text-[#FF6400]"
+                    isSelected ? "bg-black text-white" : "bg-red-600/20 text-red-400"
                   }`}
                 >
                   Today
@@ -137,7 +137,7 @@ function ScheduleCard({ item, idx }: { item: Movie; idx: number }) {
     <Link
       href={`/series/${item.id}`}
       onClick={handleClick}
-      className="group block rounded-xl overflow-hidden bg-[#131620] border border-white/[0.08] hover:border-[#FF6400]/60 transition-all duration-300 hover:-translate-y-1 cursor-pointer select-none"
+      className="group block rounded-xl overflow-hidden bg-[#131620] border border-white/[0.08] hover:border-red-500/60 transition-all duration-300 hover:-translate-y-1 cursor-pointer select-none"
     >
       {/* Poster with Airing Badge */}
       <div className="relative aspect-[3/4] w-full overflow-hidden bg-black/40">
@@ -155,8 +155,8 @@ function ScheduleCard({ item, idx }: { item: Movie; idx: number }) {
           {airingHours} JST
         </div>
 
-        {/* Episode Badge in Crunchyroll Orange */}
-        <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md text-[10px] font-black bg-[#FF6400] text-black shadow-sm">
+        {/* Episode Badge in Red */}
+        <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded-md text-[10px] font-black bg-red-600 text-white shadow-sm">
           EP {episodeNumber}
         </div>
 
@@ -167,7 +167,7 @@ function ScheduleCard({ item, idx }: { item: Movie; idx: number }) {
 
       {/* Info */}
       <div className="p-3">
-        <h3 className="text-xs sm:text-sm font-bold text-white line-clamp-1 group-hover:text-[#FF6400] transition-colors">
+        <h3 className="text-xs sm:text-sm font-bold text-white line-clamp-1 group-hover:text-red-400 transition-colors">
           {title}
         </h3>
         <p className="text-[11px] text-zinc-400 mt-0.5 line-clamp-1">

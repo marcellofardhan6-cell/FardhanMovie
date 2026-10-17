@@ -171,11 +171,7 @@ export default function Hero({ items, item, isAnime }: Props) {
           <div className="w-full max-w-2xl mx-auto md:mx-0 flex flex-col items-center md:items-start text-center md:text-left">
             {/* Tag / Category Badge */}
             <div className="inline-flex items-center gap-2 mb-1.5 sm:mb-2">
-              <span
-                className={`px-2.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider shadow-sm transition-colors ${
-                  isAnimePage ? "bg-[#FF6400] text-black" : "bg-red-600 text-white"
-                }`}
-              >
+              <span className="px-2.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider shadow-sm transition-colors bg-red-600 text-white">
                 {isAnimePage ? "Anime Spotlight" : "Top Featured"}
               </span>
               <span className="text-xs text-zinc-400 font-semibold">
@@ -243,11 +239,7 @@ export default function Hero({ items, item, isAnime }: Props) {
                   e.preventDefault();
                   openPreview(currentItem, true);
                 }}
-                className={`inline-flex items-center justify-center gap-2 font-bold px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm transition-all shadow-xl active:scale-95 cursor-pointer ${
-                  isAnimePage
-                    ? "bg-[#FF6400] hover:bg-[#ff7b1a] text-black shadow-[#FF6400]/25"
-                    : "bg-white hover:bg-zinc-200 text-black shadow-white/10"
-                }`}
+                className="inline-flex items-center justify-center gap-2 font-bold px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm transition-all shadow-xl active:scale-95 cursor-pointer bg-white hover:bg-zinc-200 text-black shadow-white/10"
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M5 3l14 9-14 9V3z" />
@@ -308,9 +300,7 @@ export default function Hero({ items, item, isAnime }: Props) {
                 aria-label={`Go to slide ${idx + 1}: ${displayTitle(m)}`}
                 className={`transition-all duration-300 rounded-full cursor-pointer ${
                   idx === currentIndex
-                    ? isAnimePage
-                      ? "w-6 sm:w-8 h-1.5 bg-[#FF6400] shadow-[0_0_10px_rgba(255,100,0,0.6)]"
-                      : "w-6 sm:w-8 h-1.5 bg-white shadow-sm"
+                    ? "w-6 sm:w-8 h-1.5 bg-white shadow-sm"
                     : "w-1.5 sm:w-2 h-1.5 sm:h-2 bg-white/35 hover:bg-white/70"
                 }`}
               />
