@@ -64,7 +64,7 @@ export default function ContinueWatching() {
             : `/film/${item.id}${currentSec > 15 ? `?startAt=${Math.floor(currentSec)}` : ""}`;
 
           const imageSrc = item.backdrop_path
-            ? backdrop(item.backdrop_path)
+            ? backdrop(item.backdrop_path, "w780")
             : img(item.poster_path ?? null, "w500");
 
           const timeText =

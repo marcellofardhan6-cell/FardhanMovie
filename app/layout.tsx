@@ -185,6 +185,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="id" className={`${inter.variable} ${fraunces.variable}`}>
       <head>
+        <link rel="preconnect" href="https://image.tmdb.org" />
+        <link rel="dns-prefetch" href="https://image.tmdb.org" />
+        <link rel="dns-prefetch" href="https://vidlink.pro" />
+        <link rel="dns-prefetch" href="https://cinesrc.st" />
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
         <link rel="icon" type="image/png" sizes="48x48" href="/icon-48.png" />
         <link rel="icon" type="image/png" sizes="96x96" href="/icon-96.png" />

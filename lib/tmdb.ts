@@ -643,9 +643,12 @@ export function img(path: string | null, size: string = "w500"): string {
   return `https://image.tmdb.org/t/p/${size}${path}`;
 }
 
-export function backdrop(path: string | null): string {
+export function backdrop(
+  path: string | null,
+  size: "w300" | "w780" | "w1280" | "original" = "w1280"
+): string {
   if (!path) return "/backdrop-placeholder.svg";
-  return `https://image.tmdb.org/t/p/original${path}`;
+  return `https://image.tmdb.org/t/p/${size}${path}`;
 }
 
 export function displayTitle(item: Movie): string {
