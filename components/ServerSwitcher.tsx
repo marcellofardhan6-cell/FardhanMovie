@@ -43,14 +43,14 @@ function buildServerUrl(server: Server, props: Props, isAnimeTheme?: boolean, st
         : `https://vidsrc.wiki/embed/tv/${id}/${season}/${episode}`;
     default:
       return type === "movie"
-        ? `https://vidlink.pro/movie/${id}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914`
-        : `https://vidlink.pro/tv/${id}/${season}/${episode}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914`;
+        ? `https://cinesrc.st/embed/movie/${id}`
+        : `https://cinesrc.st/embed/tv/${id}?s=${season}&e=${episode}`;
   }
 }
 
 const SERVERS: Server[] = [
-  { id: 1, name: "VidLink", key: "vidlink", badge: "Primary" },
-  { id: 2, name: "CineSrc", key: "cinesrc", badge: "Server 2" },
+  { id: 1, name: "CineSrc", key: "cinesrc", badge: "Primary" },
+  { id: 2, name: "VidLink", key: "vidlink", badge: "Server 2" },
   { id: 3, name: "VidSrc Wiki", key: "vidsrcwiki", badge: "Server 3" },
 ];
 

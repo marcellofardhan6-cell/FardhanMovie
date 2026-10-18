@@ -116,7 +116,7 @@ export default function NetflixPreviewModal() {
   const [selectedSeason, setSelectedSeason] = useState(1);
   const [selectedEpisode, setSelectedEpisode] = useState(1);
   const [isTheaterOpen, setIsTheaterOpen] = useState(false);
-  const [activeServer, setActiveServer] = useState<"vidlink" | "cinesrc" | "vidsrcwiki">("vidlink");
+  const [activeServer, setActiveServer] = useState<"cinesrc" | "vidlink" | "vidsrcwiki">("cinesrc");
   const [controlsVisible, setControlsVisible] = useState(true);
   const [serverDropdownOpen, setServerDropdownOpen] = useState(false);
   const [serverHintVisible, setServerHintVisible] = useState(false);
@@ -578,7 +578,7 @@ export default function NetflixPreviewModal() {
         setSelectedSeason(initialSeason || 1);
         setSelectedEpisode(initialEpisode || 1);
         setIsTheaterOpen(false);
-        setActiveServer("vidlink");
+        setActiveServer("cinesrc");
         fetchDetail(activeItem.id, resolvedType, initialSeason || 1);
 
         if (autoPlay) {
@@ -650,17 +650,17 @@ export default function NetflixPreviewModal() {
   const seasonEpisodes = seasonEpisodesMap[selectedSeason] || [];
   const matchPercent = Math.min(99, Math.max(85, Math.round((rating || 7.5) * 10) + 12));
 
-  // Build stream URL for active servers (VidLink as primary, CineSrc as server 2)
+  // Build stream URL for active servers (CineSrc as primary, VidLink as server 2)
   const idStr = String(activeItem.id);
   const streamUrl =
-    activeServer === "vidlink"
-      ? resolvedType === "tv"
-        ? `https://vidlink.pro/tv/${idStr}/${selectedSeason}/${selectedEpisode}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914`
-        : `https://vidlink.pro/movie/${idStr}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914`
-      : activeServer === "cinesrc"
+    activeServer === "cinesrc"
       ? resolvedType === "tv"
         ? `https://cinesrc.st/embed/tv/${idStr}?s=${selectedSeason}&e=${selectedEpisode}`
         : `https://cinesrc.st/embed/movie/${idStr}`
+      : activeServer === "vidlink"
+      ? resolvedType === "tv"
+        ? `https://vidlink.pro/tv/${idStr}/${selectedSeason}/${selectedEpisode}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914`
+        : `https://vidlink.pro/movie/${idStr}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914`
       : resolvedType === "tv"
       ? `https://vidsrc.wiki/embed/tv/${idStr}/${selectedSeason}/${selectedEpisode}`
       : `https://vidsrc.wiki/embed/movie/${idStr}`;
@@ -752,10 +752,10 @@ export default function NetflixPreviewModal() {
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
                   <span className="text-[11px] sm:text-xs">
-                    {activeServer === "vidlink"
-                      ? "VidLink"
-                      : activeServer === "cinesrc"
+                    {activeServer === "cinesrc"
                       ? "CineSrc"
+                      : activeServer === "vidlink"
+                      ? "VidLink"
                       : "VidSrc"}
                   </span>
                   <svg
@@ -791,38 +791,6 @@ export default function NetflixPreviewModal() {
                     </div>
 
                     <div className="p-1 space-y-1">
-                      {/* VidLink */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setActiveServer("vidlink");
-                          setServerDropdownOpen(false);
-                        }}
-                        className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs transition-colors cursor-pointer text-left ${
-                          activeServer === "vidlink"
-                            ? "bg-red-600 text-white font-bold"
-                            : "text-zinc-300 hover:text-white hover:bg-white/[0.08]"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`w-2 h-2 rounded-full ${
-                              activeServer === "vidlink" ? "bg-white" : "bg-emerald-500"
-                            }`}
-                          />
-                          <span>VidLink</span>
-                        </div>
-                        <span
-                          className={`text-[9px] px-1.5 py-0.5 rounded font-semibold ${
-                            activeServer === "vidlink"
-                              ? "bg-black/30 text-white"
-                              : "bg-white/[0.08] text-zinc-400"
-                          }`}
-                        >
-                          Server 1 (Utama)
-                        </span>
-                      </button>
-
                       {/* CineSrc */}
                       <button
                         type="button"
@@ -839,7 +807,7 @@ export default function NetflixPreviewModal() {
                         <div className="flex items-center gap-2">
                           <span
                             className={`w-2 h-2 rounded-full ${
-                              activeServer === "cinesrc" ? "bg-white" : "bg-amber-400"
+                              activeServer === "cinesrc" ? "bg-white" : "bg-emerald-500"
                             }`}
                           />
                           <span>CineSrc</span>
@@ -847,6 +815,38 @@ export default function NetflixPreviewModal() {
                         <span
                           className={`text-[9px] px-1.5 py-0.5 rounded font-semibold ${
                             activeServer === "cinesrc"
+                              ? "bg-black/30 text-white"
+                              : "bg-white/[0.08] text-zinc-400"
+                          }`}
+                        >
+                          Server 1 (Utama)
+                        </span>
+                      </button>
+
+                      {/* VidLink */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveServer("vidlink");
+                          setServerDropdownOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs transition-colors cursor-pointer text-left ${
+                          activeServer === "vidlink"
+                            ? "bg-red-600 text-white font-bold"
+                            : "text-zinc-300 hover:text-white hover:bg-white/[0.08]"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`w-2 h-2 rounded-full ${
+                              activeServer === "vidlink" ? "bg-white" : "bg-amber-400"
+                            }`}
+                          />
+                          <span>VidLink</span>
+                        </div>
+                        <span
+                          className={`text-[9px] px-1.5 py-0.5 rounded font-semibold ${
+                            activeServer === "vidlink"
                               ? "bg-black/30 text-white"
                               : "bg-white/[0.08] text-zinc-400"
                           }`}
