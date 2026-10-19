@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -35,6 +35,9 @@ export default function Hero({ items, item, isAnime }: Props) {
   const [detailOpen, setDetailOpen] = useState(false);
   const [clientLogos, setClientLogos] = useState<Record<number, string | null>>({});
 
+  const touchStartXRef = useRef<number | null>(null);
+  const touchStartYRef = useRef<number | null>(null);
+
   const currentItem = heroList[currentIndex] || heroList[0];
 
   const nextSlide = useCallback(() => {
@@ -44,6 +47,31 @@ export default function Hero({ items, item, isAnime }: Props) {
   const prevSlide = useCallback(() => {
     setCurrentIndex((prev) => (prev - 1 + heroList.length) % heroList.length);
   }, [heroList.length]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartXRef.current = e.touches[0].clientX;
+    touchStartYRef.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartXRef.current === null || touchStartYRef.current === null) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+    const diffX = touchEndX - touchStartXRef.current;
+    const diffY = touchEndY - touchStartYRef.current;
+
+    // Detect horizontal swipe with minimum threshold of 40px
+    if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY) * 1.2) {
+      if (diffX < 0) {
+        nextSlide();
+      } else {
+        prevSlide();
+      }
+    }
+
+    touchStartXRef.current = null;
+    touchStartYRef.current = null;
+  };
 
   // Client-side fallback: fetch logo if not already attached on server
   useEffect(() => {
@@ -86,7 +114,9 @@ export default function Hero({ items, item, isAnime }: Props) {
   return (
     <>
       <section
-        className="relative w-full overflow-hidden select-none group/hero h-[66vh] sm:h-[72vh] min-h-[480px] sm:min-h-[520px] max-h-[580px] sm:max-h-[620px] bg-[#06070a]"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        className="relative w-full overflow-hidden select-none group/hero h-[66vh] sm:h-[72vh] min-h-[480px] sm:min-h-[520px] max-h-[580px] sm:max-h-[620px] bg-[#06070a] touch-pan-y"
         aria-label={`Featured: ${title}`}
       >
         {/* Full Backdrop / Poster with smooth cross-fade */}
@@ -166,7 +196,7 @@ export default function Hero({ items, item, isAnime }: Props) {
 
         {/* Hero Content Container */}
         <div
-          className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-end z-10 h-full pb-6 sm:pb-8 pt-16 sm:pt-20"
+          className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-end z-10 h-full pb-9 sm:pb-8 pt-16 sm:pt-20"
         >
           <div className="w-full max-w-2xl mx-auto md:mx-0 flex flex-col items-center md:items-start text-center md:text-left">
             {/* Tag / Category Badge */}
@@ -286,10 +316,37 @@ export default function Hero({ items, item, isAnime }: Props) {
           </div>
         </div>
 
-        {/* Slide Indicator Dots (Bottom Right matching 7reels layout) */}
+        {/* Navigation Chevrons on Hover (Desktop) */}
+        {heroList.length > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={prevSlide}
+              aria-label="Previous slide"
+              className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/40 hover:bg-black/80 text-white/70 hover:text-white backdrop-blur-md border border-white/10 items-center justify-center opacity-0 group-hover/hero:opacity-100 transition-all duration-200 active:scale-95 cursor-pointer"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="m15 18-6-6 6-6" />
+              </svg>
+            </button>
+
+            <button
+              type="button"
+              onClick={nextSlide}
+              aria-label="Next slide"
+              className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/40 hover:bg-black/80 text-white/70 hover:text-white backdrop-blur-md border border-white/10 items-center justify-center opacity-0 group-hover/hero:opacity-100 transition-all duration-200 active:scale-95 cursor-pointer"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="m9 18 6-6-6-6" />
+              </svg>
+            </button>
+          </>
+        )}
+
+        {/* Slide Indicator Dots (Centered on mobile, right-aligned on desktop) */}
         {heroList.length > 1 && (
           <div
-            className="absolute bottom-4 sm:bottom-5 right-4 sm:right-6 z-20 flex items-center gap-1.5 sm:gap-2"
+            className="absolute bottom-2.5 sm:bottom-5 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:right-8 z-20 flex items-center gap-1.5 sm:gap-2 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-md border border-white/10 md:bg-transparent md:backdrop-blur-none md:border-none md:p-0"
             aria-label="Slide indicators"
           >
             {heroList.map((m, idx) => (
@@ -301,7 +358,7 @@ export default function Hero({ items, item, isAnime }: Props) {
                 className={`transition-all duration-300 rounded-full cursor-pointer ${
                   idx === currentIndex
                     ? "w-6 sm:w-8 h-1.5 bg-white shadow-sm"
-                    : "w-1.5 sm:w-2 h-1.5 sm:h-2 bg-white/35 hover:bg-white/70"
+                    : "w-1.5 sm:w-2 h-1.5 sm:h-2 bg-white/40 hover:bg-white/80"
                 }`}
               />
             ))}
