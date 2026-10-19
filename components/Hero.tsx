@@ -316,32 +316,7 @@ export default function Hero({ items, item, isAnime }: Props) {
           </div>
         </div>
 
-        {/* Navigation Chevrons on Hover (Desktop) */}
-        {heroList.length > 1 && (
-          <>
-            <button
-              type="button"
-              onClick={prevSlide}
-              aria-label="Previous slide"
-              className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/40 hover:bg-black/80 text-white/70 hover:text-white backdrop-blur-md border border-white/10 items-center justify-center opacity-0 group-hover/hero:opacity-100 transition-all duration-200 active:scale-95 cursor-pointer"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="m15 18-6-6 6-6" />
-              </svg>
-            </button>
 
-            <button
-              type="button"
-              onClick={nextSlide}
-              aria-label="Next slide"
-              className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/40 hover:bg-black/80 text-white/70 hover:text-white backdrop-blur-md border border-white/10 items-center justify-center opacity-0 group-hover/hero:opacity-100 transition-all duration-200 active:scale-95 cursor-pointer"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="m9 18 6-6-6-6" />
-              </svg>
-            </button>
-          </>
-        )}
 
         {/* Slide Indicator Dots (Centered on mobile, right-aligned on desktop) */}
         {heroList.length > 1 && (
