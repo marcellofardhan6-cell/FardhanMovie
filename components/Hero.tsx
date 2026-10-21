@@ -210,22 +210,22 @@ export default function Hero({ items, item, isAnime }: Props) {
             </div>
 
             {/* Title: Official TMDB Graphic Logo (if available) or Stylized Fraunces Typography */}
-            <div className="mb-2 sm:mb-2.5 min-h-[42px] sm:min-h-[50px] md:min-h-[62px] flex items-center justify-center md:justify-start">
+            <div className="mb-2 sm:mb-2.5 min-h-[44px] sm:min-h-[52px] md:min-h-[65px] flex items-center justify-center md:justify-start">
               {currentLogo ? (
-                <div className="relative h-11 sm:h-[50px] md:h-[60px] lg:h-[70px] max-w-[200px] sm:max-w-[260px] md:max-w-[320px] lg:max-w-[350px] w-auto">
+                <div className="relative h-[46px] sm:h-[54px] md:h-[65px] lg:h-[75px] max-w-[210px] sm:max-w-[270px] md:max-w-[340px] lg:max-w-[370px] w-auto">
                   <Image
                     key={`hero-logo-${currentItem.id}`}
                     src={`https://image.tmdb.org/t/p/original${currentLogo}`}
                     alt={`Logo ${title}`}
-                    width={350}
-                    height={100}
+                    width={370}
+                    height={105}
                     priority={currentIndex === 0}
-                    className="h-full w-auto max-h-11 sm:max-h-[50px] md:max-h-[60px] lg:max-h-[70px] object-contain object-center md:object-left drop-shadow-[0_4px_20px_rgba(0,0,0,0.95)] animate-fade-in"
+                    className="h-full w-auto max-h-[46px] sm:max-h-[54px] md:max-h-[65px] lg:max-h-[75px] object-contain object-center md:object-left drop-shadow-[0_4px_20px_rgba(0,0,0,0.95)] animate-fade-in"
                   />
                 </div>
               ) : (
                 <h1
-                  className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-white tracking-tight leading-[1.12] drop-shadow-2xl animate-fade-in"
+                  className="text-2xl sm:text-3xl md:text-[34px] lg:text-[42px] font-black text-white tracking-tight leading-[1.1] drop-shadow-2xl animate-fade-in"
                   style={{ fontFamily: "var(--font-fraunces)" }}
                 >
                   {title}
