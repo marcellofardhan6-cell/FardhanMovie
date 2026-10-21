@@ -116,7 +116,7 @@ export default function Hero({ items, item, isAnime }: Props) {
       <section
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        className="relative w-full overflow-hidden select-none group/hero h-[66vh] sm:h-[72vh] min-h-[480px] sm:min-h-[520px] max-h-[580px] sm:max-h-[620px] bg-[#06070a] touch-pan-y"
+        className="relative w-full overflow-hidden select-none group/hero h-[66vh] sm:h-[74vh] min-h-[480px] sm:min-h-[540px] max-h-[600px] sm:max-h-[660px] bg-[#06070a] touch-pan-y"
         aria-label={`Featured: ${title}`}
       >
         {/* Full Backdrop / Poster with smooth cross-fade */}
@@ -210,22 +210,22 @@ export default function Hero({ items, item, isAnime }: Props) {
             </div>
 
             {/* Title: Official TMDB Graphic Logo (if available) or Stylized Fraunces Typography */}
-            <div className="mb-2 sm:mb-2.5 min-h-[44px] sm:min-h-[56px] md:min-h-[68px] flex items-center justify-center md:justify-start">
+            <div className="mb-2.5 sm:mb-3 min-h-[56px] sm:min-h-[72px] md:min-h-[96px] flex items-center justify-center md:justify-start">
               {currentLogo ? (
-                <div className="relative h-11 sm:h-14 md:h-16 max-w-[220px] sm:max-w-[280px] md:max-w-[340px] w-auto">
+                <div className="relative h-16 sm:h-24 md:h-32 lg:h-36 max-w-[280px] sm:max-w-[380px] md:max-w-[500px] lg:max-w-[560px] w-auto">
                   <Image
                     key={`hero-logo-${currentItem.id}`}
                     src={`https://image.tmdb.org/t/p/original${currentLogo}`}
                     alt={`Logo ${title}`}
-                    width={340}
-                    height={85}
+                    width={560}
+                    height={180}
                     priority={currentIndex === 0}
-                    className="h-full w-auto max-h-11 sm:max-h-14 md:max-h-16 object-contain object-center md:object-left drop-shadow-[0_4px_20px_rgba(0,0,0,0.95)] animate-fade-in"
+                    className="h-full w-auto max-h-16 sm:max-h-24 md:max-h-32 lg:max-h-36 object-contain object-center md:object-left drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)] animate-fade-in"
                   />
                 </div>
               ) : (
                 <h1
-                  className="text-2xl sm:text-3xl md:text-5xl font-black text-white tracking-tight leading-[1.1] drop-shadow-2xl animate-fade-in"
+                  className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.08] drop-shadow-2xl animate-fade-in"
                   style={{ fontFamily: "var(--font-fraunces)" }}
                 >
                   {title}
