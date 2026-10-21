@@ -645,7 +645,7 @@ export function img(path: string | null, size: string = "w500"): string {
 
 export function backdrop(
   path: string | null,
-  size: "w300" | "w780" | "w1280" | "original" = "w1280"
+  size: "w300" | "w780" | "w1280" | "original" = "original"
 ): string {
   if (!path) return "/backdrop-placeholder.svg";
   return `https://image.tmdb.org/t/p/${size}${path}`;

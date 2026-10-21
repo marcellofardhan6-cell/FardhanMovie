@@ -122,8 +122,8 @@ export default function Hero({ items, item, isAnime }: Props) {
         {/* Full Backdrop / Poster with smooth cross-fade */}
         {heroList.map((m, idx) => {
           const isCurrent = idx === currentIndex;
-          const bgPoster = m.poster_path ? img(m.poster_path, "w780") : null;
-          const bgBackdrop = m.backdrop_path ? backdrop(m.backdrop_path, "w1280") : null;
+          const bgPoster = m.poster_path ? img(m.poster_path, "original") : null;
+          const bgBackdrop = m.backdrop_path ? backdrop(m.backdrop_path, "original") : null;
 
           return (
             <div

@@ -961,7 +961,7 @@ export default function NetflixPreviewModal() {
           <div className="relative w-full h-[210px] sm:h-[280px] md:h-[320px] overflow-hidden bg-black">
             {backdropUrl ? (
               <Image
-                src={`https://image.tmdb.org/t/p/w1280${backdropUrl}`}
+                src={`https://image.tmdb.org/t/p/original${backdropUrl}`}
                 alt={title}
                 fill
                 priority
@@ -1310,14 +1310,14 @@ export default function NetflixPreviewModal() {
                       <div className="relative aspect-video w-full overflow-hidden bg-zinc-900">
                         {rec.backdrop_path ? (
                           <Image
-                            src={`https://image.tmdb.org/t/p/w500${rec.backdrop_path}`}
+                            src={`https://image.tmdb.org/t/p/w780${rec.backdrop_path}`}
                             alt={displayTitle(rec)}
                             fill
                             className="object-cover group-hover:scale-105 transition-transform duration-300"
                           />
                         ) : rec.poster_path ? (
                           <Image
-                            src={`https://image.tmdb.org/t/p/w342${rec.poster_path}`}
+                            src={`https://image.tmdb.org/t/p/w500${rec.poster_path}`}
                             alt={displayTitle(rec)}
                             fill
                             className="object-cover group-hover:scale-105 transition-transform duration-300"

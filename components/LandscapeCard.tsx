@@ -21,7 +21,7 @@ export default function LandscapeCard({ item, priority = false }: Props) {
   const type = item.media_type === "tv" || isTV(item) ? "series" : "movie";
   const href = `/${type === "movie" ? "film" : "series"}/${item.id}`;
   const imageUrl = item.backdrop_path
-    ? backdrop(item.backdrop_path, "w780")
+    ? backdrop(item.backdrop_path, "w1280")
     : img(item.poster_path, "w500");
   const [imgSrc, setImgSrc] = useState(imageUrl);
   const rating = item.vote_average ? item.vote_average.toFixed(1) : null;
