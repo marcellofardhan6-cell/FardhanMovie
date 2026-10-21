@@ -120,7 +120,7 @@ export default function AnimeSchedule({ items }: Props) {
 function ScheduleCard({ item, idx }: { item: Movie; idx: number }) {
   const { openPreview } = usePreviewModal();
   const title = displayTitle(item);
-  const posterUrl = img(item.poster_path, "w500");
+  const posterUrl = img(item.poster_path, "w780");
   const [imgSrc, setImgSrc] = useState(posterUrl);
   const episodeNumber = ((item.id % 24) || 12) + (idx % 2);
   const airingHours = ["17:30", "18:00", "19:30", "20:00", "21:30", "22:00"][

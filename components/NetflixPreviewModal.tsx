@@ -1144,9 +1144,9 @@ export default function NetflixPreviewModal() {
                     {seasonEpisodes.map((ep) => {
                       const isActive = selectedEpisode === ep.episode_number;
                       const thumb = ep.still_path
-                        ? `https://image.tmdb.org/t/p/w300${ep.still_path}`
+                        ? `https://image.tmdb.org/t/p/original${ep.still_path}`
                         : backdropUrl
-                        ? `https://image.tmdb.org/t/p/w300${backdropUrl}`
+                        ? `https://image.tmdb.org/t/p/original${backdropUrl}`
                         : null;
 
                       return (
@@ -1267,7 +1267,7 @@ export default function NetflixPreviewModal() {
                       <div className="relative w-14 h-14 rounded-full overflow-hidden mb-2 border border-white/15 bg-zinc-800 flex items-center justify-center shadow-md">
                         {actor.profile_path ? (
                           <Image
-                            src={img(actor.profile_path, "w185")}
+                            src={img(actor.profile_path, "h632")}
                             alt={actor.name}
                             width={56}
                             height={56}
@@ -1317,7 +1317,7 @@ export default function NetflixPreviewModal() {
                           />
                         ) : rec.poster_path ? (
                           <Image
-                            src={`https://image.tmdb.org/t/p/w500${rec.poster_path}`}
+                            src={`https://image.tmdb.org/t/p/w780${rec.poster_path}`}
                             alt={displayTitle(rec)}
                             fill
                             className="object-cover group-hover:scale-105 transition-transform duration-300"

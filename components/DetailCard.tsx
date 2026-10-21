@@ -45,7 +45,7 @@ export default function DetailCard({
 }: Props) {
   const [showMore, setShowMore] = useState(false);
   const [downloadOpen, setDownloadOpen] = useState(false);
-  const [posterSrc, setPosterSrc] = useState(img(posterPath, "w500"));
+  const [posterSrc, setPosterSrc] = useState(img(posterPath, "w780"));
 
   const displayRating = rating > 0 ? rating.toFixed(1) : null;
   const targetRoute = type === "tv" ? "/series" : "/films";
@@ -236,7 +236,7 @@ export default function DetailCard({
                 <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden mb-2 border border-white/10 bg-[#1e2029] shadow-md flex items-center justify-center">
                   {actor.profile_path ? (
                     <Image
-                      src={img(actor.profile_path, "w185")}
+                      src={img(actor.profile_path, "h632")}
                       alt={actor.name}
                       width={64}
                       height={64}

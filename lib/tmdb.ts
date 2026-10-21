@@ -638,7 +638,7 @@ export async function getLatestUploads(params?: {
 }
 
 // ---- Image Helpers ----
-export function img(path: string | null, size: string = "w500"): string {
+export function img(path: string | null, size: string = "w780"): string {
   if (!path) return "/poster-placeholder.svg";
   return `https://image.tmdb.org/t/p/${size}${path}`;
 }

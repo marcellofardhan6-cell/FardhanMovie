@@ -37,6 +37,11 @@ body {
   overscroll-behavior-x: none;
 }
 
+/* Crisp edge and optimal contrast image downsampling */
+img {
+  image-rendering: -webkit-optimize-contrast;
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 7px;

@@ -21,7 +21,7 @@ export default function Top10Card({ item, rank, priority = false }: Props) {
   const year = displayYear(item);
   const type = item.media_type === "tv" || isTV(item) ? "series" : "movie";
   const href = `/${type === "movie" ? "film" : "series"}/${item.id}`;
-  const posterUrl = img(item.poster_path, "w500");
+  const posterUrl = img(item.poster_path, "w780");
   const [imgSrc, setImgSrc] = useState(posterUrl);
   const rating = item.vote_average ? item.vote_average.toFixed(1) : null;
 

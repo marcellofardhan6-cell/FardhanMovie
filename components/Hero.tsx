@@ -215,7 +215,7 @@ export default function Hero({ items, item, isAnime }: Props) {
                 <div className="relative h-11 sm:h-14 md:h-16 max-w-[220px] sm:max-w-[280px] md:max-w-[340px] w-auto">
                   <Image
                     key={`hero-logo-${currentItem.id}`}
-                    src={`https://image.tmdb.org/t/p/w500${currentLogo}`}
+                    src={`https://image.tmdb.org/t/p/original${currentLogo}`}
                     alt={`Logo ${title}`}
                     width={340}
                     height={85}
