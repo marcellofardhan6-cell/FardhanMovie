@@ -1,7 +1,5 @@
 import {
   getTrending,
-  getPopularMovies,
-  getPopularTV,
   getAnime,
   getTopRatedMovies,
   getLatestUploads,
@@ -29,8 +27,8 @@ export default async function HomePage() {
     latestID,
   ] = await Promise.all([
     getTrending("all", "day").catch(() => ({ results: EMPTY, total_pages: 0, total_results: 0, page: 1 })),
-    getPopularMovies().catch(() => ({ results: EMPTY, total_pages: 0, total_results: 0, page: 1 })),
-    getPopularTV().catch(() => ({ results: EMPTY, total_pages: 0, total_results: 0, page: 1 })),
+    getTrending("movie", "week").catch(() => ({ results: EMPTY, total_pages: 0, total_results: 0, page: 1 })),
+    getTrending("tv", "week").catch(() => ({ results: EMPTY, total_pages: 0, total_results: 0, page: 1 })),
     getAnime().catch(() => ({ results: EMPTY, total_pages: 0, total_results: 0, page: 1 })),
     getTopRatedMovies().catch(() => ({ results: EMPTY, total_pages: 0, total_results: 0, page: 1 })),
     getLatestUploads({ type: "movie" }).catch(() => EMPTY),
