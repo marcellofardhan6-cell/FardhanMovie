@@ -15,7 +15,7 @@ async function tmdbGet(url: string): Promise<Response> {
   return fetch(url, {
     headers,
     signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-    next: { revalidate: 3600 },
+    next: { revalidate: 1800 },
   });
 }
 
@@ -153,7 +153,7 @@ export interface CreditsResponse {
 
 // ---- API Functions ----
 
-export async function getTrending(type: "all" | "movie" | "tv" = "all", timeWindow: "day" | "week" = "week") {
+export async function getTrending(type: "all" | "movie" | "tv" = "all", timeWindow: "day" | "week" = "day") {
   return tmdbFetch<TMDBResponse<Movie>>(`/trending/${type}/${timeWindow}`);
 }
 

@@ -13,7 +13,7 @@ import Carousel from "@/components/Carousel";
 import ContinueWatching from "@/components/ContinueWatching";
 import LatestUploads from "@/components/LatestUploads";
 
-export const revalidate = 3600;
+export const revalidate = 1800;
 
 const EMPTY: Movie[] = [];
 
@@ -28,7 +28,7 @@ export default async function HomePage() {
     latestTV,
     latestID,
   ] = await Promise.all([
-    getTrending("all", "week").catch(() => ({ results: EMPTY, total_pages: 0, total_results: 0, page: 1 })),
+    getTrending("all", "day").catch(() => ({ results: EMPTY, total_pages: 0, total_results: 0, page: 1 })),
     getPopularMovies().catch(() => ({ results: EMPTY, total_pages: 0, total_results: 0, page: 1 })),
     getPopularTV().catch(() => ({ results: EMPTY, total_pages: 0, total_results: 0, page: 1 })),
     getAnime().catch(() => ({ results: EMPTY, total_pages: 0, total_results: 0, page: 1 })),
