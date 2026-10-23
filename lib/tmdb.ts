@@ -1,12 +1,47 @@
 const TMDB_BASE = "https://api.themoviedb.org/3";
 const TOKEN = process.env.TMDB_READ_ACCESS_TOKEN!;
-/** TMDB kadang lelet dari jaringan Indonesia — abort cepat biar UI gak nunggu lama */
-const FETCH_TIMEOUT_MS = 8000;
+/** Timeout cepat 4 detik agar request server tidak hang/menunggu lama */
+const FETCH_TIMEOUT_MS = 4000;
 
 const headers = {
   Authorization: `Bearer ${TOKEN}`,
   "Content-Type": "application/json",
 };
+
+// High-speed In-Memory Cache to serve repeated requests in 0ms without hitting network
+interface CacheEntry<T> {
+  data: T;
+  expiresAt: number;
+  staleAt: number;
+}
+const memoryCache = new Map<string, CacheEntry<any>>();
+const MAX_CACHE_ENTRIES = 300;
+
+function getCached<T>(key: string): { hit: boolean; data?: T; isStale?: boolean } {
+  const entry = memoryCache.get(key);
+  if (!entry) return { hit: false };
+  const now = Date.now();
+  if (now < entry.expiresAt) {
+    return { hit: true, data: entry.data as T, isStale: false };
+  }
+  if (now < entry.staleAt) {
+    return { hit: true, data: entry.data as T, isStale: true };
+  }
+  memoryCache.delete(key);
+  return { hit: false };
+}
+
+function setCached<T>(key: string, data: T, ttlSeconds: number = 1800) {
+  if (memoryCache.size >= MAX_CACHE_ENTRIES) {
+    const keysToDelete = Array.from(memoryCache.keys()).slice(0, 50);
+    keysToDelete.forEach((k) => memoryCache.delete(k));
+  }
+  memoryCache.set(key, {
+    data,
+    expiresAt: Date.now() + ttlSeconds * 1000,
+    staleAt: Date.now() + ttlSeconds * 1000 * 3, // Allow stale fallback if network fails
+  });
+}
 
 async function tmdbGet(url: string): Promise<Response> {
   if (!TOKEN) {
@@ -19,47 +54,42 @@ async function tmdbGet(url: string): Promise<Response> {
   });
 }
 
-async function tmdbFetch<T>(path: string, params?: Record<string, string>): Promise<T> {
+async function tmdbFetch<T>(
+  path: string,
+  params?: Record<string, string>,
+  ttlSeconds: number = 1800
+): Promise<T> {
+  const cacheKey = `${path}?${new URLSearchParams(params || {}).toString()}`;
+  const cached = getCached<T>(cacheKey);
+
+  // Return immediately from RAM in 0ms if fresh
+  if (cached.hit && !cached.isStale) {
+    return cached.data!;
+  }
+
   const url = new URL(`${TMDB_BASE}${path}`);
   url.searchParams.set("language", "en-US");
   if (params) {
     Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
   }
 
-  let res: Response;
   try {
-    res = await tmdbGet(url.toString());
-  } catch {
-    // Timeout / network error: coba sekali lagi sebelum menyerah
-    res = await tmdbGet(url.toString());
-  }
-
-  if (!res.ok) {
-    // Fallback to en-US if id-ID returns error
-    url.searchParams.set("language", "en-US");
-    const fallback = await tmdbGet(url.toString());
-    if (!fallback.ok) throw new Error(`TMDB error: ${res.status} ${path}`);
-    return fallback.json();
-  }
-
-  const data = await res.json();
-
-  // Jika overview kosong (id-ID belum ada terjemahan), ambil en-US.
-  // Cek hanya untuk response detail (punya field overview string).
-  if (typeof data?.overview === "string" && data.overview === "") {
-    url.searchParams.set("language", "en-US");
-    try {
-      const fallback = await tmdbGet(url.toString());
-      if (fallback.ok) {
-        const fallbackData = await fallback.json();
-        return { ...data, overview: fallbackData.overview } as T;
-      }
-    } catch {
-      // fallback gagal — pakai data id-ID apa adanya
+    const res = await tmdbGet(url.toString());
+    if (!res.ok) {
+      if (cached.hit) return cached.data!;
+      throw new Error(`TMDB error: ${res.status} ${path}`);
     }
-  }
 
-  return data;
+    const data = await res.json();
+    setCached(cacheKey, data, ttlSeconds);
+    return data as T;
+  } catch (error) {
+    // If request failed or timed out, gracefully return stale cache if available
+    if (cached.hit) {
+      return cached.data!;
+    }
+    throw error;
+  }
 }
 
 // ---- Types ----
@@ -718,7 +748,7 @@ export async function getTitleLogo(
   try {
     const data = await tmdbFetch<{
       logos?: { file_path: string; iso_639_1: string | null }[];
-    }>(`/${type}/${id}/images`, { include_image_language: "en,null,id" });
+    }>(`/${type}/${id}/images`, { include_image_language: "en,null,id" }, 7200);
     if (!data?.logos || data.logos.length === 0) return null;
     const best =
       data.logos.find((l) => l.iso_639_1 === "en") ||
@@ -733,7 +763,7 @@ export async function getTitleLogo(
 export async function attachTitleLogos(items: Movie[]): Promise<Movie[]> {
   return Promise.all(
     items.map(async (item) => {
-      if (item.logo_path) return item;
+      if (item.logo_path !== undefined) return item;
       const type = item.media_type === "tv" || (!item.title && item.name) ? "tv" : "movie";
       const logoPath = await getTitleLogo(item.id, type);
       return { ...item, logo_path: logoPath };

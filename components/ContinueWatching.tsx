@@ -64,7 +64,7 @@ export default function ContinueWatching() {
             : `/film/${item.id}${currentSec > 15 ? `?startAt=${Math.floor(currentSec)}` : ""}`;
 
           const imageSrc = item.backdrop_path
-            ? backdrop(item.backdrop_path, "original")
+            ? backdrop(item.backdrop_path, "w780")
             : img(item.poster_path ?? null, "w780");
 
           const timeText =
@@ -108,6 +108,8 @@ export default function ContinueWatching() {
                   alt={item.title}
                   fill
                   sizes="260px"
+                  loading="lazy"
+                  decoding="async"
                   className="object-cover object-[center_top] transition-transform duration-300 group-hover:scale-105"
                   unoptimized={imageSrc.startsWith("/")}
                 />

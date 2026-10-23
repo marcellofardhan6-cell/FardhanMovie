@@ -134,11 +134,11 @@ export default function Carousel({
               className={`scroll-snap-item shrink-0 ${itemWidthClass}`}
             >
               {variant === "top10" ? (
-                <Top10Card item={item} rank={i + 1} priority={i < 3} />
+                <Top10Card item={item} rank={i + 1} priority={i < 2} />
               ) : variant === "backdrop" ? (
-                <LandscapeCard item={item} priority={i < 3} />
+                <LandscapeCard item={item} priority={false} />
               ) : (
-                <MovieCard item={item} priority={i < 4} />
+                <MovieCard item={item} priority={false} />
               )}
             </li>
           ))}

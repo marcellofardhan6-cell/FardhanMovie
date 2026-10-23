@@ -30,7 +30,14 @@ export async function GET(request: Request) {
         vote_average: item.vote_average ?? 0,
       }));
 
-    return NextResponse.json({ results: filtered });
+    return NextResponse.json(
+      { results: filtered },
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
+        },
+      }
+    );
   } catch (error) {
     console.error("Live search error:", error);
     return NextResponse.json({ results: [] }, { status: 500 });

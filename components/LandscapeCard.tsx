@@ -21,7 +21,7 @@ export default function LandscapeCard({ item, priority = false }: Props) {
   const type = item.media_type === "tv" || isTV(item) ? "series" : "movie";
   const href = `/${type === "movie" ? "film" : "series"}/${item.id}`;
   const imageUrl = item.backdrop_path
-    ? backdrop(item.backdrop_path, "original")
+    ? backdrop(item.backdrop_path, "w780")
     : img(item.poster_path, "w780");
   const [imgSrc, setImgSrc] = useState(imageUrl);
   const rating = item.vote_average ? item.vote_average.toFixed(1) : null;
@@ -54,6 +54,8 @@ export default function LandscapeCard({ item, priority = false }: Props) {
           sizes="(max-width: 640px) 70vw, (max-width: 1024px) 35vw, 320px"
           className="object-cover object-[center_top] transition-transform duration-500 ease-out group-hover:scale-106"
           priority={priority}
+          loading={priority ? "eager" : "lazy"}
+          decoding="async"
           onError={() => setImgSrc("/backdrop-placeholder.svg")}
         />
 

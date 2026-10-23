@@ -124,11 +124,18 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({
-      items,
-      totalPages: Math.min(totalPages, 500),
-      page,
-    });
+    return NextResponse.json(
+      {
+        items,
+        totalPages: Math.min(totalPages, 500),
+        page,
+      },
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=1800, stale-while-revalidate=900",
+        },
+      }
+    );
   } catch {
     return NextResponse.json({ items: [], totalPages: 1, page }, { status: 500 });
   }

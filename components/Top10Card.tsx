@@ -76,6 +76,8 @@ export default function Top10Card({ item, rank, priority = false }: Props) {
           sizes="(max-width: 640px) 35vw, (max-width: 1024px) 20vw, 170px"
           className="object-cover transition-transform duration-500 ease-out group-hover:scale-108"
           priority={priority}
+          loading={priority ? "eager" : "lazy"}
+          decoding="async"
           onError={() => setImgSrc("/poster-placeholder.svg")}
         />
 

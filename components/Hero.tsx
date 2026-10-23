@@ -76,7 +76,7 @@ export default function Hero({ items, item, isAnime }: Props) {
   // Client-side fallback: fetch logo if not already attached on server
   useEffect(() => {
     heroList.forEach(async (m) => {
-      if (m.logo_path || clientLogos[m.id] !== undefined) return;
+      if (m.logo_path !== undefined || clientLogos[m.id] !== undefined) return;
       try {
         const mType = m.media_type === "tv" || (!m.title && m.name) ? "tv" : "movie";
         const res = await fetch(`/api/logo?id=${m.id}&type=${mType}`);
@@ -86,7 +86,7 @@ export default function Hero({ items, item, isAnime }: Props) {
         setClientLogos((prev) => ({ ...prev, [m.id]: null }));
       }
     });
-  }, [heroList, clientLogos]);
+  }, [heroList]);
 
   // Silky-smooth auto-advance slides every 5.5 seconds
   useEffect(() => {
@@ -122,8 +122,14 @@ export default function Hero({ items, item, isAnime }: Props) {
         {/* Full Backdrop / Poster with smooth cross-fade */}
         {heroList.map((m, idx) => {
           const isCurrent = idx === currentIndex;
-          const bgPoster = m.poster_path ? img(m.poster_path, "original") : null;
-          const bgBackdrop = m.backdrop_path ? backdrop(m.backdrop_path, "original") : null;
+          // Only mount images for current slide and adjacent slides (saves 70% VRAM on Smart TVs)
+          const isAdjacent =
+            idx === (currentIndex + 1) % heroList.length ||
+            (currentIndex === 0 && idx === heroList.length - 1);
+          const shouldMountImage = isCurrent || isAdjacent;
+
+          const bgPoster = m.poster_path ? img(m.poster_path, "w780") : null;
+          const bgBackdrop = m.backdrop_path ? backdrop(m.backdrop_path, "w1280") : null;
 
           return (
             <div
@@ -132,55 +138,19 @@ export default function Hero({ items, item, isAnime }: Props) {
                 isCurrent ? "opacity-100 z-0" : "opacity-0 pointer-events-none"
               }`}
             >
-              {/* Mobile View: Vertical Poster fits portrait phone screens perfectly */}
-              {bgPoster ? (
-                <div className="block sm:hidden absolute inset-0">
-                  <Image
-                    src={bgPoster}
-                    alt={`Poster ${displayTitle(m)}`}
-                    fill
-                    priority={idx === 0}
-                    className="object-cover object-[center_top]"
-                    sizes="100vw"
-                  />
-                </div>
-              ) : bgBackdrop ? (
-                <div className="block sm:hidden absolute inset-0">
-                  <Image
-                    src={bgBackdrop}
+              {shouldMountImage && (
+                <picture className="absolute inset-0 w-full h-full">
+                  {bgPoster && <source media="(max-width: 639px)" srcSet={bgPoster} />}
+                  <img
+                    src={bgBackdrop || bgPoster || ""}
                     alt={`Backdrop ${displayTitle(m)}`}
-                    fill
-                    priority={idx === 0}
-                    className="object-cover object-[center_top]"
-                    sizes="100vw"
+                    loading={idx === 0 ? "eager" : "lazy"}
+                    decoding="async"
+                    fetchPriority={idx === 0 ? "high" : "low"}
+                    className="w-full h-full object-cover object-[center_top] md:object-[center_15%]"
                   />
-                </div>
-              ) : null}
-
-              {/* Tablet & Desktop View: Wide Landscape Backdrop */}
-              {bgBackdrop ? (
-                <div className="hidden sm:block absolute inset-0">
-                  <Image
-                    src={bgBackdrop}
-                    alt={`Backdrop ${displayTitle(m)}`}
-                    fill
-                    priority={idx === 0}
-                    className="object-cover object-[center_top] md:object-[center_15%]"
-                    sizes="100vw"
-                  />
-                </div>
-              ) : bgPoster ? (
-                <div className="hidden sm:block absolute inset-0">
-                  <Image
-                    src={bgPoster}
-                    alt={`Poster ${displayTitle(m)}`}
-                    fill
-                    priority={idx === 0}
-                    className="object-cover object-[center_top]"
-                    sizes="100vw"
-                  />
-                </div>
-              ) : null}
+                </picture>
+              )}
 
               {/* Subtle top shade for navbar legibility */}
               <div className="absolute top-0 left-0 right-0 h-28 bg-gradient-to-b from-black/80 via-black/40 to-transparent pointer-events-none z-[2]" />

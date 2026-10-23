@@ -56,6 +56,8 @@ export default function MovieCard({ item, priority = false }: Props) {
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 220px"
           className="object-cover transition-transform duration-500 ease-out group-hover:scale-108"
           priority={priority}
+          loading={priority ? "eager" : "lazy"}
+          decoding="async"
           onError={() => setImgSrc("/poster-placeholder.svg")}
         />
 
