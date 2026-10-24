@@ -1,4 +1,4 @@
-import { discoverMovies, getMovieGenres, getNowPlaying } from "@/lib/tmdb";
+import { discoverMovies, getMovieGenres } from "@/lib/tmdb";
 import InfiniteMovieGrid from "@/components/InfiniteMovieGrid";
 import FilterBar from "@/components/FilterBar";
 import { Suspense } from "react";
@@ -39,10 +39,12 @@ export default async function FilmsPage({ searchParams }: Props) {
       ? "vote_average.desc"
       : "popularity.desc";
 
-  const fetchPromise =
-    sortParam === "latest" && !genre && !year && !country
-      ? getNowPlaying(1).catch(() => ({ results: [], total_pages: 0, total_results: 0, page: 1 }))
-      : discoverMovies({ genre, year, country, sort_by: sort, page: 1 }).catch(() => ({ results: [], total_pages: 0, total_results: 0, page: 1 }));
+  const fetchPromise = discoverMovies({ genre, year, country, sort_by: sort, page: 1 }).catch(() => ({
+    results: [],
+    total_pages: 0,
+    total_results: 0,
+    page: 1,
+  }));
 
   const [data, genres] = await Promise.all([
     fetchPromise,

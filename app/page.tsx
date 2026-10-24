@@ -45,11 +45,19 @@ export default async function HomePage() {
   const animeList = anime.results.filter((m) => Boolean(m.backdrop_path));
   const topRatedList = topRated.results.filter((m) => Boolean(m.poster_path));
 
-  const latestAll = [...latestMovies, ...latestTV].sort((a, b) => {
+  const latestSeen = new Set<number>();
+  const latestAll: Movie[] = [];
+  const combinedLatest = [...latestMovies, ...latestTV, ...latestID].sort((a, b) => {
     const dateA = a.release_date || a.first_air_date || "";
     const dateB = b.release_date || b.first_air_date || "";
     return dateB.localeCompare(dateA);
   });
+  for (const item of combinedLatest) {
+    if (!latestSeen.has(item.id)) {
+      latestSeen.add(item.id);
+      latestAll.push(item);
+    }
+  }
 
   return (
     <>

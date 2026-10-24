@@ -64,7 +64,13 @@ export default function LatestUploads({
             >
               Latest Releases
             </h2>
+            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+              Upload Terbaru
+            </span>
           </div>
+          <p className="text-xs text-zinc-400 mt-1">
+            Fresh cinema &amp; digital WEB-DL releases updated daily
+          </p>
         </div>
 
         {/* Filter Tabs */}

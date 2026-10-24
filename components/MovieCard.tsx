@@ -59,8 +59,8 @@ export default function MovieCard({ item, priority = false }: Props) {
           onError={() => setImgSrc("/poster-placeholder.svg")}
         />
 
-        {/* Ambient Dark Gradient Base (Reveals on Hover for Text Contrast) */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10" />
+        {/* Ambient Dark Gradient Base (Reveals on Hover for Text Contrast, always active on mobile) */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/25 to-transparent opacity-85 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10" />
 
         {/* Floating Top Rating Badge */}
         {rating && (
@@ -71,6 +71,13 @@ export default function MovieCard({ item, priority = false }: Props) {
             <span>{rating}</span>
           </div>
         )}
+
+        {/* Quality Badge (Ngefilm21 Style: WEB-DL / BluRay) - Desktop Idle State */}
+        <div className="hidden sm:block absolute bottom-2 left-2 z-20 pointer-events-none transition-opacity duration-300 group-hover:opacity-0">
+          <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wide bg-emerald-600/90 text-white shadow-md border border-emerald-400/30 backdrop-blur-sm">
+            {item.vote_count && item.vote_count > 100 && year && Number(year) < 2024 ? "BluRay" : "WEB-DL"}
+          </span>
+        </div>
 
         {/* Floating Favorite Heart Icon Top-Right (Always Visible & Clickable) */}
         <button
@@ -119,15 +126,20 @@ export default function MovieCard({ item, priority = false }: Props) {
           </button>
         </div>
 
-        {/* Bottom Title & Details on Poster (Reveals on Hover) */}
-        <div className="absolute bottom-0 inset-x-0 p-2 sm:p-2.5 z-20 pointer-events-none transform translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ease-out">
+        {/* Bottom Title & Details on Poster (Always Visible on Mobile, Hover on Desktop) */}
+        <div className="absolute bottom-0 inset-x-0 p-2 sm:p-2.5 z-20 pointer-events-none transform translate-y-0 sm:translate-y-2 opacity-100 sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100 transition-all duration-300 ease-out">
+          <div className="flex items-center gap-1.5 mb-1">
+            <span className="px-1.5 py-0.2 rounded text-[8px] font-extrabold uppercase tracking-wide bg-emerald-600/90 text-white shadow-sm border border-emerald-400/30">
+              {item.vote_count && item.vote_count > 100 && year && Number(year) < 2024 ? "BluRay" : "WEB-DL"}
+            </span>
+            <span className="text-[9px] text-zinc-300 font-medium">
+              {type === "series" ? "Series" : "Movie"}
+            </span>
+            {year && <span className="text-[9px] text-zinc-400">• {year}</span>}
+          </div>
           <h3 className="text-xs font-bold text-white line-clamp-1 group-hover:text-red-400 transition-colors drop-shadow-md">
             {title}
           </h3>
-          <div className="flex items-center gap-1.5 text-[9px] text-zinc-300 font-medium drop-shadow-sm">
-            <span>{type === "series" ? "Series" : "Movie"}</span>
-            {year && <span>• {year}</span>}
-          </div>
         </div>
       </div>
     </Link>

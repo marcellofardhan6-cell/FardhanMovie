@@ -481,26 +481,23 @@ export async function discoverMovies(params: {
     p["primary_release_date.lte"] = today;
   }
 
-  // Quality filters against AI slop and 0-vote amateur uploads
+  // Quality filters against 0-data noise while allowing genuine recent releases
   if (params.country) {
     p.with_origin_country = params.country;
-    p.with_release_type = "2|3|4";
     if (params.country === "ID") {
       p.with_original_language = "id";
-      p["vote_count.gte"] = "15";
-      p["popularity.gte"] = "1.0";
+      p["vote_count.gte"] = "1";
+      p["popularity.gte"] = "0.5";
     } else {
-      // Regional cinema
-      p["vote_count.gte"] = "15";
-      p["popularity.gte"] = "2.0";
+      p["vote_count.gte"] = params.sort_by === "primary_release_date.desc" ? "1" : "5";
+      p["popularity.gte"] = "1.0";
     }
   } else {
-    // Global catalog: strict anti-AI thresholds
+    // Global catalog: allow genuine new releases with 1+ votes
     if (params.sort_by === "primary_release_date.desc") {
-      p.with_release_type = "2|3|4";
       p["primary_release_date.lte"] = today;
-      p["vote_count.gte"] = "25";
-      p["popularity.gte"] = "10";
+      p["vote_count.gte"] = "1";
+      p["popularity.gte"] = "1.5";
     } else {
       p["vote_count.gte"] = "10";
       p["popularity.gte"] = "5";
@@ -543,22 +540,22 @@ export async function discoverTV(params: {
     p["first_air_date.lte"] = today;
   }
 
-  // Quality filters against amateur web series & podcasts
+  // Quality filters against noise while allowing genuine recent releases
   if (params.country) {
     p.with_origin_country = params.country;
     if (params.country === "ID") {
       p.with_original_language = "id";
-      p["vote_count.gte"] = "5";
-      p["popularity.gte"] = "2";
+      p["vote_count.gte"] = "1";
+      p["popularity.gte"] = "0.5";
     } else {
-      p["vote_count.gte"] = "8";
-      p["popularity.gte"] = "3";
+      p["vote_count.gte"] = params.sort_by === "first_air_date.desc" ? "1" : "5";
+      p["popularity.gte"] = "1.0";
     }
   } else {
     if (params.sort_by === "first_air_date.desc") {
       p["first_air_date.lte"] = today;
-      p["vote_count.gte"] = "15";
-      p["popularity.gte"] = "8";
+      p["vote_count.gte"] = "1";
+      p["popularity.gte"] = "1.5";
     } else {
       p["vote_count.gte"] = "10";
       p["popularity.gte"] = "5";
@@ -588,38 +585,45 @@ export async function getLatestUploads(params?: {
   const today = new Date().toISOString().split("T")[0];
 
   const fetchMovies = async () => {
-    // If no country specified, now_playing gives the top theatrical & digital hits (Ngefilm21 style)
-    if (!country) {
-      const np = await getNowPlaying(page).catch(() => ({ results: [] as Movie[] }));
-      return (np.results || [])
-        .filter((m) => Boolean(m.poster_path && m.backdrop_path && m.overview && m.overview.trim().length > 15))
-        .map((m) => ({ ...m, media_type: "movie" as const }));
-    }
-
     const q: Record<string, string> = {
       sort_by: "primary_release_date.desc",
       "primary_release_date.lte": today,
       page: String(page),
       include_adult: "false",
-      with_origin_country: country,
-      with_release_type: "2|3|4",
-      "vote_count.gte": country === "ID" ? "15" : "15",
-      "popularity.gte": country === "ID" ? "1.0" : "3.0",
+      "vote_count.gte": "1",
     };
-    if (country === "ID") {
-      q.with_original_language = "id";
+
+    if (country) {
+      q.with_origin_country = country;
+      if (country === "ID") {
+        q.with_original_language = "id";
+        q["popularity.gte"] = "0.5";
+      } else {
+        q["popularity.gte"] = "1.5";
+      }
+    } else {
+      q["popularity.gte"] = "2.0";
     }
 
-    const res = await tmdbFetch<TMDBResponse<Movie>>("/discover/movie", q).catch(() => ({
-      results: [] as Movie[],
-      total_pages: 0,
-      total_results: 0,
-      page,
-    }));
+    // Fetch 2 pages in parallel to guarantee a deep and clean pool of real new releases (Ngefilm21 style)
+    const [res1, res2] = await Promise.all([
+      tmdbFetch<TMDBResponse<Movie>>("/discover/movie", q).catch(() => ({ results: [] as Movie[] })),
+      tmdbFetch<TMDBResponse<Movie>>("/discover/movie", { ...q, page: String(page + 1) }).catch(() => ({ results: [] as Movie[] })),
+    ]);
 
-    return (res.results || [])
-      .filter((m) => Boolean(m.poster_path && m.backdrop_path && m.overview && m.overview.trim().length > 15))
-      .map((m) => ({ ...m, media_type: "movie" as const }));
+    const combined = [...(res1.results || []), ...(res2.results || [])];
+    const seen = new Set<number>();
+    const clean: Movie[] = [];
+
+    for (const m of combined) {
+      if (seen.has(m.id)) continue;
+      seen.add(m.id);
+      if (m.poster_path && m.backdrop_path && m.overview && m.overview.trim().length > 10) {
+        clean.push({ ...m, media_type: "movie" as const });
+      }
+    }
+
+    return clean;
   };
 
   const fetchTV = async () => {
@@ -628,33 +632,44 @@ export async function getLatestUploads(params?: {
       "first_air_date.lte": today,
       page: String(page),
       include_adult: "false",
+      "vote_count.gte": "1",
     };
+
     if (country) {
       q.with_origin_country = country;
       if (country === "ID") {
         q.with_original_language = "id";
-        q["vote_count.gte"] = "5";
-        q["popularity.gte"] = "2";
+        q["popularity.gte"] = "0.5";
       } else {
-        q["vote_count.gte"] = "8";
-        q["popularity.gte"] = "3";
+        q["popularity.gte"] = "1.5";
       }
     } else {
-      q["vote_count.gte"] = "15";
-      q["popularity.gte"] = "8";
+      q["popularity.gte"] = "2.0";
     }
 
-    const res = await tmdbFetch<TMDBResponse<Movie>>("/discover/tv", q).catch(() => ({
-      results: [] as Movie[],
-      total_pages: 0,
-      total_results: 0,
-      page,
-    }));
+    const [res1, res2] = await Promise.all([
+      tmdbFetch<TMDBResponse<Movie>>("/discover/tv", q).catch(() => ({ results: [] as Movie[] })),
+      tmdbFetch<TMDBResponse<Movie>>("/discover/tv", { ...q, page: String(page + 1) }).catch(() => ({ results: [] as Movie[] })),
+    ]);
 
-    return (res.results || [])
-      .filter((m) => Boolean(m.poster_path && m.backdrop_path && m.overview && m.overview.trim().length > 15))
-      .map((m) => ({ ...m, media_type: "tv" as const }));
+    const combined = [...(res1.results || []), ...(res2.results || [])];
+    const seen = new Set<number>();
+    const clean: Movie[] = [];
+
+    for (const t of combined) {
+      if (seen.has(t.id)) continue;
+      seen.add(t.id);
+      if (t.poster_path && t.backdrop_path && t.overview && t.overview.trim().length > 10) {
+        clean.push({ ...t, media_type: "tv" as const });
+      }
+    }
+
+    return clean;
   };
+
+  if (country === "ID") {
+    return fetchMovies();
+  }
 
   if (type === "movie") return fetchMovies();
   if (type === "tv") return fetchTV();
