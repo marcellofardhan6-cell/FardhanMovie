@@ -928,7 +928,7 @@ export default function NetflixPreviewModal() {
               </h1>
 
               {/* Action Buttons */}
-              <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+              <div className="flex items-center gap-2.5 sm:gap-3">
                 {/* Large White Play Button */}
                 <button
                   type="button"
@@ -967,46 +967,6 @@ export default function NetflixPreviewModal() {
                     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                   </svg>
                 </button>
-
-                {/* Server Pre-Selection Pills */}
-                <div className="flex items-center gap-1 bg-black/60 backdrop-blur-md px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg border border-white/15 text-xs">
-                  <span className="text-[10px] sm:text-xs text-zinc-400 font-medium px-1 sm:px-1.5">
-                    Server:
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setActiveServer("cinesrc")}
-                    className={`px-2 py-1 sm:px-2.5 sm:py-1 rounded text-[10px] sm:text-xs font-bold transition-all cursor-pointer ${
-                      activeServer === "cinesrc"
-                        ? "bg-red-600 text-white shadow-sm"
-                        : "text-zinc-300 hover:text-white hover:bg-white/10"
-                    }`}
-                  >
-                    Server 1 (Default)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveServer("vidlink")}
-                    className={`px-2 py-1 sm:px-2.5 sm:py-1 rounded text-[10px] sm:text-xs font-bold transition-all cursor-pointer ${
-                      activeServer === "vidlink"
-                        ? "bg-red-600 text-white shadow-sm"
-                        : "text-zinc-300 hover:text-white hover:bg-white/10"
-                    }`}
-                  >
-                    Server 2
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveServer("vidsrcwiki")}
-                    className={`px-2 py-1 sm:px-2.5 sm:py-1 rounded text-[10px] sm:text-xs font-bold transition-all cursor-pointer ${
-                      activeServer === "vidsrcwiki"
-                        ? "bg-red-600 text-white shadow-sm"
-                        : "text-zinc-300 hover:text-white hover:bg-white/10"
-                    }`}
-                  >
-                    Server 3
-                  </button>
-                </div>
               </div>
             </div>
           </div>
@@ -1026,12 +986,6 @@ export default function NetflixPreviewModal() {
                   {detailData?.runtime && (
                     <span className="text-zinc-300">{detailData.runtime}</span>
                   )}
-                  <span className="border border-white/40 px-1 py-0.2 rounded text-[9px] text-zinc-300 font-bold uppercase">
-                    Ultra HD 4K
-                  </span>
-                  <span className="border border-white/40 px-1 py-0.2 rounded text-[9px] text-zinc-300 font-bold uppercase">
-                    CC
-                  </span>
                 </div>
 
                 {/* Synopsis Paragraph */}
