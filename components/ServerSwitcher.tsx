@@ -41,6 +41,10 @@ function buildServerUrl(server: Server, props: Props, isAnimeTheme?: boolean, st
       return type === "movie"
         ? `https://vidsrc.wiki/embed/movie/${id}`
         : `https://vidsrc.wiki/embed/tv/${id}/${season}/${episode}`;
+    case "rivestream":
+      return type === "movie"
+        ? `https://rivestream.ru/embed?type=movie&id=${id}`
+        : `https://rivestream.ru/embed?type=tv&id=${id}&season=${season}&episode=${episode}`;
     default:
       return type === "movie"
         ? `https://cinesrc.st/embed/movie/${id}`
@@ -52,6 +56,7 @@ const SERVERS: Server[] = [
   { id: 1, name: "Server 1", key: "cinesrc", badge: "Default" },
   { id: 2, name: "Server 2", key: "vidlink", badge: "Backup" },
   { id: 3, name: "Server 3", key: "vidsrcwiki", badge: "Backup" },
+  { id: 4, name: "Server 4", key: "rivestream", badge: "Backup" },
 ];
 
 export default function ServerSwitcher(props: Props) {

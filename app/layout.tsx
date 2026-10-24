@@ -180,12 +180,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="id" className={`${inter.variable} ${fraunces.variable}`}>
+    <html lang="en" className={`${inter.variable} ${fraunces.variable}`}>
       <head>
         <link rel="preconnect" href="https://image.tmdb.org" />
         <link rel="dns-prefetch" href="https://image.tmdb.org" />
         <link rel="dns-prefetch" href="https://cinesrc.st" />
         <link rel="dns-prefetch" href="https://vidlink.pro" />
+        <link rel="dns-prefetch" href="https://vidsrc.wiki" />
+        <link rel="dns-prefetch" href="https://rivestream.ru" />
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
         <link rel="icon" type="image/png" sizes="192x192" href="/icon" />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon" />

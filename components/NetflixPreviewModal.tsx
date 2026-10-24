@@ -116,7 +116,7 @@ export default function NetflixPreviewModal() {
   const [selectedSeason, setSelectedSeason] = useState(1);
   const [selectedEpisode, setSelectedEpisode] = useState(1);
   const [isTheaterOpen, setIsTheaterOpen] = useState(false);
-  const [activeServer, setActiveServer] = useState<"cinesrc" | "vidlink" | "vidsrcwiki">("cinesrc");
+  const [activeServer, setActiveServer] = useState<"cinesrc" | "vidlink" | "vidsrcwiki" | "rivestream">("cinesrc");
   const [controlsVisible, setControlsVisible] = useState(true);
   const [serverHintVisible, setServerHintVisible] = useState(false);
   const [isForcedLandscape, setIsForcedLandscape] = useState(false);
@@ -642,7 +642,7 @@ export default function NetflixPreviewModal() {
   const seasonEpisodes = seasonEpisodesMap[selectedSeason] || [];
   const matchPercent = Math.min(99, Math.max(85, Math.round((rating || 7.5) * 10) + 12));
 
-  // Build stream URL for active servers (CineSrc as primary, VidLink as server 2)
+  // Build stream URL for active servers (CineSrc, VidLink, VidSrc Wiki, RiveStream)
   const idStr = String(activeItem.id);
   const streamUrl =
     activeServer === "cinesrc"
@@ -653,9 +653,13 @@ export default function NetflixPreviewModal() {
       ? resolvedType === "tv"
         ? `https://vidlink.pro/tv/${idStr}/${selectedSeason}/${selectedEpisode}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914`
         : `https://vidlink.pro/movie/${idStr}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914`
+      : activeServer === "vidsrcwiki"
+      ? resolvedType === "tv"
+        ? `https://vidsrc.wiki/embed/tv/${idStr}/${selectedSeason}/${selectedEpisode}`
+        : `https://vidsrc.wiki/embed/movie/${idStr}`
       : resolvedType === "tv"
-      ? `https://vidsrc.wiki/embed/tv/${idStr}/${selectedSeason}/${selectedEpisode}`
-      : `https://vidsrc.wiki/embed/movie/${idStr}`;
+      ? `https://rivestream.ru/embed?type=tv&id=${idStr}&season=${selectedSeason}&episode=${selectedEpisode}`
+      : `https://rivestream.ru/embed?type=movie&id=${idStr}`;
 
   return (
     <>
@@ -728,7 +732,9 @@ export default function NetflixPreviewModal() {
                     ? "Server 1"
                     : activeServer === "vidlink"
                     ? "Server 2"
-                    : "Server 3"}
+                    : activeServer === "vidsrcwiki"
+                    ? "Server 3"
+                    : "Server 4"}
                 </strong>
               </span>
               <span className="text-[10px] bg-red-600 hover:bg-red-500 text-white font-bold px-2 py-0.5 rounded-full transition-colors ml-0.5">
@@ -830,6 +836,21 @@ export default function NetflixPreviewModal() {
                   <span className={`w-1.5 h-1.5 rounded-full ${activeServer === "vidsrcwiki" ? "bg-white" : "bg-blue-400"}`} />
                   <span>Server 3</span>
                 </button>
+
+                {/* Server 4 */}
+                <button
+                  type="button"
+                  onClick={() => setActiveServer("rivestream")}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition-all cursor-pointer active:scale-95 ${
+                    activeServer === "rivestream"
+                      ? "bg-red-600 text-white font-bold shadow-md"
+                      : "text-zinc-300 hover:text-white hover:bg-white/10"
+                  }`}
+                  title="Server 4"
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${activeServer === "rivestream" ? "bg-white" : "bg-purple-400"}`} />
+                  <span>Server 4</span>
+                </button>
               </div>
 
               {/* Fullscreen Toggle */}
@@ -852,7 +873,7 @@ export default function NetflixPreviewModal() {
             <div className="absolute top-14 sm:top-16 right-3 sm:right-6 z-40 pointer-events-none animate-fade-in">
               <div className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-black/90 border border-white/20 text-white text-[11px] sm:text-xs font-medium shadow-2xl backdrop-blur-md">
                 <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                <span>Video buffering or slow? Try Server 1, 2, or 3 above</span>
+                <span>Video buffering or slow? Try Server 1, 2, 3, or 4 above</span>
               </div>
             </div>
           )}

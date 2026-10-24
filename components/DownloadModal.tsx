@@ -96,6 +96,11 @@ export default function DownloadModal({
       ? `https://vidsrc.wiki/embed/movie/${id}`
       : `https://vidsrc.wiki/embed/tv/${id}/${season}/${episode}`;
 
+  const rivestreamUrl =
+    type === "movie"
+      ? `https://rivestream.ru/embed?type=movie&id=${id}`
+      : `https://rivestream.ru/embed?type=tv&id=${id}&season=${season}&episode=${episode}`;
+
   return (
     <div
       className="fixed inset-0 z-[110] flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-fade-in"
@@ -371,6 +376,32 @@ export default function DownloadModal({
                     className="py-1 px-2.5 rounded-md text-[11px] font-semibold bg-white/[0.06] hover:bg-white/[0.12] text-zinc-300 hover:text-white border border-white/10 transition-colors"
                   >
                     {copiedKey === "vidsrcwiki" ? "Copied!" : "Copy Link"}
+                  </button>
+                </div>
+              </div>
+
+              {/* Server 4 */}
+              <div className="p-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <span className="font-bold text-white text-xs block truncate">Server 4</span>
+                  <span className="text-[10px] text-purple-400">Ultra Fast Stream (Rive)</span>
+                </div>
+
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <a
+                    href={rivestreamUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="py-1 px-2.5 rounded-md text-[11px] font-bold bg-white/[0.08] hover:bg-white/[0.15] text-white transition-colors"
+                  >
+                    Open Player
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => copyToClipboard(rivestreamUrl, "rivestream")}
+                    className="py-1 px-2.5 rounded-md text-[11px] font-semibold bg-white/[0.06] hover:bg-white/[0.12] text-zinc-300 hover:text-white border border-white/10 transition-colors"
+                  >
+                    {copiedKey === "rivestream" ? "Copied!" : "Copy Link"}
                   </button>
                 </div>
               </div>
