@@ -118,13 +118,11 @@ export default function NetflixPreviewModal() {
   const [isTheaterOpen, setIsTheaterOpen] = useState(false);
   const [activeServer, setActiveServer] = useState<"cinesrc" | "vidlink" | "vidsrcwiki">("cinesrc");
   const [controlsVisible, setControlsVisible] = useState(true);
-  const [serverDropdownOpen, setServerDropdownOpen] = useState(false);
   const [serverHintVisible, setServerHintVisible] = useState(false);
   const [isForcedLandscape, setIsForcedLandscape] = useState(false);
   const [isMobilePortrait, setIsMobilePortrait] = useState(false);
   const [isNativeFullscreen, setIsNativeFullscreen] = useState(false);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const serverDropdownRef = useRef<HTMLDivElement | null>(null);
   const serverHintTimerRef = useRef<NodeJS.Timeout | null>(null);
   const theaterContainerRef = useRef<HTMLDivElement | null>(null);
   const currentTimeRef = useRef<number>(0);
@@ -145,18 +143,6 @@ export default function NetflixPreviewModal() {
       window.removeEventListener("orientationchange", checkOrientation);
     };
   }, []);
-
-  // Close server dropdown when clicking outside
-  useEffect(() => {
-    if (!serverDropdownOpen) return;
-    const handleClickOutside = (e: MouseEvent) => {
-      if (serverDropdownRef.current && !serverDropdownRef.current.contains(e.target as Node)) {
-        setServerDropdownOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [serverDropdownOpen]);
 
   const lockLandscape = async () => {
     try {
@@ -243,16 +229,15 @@ export default function NetflixPreviewModal() {
       if (episodeNum !== undefined) setSelectedEpisode(episodeNum);
       setIsTheaterOpen(true);
       setControlsVisible(true);
-      setServerDropdownOpen(false);
       setServerHintVisible(true);
       if (serverHintTimerRef.current) clearTimeout(serverHintTimerRef.current);
       serverHintTimerRef.current = setTimeout(() => {
         setServerHintVisible(false);
-      }, 4500);
+      }, 5500);
       if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
       controlsTimeoutRef.current = setTimeout(() => {
         setControlsVisible(false);
-      }, 3200);
+      }, 3800);
 
       // Record to Watch History immediately so Continue Watching reflects the new watch
       if (activeItem) {
@@ -336,7 +321,6 @@ export default function NetflixPreviewModal() {
       }
       setIsTheaterOpen(false);
       setIsForcedLandscape(false);
-      setServerDropdownOpen(false);
       setServerHintVisible(false);
       if (serverHintTimerRef.current) clearTimeout(serverHintTimerRef.current);
       unlockOrientation();
@@ -513,10 +497,10 @@ export default function NetflixPreviewModal() {
     if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
     controlsTimeoutRef.current = setTimeout(() => {
       setControlsVisible(false);
-    }, 3200);
+    }, 3800);
   }, []);
 
-  // Listen for window-level mouse movement & touches when theater is open
+  // Listen for window-level mouse movement, touches & iframe focus changes when theater is open
   useEffect(() => {
     if (!isTheaterOpen) return;
 
@@ -525,15 +509,27 @@ export default function NetflixPreviewModal() {
       if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
       controlsTimeoutRef.current = setTimeout(() => {
         setControlsVisible(false);
-      }, 3200);
+      }, 3800);
+    };
+
+    // When the user clicks or taps inside the cross-origin video iframe, the parent window fires a blur event.
+    // By listening to window blur, clicking on the player reliably reveals the controls!
+    const onWindowBlur = () => {
+      setControlsVisible(true);
+      if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+      controlsTimeoutRef.current = setTimeout(() => {
+        setControlsVisible(false);
+      }, 4500);
     };
 
     window.addEventListener("mousemove", onActivity, { passive: true });
     window.addEventListener("touchstart", onActivity, { passive: true });
+    window.addEventListener("blur", onWindowBlur);
 
     return () => {
       window.removeEventListener("mousemove", onActivity);
       window.removeEventListener("touchstart", onActivity);
+      window.removeEventListener("blur", onWindowBlur);
     };
   }, [isTheaterOpen]);
 
@@ -608,10 +604,6 @@ export default function NetflixPreviewModal() {
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape" && isOpen) {
-        if (serverDropdownOpen) {
-          setServerDropdownOpen(false);
-          return;
-        }
         if (isTheaterOpen) {
           handleExitTheater();
         } else {
@@ -701,13 +693,57 @@ export default function NetflixPreviewModal() {
           onClick={handleUserActivity}
           onTouchStart={handleUserActivity}
         >
-          {/* Floating Top Control Bar (Clean, compact, and non-blocking) */}
+          {/* Invisible Top Hotspot Bar: Always catches mouse movements and touches across the top 64px even when controls are hidden */}
+          <div
+            className="absolute top-0 inset-x-0 h-16 z-30 pointer-events-auto cursor-pointer"
+            onMouseEnter={handleUserActivity}
+            onMouseMove={handleUserActivity}
+            onTouchStart={handleUserActivity}
+            onClick={handleUserActivity}
+            aria-hidden="true"
+          />
+
+          {/* Persistent Floating Quick-Server Pill: Always accessible when controls auto-hide */}
+          <div
+            className={`absolute top-2.5 right-2.5 sm:top-3.5 sm:right-5 z-40 transition-all duration-300 pointer-events-auto ${
+              controlsVisible
+                ? "opacity-0 pointer-events-none translate-y-[-6px]"
+                : "opacity-85 hover:opacity-100 translate-y-0"
+            }`}
+          >
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleUserActivity();
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/80 hover:bg-black text-white text-[11px] sm:text-xs font-semibold border border-white/25 shadow-2xl backdrop-blur-md cursor-pointer active:scale-95 transition-all"
+              title="Ganti Server Streaming"
+            >
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>
+                Server:{" "}
+                <strong className="text-white font-bold">
+                  {activeServer === "cinesrc"
+                    ? "CineSrc"
+                    : activeServer === "vidlink"
+                    ? "VidLink"
+                    : "VidSrc"}
+                </strong>
+              </span>
+              <span className="text-[10px] bg-red-600 hover:bg-red-500 text-white font-bold px-2 py-0.5 rounded-full transition-colors ml-0.5">
+                Ganti
+              </span>
+            </button>
+          </div>
+
+          {/* Floating Top Control Bar (Clean, direct, and non-blocking) */}
           <div
             onMouseEnter={handleUserActivity}
             onMouseMove={handleUserActivity}
             onTouchStart={handleUserActivity}
-            className={`absolute top-0 inset-x-0 z-40 flex items-center justify-between px-3 py-2.5 sm:px-6 sm:py-3.5 bg-gradient-to-b from-black/85 via-black/35 to-transparent transition-all duration-300 transform pointer-events-none ${
-              controlsVisible || serverDropdownOpen
+            className={`absolute top-0 inset-x-0 z-40 flex items-center justify-between px-3 py-2.5 sm:px-6 sm:py-3.5 bg-gradient-to-b from-black/90 via-black/40 to-transparent transition-all duration-300 transform pointer-events-none ${
+              controlsVisible
                 ? "opacity-100 translate-y-0"
                 : "opacity-0 -translate-y-3"
             }`}
@@ -727,7 +763,7 @@ export default function NetflixPreviewModal() {
               </button>
 
               <div className="min-w-0">
-                <h2 className="text-xs sm:text-base font-semibold sm:font-bold text-white truncate drop-shadow-md max-w-[130px] sm:max-w-xs md:max-w-md">
+                <h2 className="text-xs sm:text-base font-semibold sm:font-bold text-white truncate drop-shadow-md max-w-[120px] sm:max-w-xs md:max-w-md">
                   {title}
                 </h2>
                 {resolvedType === "tv" && (
@@ -738,163 +774,69 @@ export default function NetflixPreviewModal() {
               </div>
             </div>
 
-            {/* Right: Compact Server Dropdown + Fullscreen Toggle */}
+            {/* Right: Direct 1-Click Server Switcher + Fullscreen Toggle */}
             <div className="flex items-center gap-2 shrink-0 pointer-events-auto">
-              {/* Compact Server Selector Dropdown */}
-              <div className="relative" ref={serverDropdownRef}>
+              {/* Direct Server Switcher Tabs */}
+              <div
+                className="flex items-center gap-1 sm:gap-1.5 bg-black/80 p-1 sm:p-1.5 rounded-xl border border-white/20 backdrop-blur-md shadow-2xl"
+                role="group"
+                aria-label="Pilih Server Streaming"
+              >
+                <span className="hidden md:inline text-[11px] font-semibold text-zinc-400 px-1.5">
+                  Server:
+                </span>
+
+                {/* Server 1: CineSrc */}
                 <button
                   type="button"
-                  onClick={() => setServerDropdownOpen((prev) => !prev)}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs font-semibold bg-black/75 hover:bg-black text-white border border-white/15 backdrop-blur-md shadow-lg transition-all cursor-pointer active:scale-95"
-                  aria-expanded={serverDropdownOpen}
-                  aria-label="Pilih Server Streaming"
-                  title="Ganti Server Streaming"
+                  onClick={() => setActiveServer("cinesrc")}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition-all cursor-pointer active:scale-95 ${
+                    activeServer === "cinesrc"
+                      ? "bg-red-600 text-white font-bold shadow-md"
+                      : "text-zinc-300 hover:text-white hover:bg-white/10"
+                  }`}
+                  title="Server 1: CineSrc (Utama)"
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                  <span className="text-[11px] sm:text-xs">
-                    {activeServer === "cinesrc"
-                      ? "CineSrc"
-                      : activeServer === "vidlink"
-                      ? "VidLink"
-                      : "VidSrc"}
-                  </span>
-                  <svg
-                    width="12"
-                    height="12"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className={`text-zinc-400 transition-transform duration-200 ${
-                      serverDropdownOpen ? "rotate-180" : ""
-                    }`}
-                  >
-                    <polyline points="6 9 12 15 18 9" />
-                  </svg>
+                  <span className={`w-1.5 h-1.5 rounded-full ${activeServer === "cinesrc" ? "bg-white" : "bg-emerald-400"}`} />
+                  <span><span className="hidden sm:inline">Server 1: </span>CineSrc</span>
                 </button>
 
-                {/* Dropdown Menu */}
-                {serverDropdownOpen && (
-                  <div
-                    className="absolute right-0 top-full mt-2 w-52 sm:w-60 py-1.5 rounded-xl bg-zinc-950/95 border border-white/15 shadow-2xl backdrop-blur-xl z-50 animate-fade-in text-left select-none"
-                    role="menu"
-                  >
-                    <div className="px-3 py-1.5 border-b border-white/[0.08] flex items-center justify-between">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
-                        Server Streaming
-                      </span>
-                      <span className="text-[9px] text-zinc-500">
-                        Ganti jika buffering
-                      </span>
-                    </div>
+                {/* Server 2: VidLink */}
+                <button
+                  type="button"
+                  onClick={() => setActiveServer("vidlink")}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition-all cursor-pointer active:scale-95 ${
+                    activeServer === "vidlink"
+                      ? "bg-red-600 text-white font-bold shadow-md"
+                      : "text-zinc-300 hover:text-white hover:bg-white/10"
+                  }`}
+                  title="Server 2: VidLink"
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${activeServer === "vidlink" ? "bg-white" : "bg-amber-400"}`} />
+                  <span><span className="hidden sm:inline">Server 2: </span>VidLink</span>
+                </button>
 
-                    <div className="p-1 space-y-1">
-                      {/* CineSrc */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setActiveServer("cinesrc");
-                          setServerDropdownOpen(false);
-                        }}
-                        className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs transition-colors cursor-pointer text-left ${
-                          activeServer === "cinesrc"
-                            ? "bg-red-600 text-white font-bold"
-                            : "text-zinc-300 hover:text-white hover:bg-white/[0.08]"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`w-2 h-2 rounded-full ${
-                              activeServer === "cinesrc" ? "bg-white" : "bg-emerald-500"
-                            }`}
-                          />
-                          <span>CineSrc</span>
-                        </div>
-                        <span
-                          className={`text-[9px] px-1.5 py-0.5 rounded font-semibold ${
-                            activeServer === "cinesrc"
-                              ? "bg-black/30 text-white"
-                              : "bg-white/[0.08] text-zinc-400"
-                          }`}
-                        >
-                          Server 1 (Utama)
-                        </span>
-                      </button>
-
-                      {/* VidLink */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setActiveServer("vidlink");
-                          setServerDropdownOpen(false);
-                        }}
-                        className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs transition-colors cursor-pointer text-left ${
-                          activeServer === "vidlink"
-                            ? "bg-red-600 text-white font-bold"
-                            : "text-zinc-300 hover:text-white hover:bg-white/[0.08]"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`w-2 h-2 rounded-full ${
-                              activeServer === "vidlink" ? "bg-white" : "bg-amber-400"
-                            }`}
-                          />
-                          <span>VidLink</span>
-                        </div>
-                        <span
-                          className={`text-[9px] px-1.5 py-0.5 rounded font-semibold ${
-                            activeServer === "vidlink"
-                              ? "bg-black/30 text-white"
-                              : "bg-white/[0.08] text-zinc-400"
-                          }`}
-                        >
-                          Server 2
-                        </span>
-                      </button>
-
-                      {/* VidSrc */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setActiveServer("vidsrcwiki");
-                          setServerDropdownOpen(false);
-                        }}
-                        className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs transition-colors cursor-pointer text-left ${
-                          activeServer === "vidsrcwiki"
-                            ? "bg-red-600 text-white font-bold"
-                            : "text-zinc-300 hover:text-white hover:bg-white/[0.08]"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`w-2 h-2 rounded-full ${
-                              activeServer === "vidsrcwiki" ? "bg-white" : "bg-zinc-400"
-                            }`}
-                          />
-                          <span>VidSrc Wiki</span>
-                        </div>
-                        <span
-                          className={`text-[9px] px-1.5 py-0.5 rounded font-semibold ${
-                            activeServer === "vidsrcwiki"
-                              ? "bg-black/30 text-white"
-                              : "bg-white/[0.08] text-zinc-400"
-                          }`}
-                        >
-                          Server 3
-                        </span>
-                      </button>
-                    </div>
-                  </div>
-                )}
+                {/* Server 3: VidSrc Wiki */}
+                <button
+                  type="button"
+                  onClick={() => setActiveServer("vidsrcwiki")}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition-all cursor-pointer active:scale-95 ${
+                    activeServer === "vidsrcwiki"
+                      ? "bg-red-600 text-white font-bold shadow-md"
+                      : "text-zinc-300 hover:text-white hover:bg-white/10"
+                  }`}
+                  title="Server 3: VidSrc Wiki"
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${activeServer === "vidsrcwiki" ? "bg-white" : "bg-blue-400"}`} />
+                  <span><span className="hidden sm:inline">Server 3: </span>VidSrc</span>
+                </button>
               </div>
 
+              {/* Fullscreen Toggle */}
               <button
                 type="button"
                 onClick={toggleFullscreen}
-                className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all cursor-pointer shrink-0 shadow-md"
+                className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-white/10 hover:bg-white/20 active:bg-white/30 text-white flex items-center justify-center transition-all cursor-pointer shrink-0 shadow-md active:scale-95"
                 title={isNativeFullscreen ? "Exit Fullscreen" : "Toggle Fullscreen"}
                 aria-label="Fullscreen"
               >
@@ -908,9 +850,9 @@ export default function NetflixPreviewModal() {
           {/* Subtle Onboarding Hint: Informs viewers they can switch servers if buffering */}
           {serverHintVisible && (
             <div className="absolute top-14 sm:top-16 right-3 sm:right-6 z-40 pointer-events-none animate-fade-in">
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/90 border border-white/20 text-white text-[11px] sm:text-xs font-medium shadow-2xl backdrop-blur-md">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                <span>Video macet atau lambat? Klik tombol Server</span>
+              <div className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-black/90 border border-white/20 text-white text-[11px] sm:text-xs font-medium shadow-2xl backdrop-blur-md">
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                <span>Video macet atau buffering? Coba ganti Server 1, 2, atau 3 di atas</span>
               </div>
             </div>
           )}
@@ -986,7 +928,7 @@ export default function NetflixPreviewModal() {
               </h1>
 
               {/* Action Buttons */}
-              <div className="flex items-center gap-2.5">
+              <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
                 {/* Large White Play Button */}
                 <button
                   type="button"
@@ -1025,6 +967,46 @@ export default function NetflixPreviewModal() {
                     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                   </svg>
                 </button>
+
+                {/* Server Pre-Selection Pills */}
+                <div className="flex items-center gap-1 bg-black/60 backdrop-blur-md px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg border border-white/15 text-xs">
+                  <span className="text-[10px] sm:text-xs text-zinc-400 font-medium px-1 sm:px-1.5">
+                    Server:
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setActiveServer("cinesrc")}
+                    className={`px-2 py-1 sm:px-2.5 sm:py-1 rounded text-[10px] sm:text-xs font-bold transition-all cursor-pointer ${
+                      activeServer === "cinesrc"
+                        ? "bg-red-600 text-white shadow-sm"
+                        : "text-zinc-300 hover:text-white hover:bg-white/10"
+                    }`}
+                  >
+                    CineSrc (Utama)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveServer("vidlink")}
+                    className={`px-2 py-1 sm:px-2.5 sm:py-1 rounded text-[10px] sm:text-xs font-bold transition-all cursor-pointer ${
+                      activeServer === "vidlink"
+                        ? "bg-red-600 text-white shadow-sm"
+                        : "text-zinc-300 hover:text-white hover:bg-white/10"
+                    }`}
+                  >
+                    VidLink
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveServer("vidsrcwiki")}
+                    className={`px-2 py-1 sm:px-2.5 sm:py-1 rounded text-[10px] sm:text-xs font-bold transition-all cursor-pointer ${
+                      activeServer === "vidsrcwiki"
+                        ? "bg-red-600 text-white shadow-sm"
+                        : "text-zinc-300 hover:text-white hover:bg-white/10"
+                    }`}
+                  >
+                    VidSrc
+                  </button>
+                </div>
               </div>
             </div>
           </div>
