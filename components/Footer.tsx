@@ -100,16 +100,6 @@ export default function Footer() {
           <p className="text-center sm:text-left">
             Created by{" "}
             <span className="text-zinc-300 font-medium">Fardhan Marcello</span>
-            {" • "}
-            Movie &amp; TV metadata provided by{" "}
-            <a
-              href="https://www.themoviedb.org"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-zinc-400 hover:text-zinc-200 underline transition-colors"
-            >
-              TMDB
-            </a>.
           </p>
           <p className="text-zinc-500 text-[11px]">
             &copy; {new Date().getFullYear()} FardTV by Fardhan Marcello. All rights reserved.
