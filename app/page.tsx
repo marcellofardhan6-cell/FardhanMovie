@@ -62,7 +62,7 @@ export default async function HomePage() {
   return (
     <>
       {/* Accessible H1 for Brand Entity & Search Engine Indexing */}
-      <h1 className="sr-only">FardTV - Nonton Film, Anime &amp; TV Series Sub Indo Gratis</h1>
+      <h1 className="sr-only">FardTV - Watch Free HD Movies, Anime &amp; TV Series Online</h1>
 
       {/* Dynamic Multi-Slide Hero (Top 5 Spotlight) with Official Title Logos */}
       <Hero items={heroItems} />

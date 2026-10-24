@@ -88,10 +88,10 @@ export default function Footer() {
         {/* SEO Brand Description Section */}
         <div className="py-6 border-b border-white/[0.06] text-[11px] leading-relaxed text-zinc-500">
           <p className="font-semibold text-zinc-300 text-xs mb-1.5">
-            FardTV - Platform Streaming Film, Anime &amp; TV Series Sub Indo Gratis
+            FardTV - Free HD Streaming for Movies, Anime &amp; TV Series
           </p>
           <p className="max-w-4xl text-zinc-400">
-            FardTV (fardtv.my.id / fardhantv.web.id) adalah platform streaming film, anime, dan TV series sub Indo gratis terbaik tanpa iklan pop-up yang mengganggu. Nikmati pengalaman nonton movie bioskop kualitas HD terbaru, serial drama TV terlengkap, dan anime ongoing sub Indo dengan server cepat dan lancar hanya di FardTV.
+            FardTV is a fast, ad-free streaming catalog platform for HD movies, ongoing anime, and TV series with multiple reliable playback servers.
           </p>
         </div>
 
