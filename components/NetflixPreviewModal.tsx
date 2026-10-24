@@ -718,21 +718,21 @@ export default function NetflixPreviewModal() {
                 handleUserActivity();
               }}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/80 hover:bg-black text-white text-[11px] sm:text-xs font-semibold border border-white/25 shadow-2xl backdrop-blur-md cursor-pointer active:scale-95 transition-all"
-              title="Ganti Server Streaming"
+              title="Change Streaming Server"
             >
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <span>
                 Server:{" "}
                 <strong className="text-white font-bold">
                   {activeServer === "cinesrc"
-                    ? "CineSrc"
+                    ? "Server 1"
                     : activeServer === "vidlink"
-                    ? "VidLink"
-                    : "VidSrc"}
+                    ? "Server 2"
+                    : "Server 3"}
                 </strong>
               </span>
               <span className="text-[10px] bg-red-600 hover:bg-red-500 text-white font-bold px-2 py-0.5 rounded-full transition-colors ml-0.5">
-                Ganti
+                Switch
               </span>
             </button>
           </div>
@@ -780,13 +780,13 @@ export default function NetflixPreviewModal() {
               <div
                 className="flex items-center gap-1 sm:gap-1.5 bg-black/80 p-1 sm:p-1.5 rounded-xl border border-white/20 backdrop-blur-md shadow-2xl"
                 role="group"
-                aria-label="Pilih Server Streaming"
+                aria-label="Select Streaming Server"
               >
                 <span className="hidden md:inline text-[11px] font-semibold text-zinc-400 px-1.5">
                   Server:
                 </span>
 
-                {/* Server 1: CineSrc */}
+                {/* Server 1 */}
                 <button
                   type="button"
                   onClick={() => setActiveServer("cinesrc")}
@@ -795,13 +795,13 @@ export default function NetflixPreviewModal() {
                       ? "bg-red-600 text-white font-bold shadow-md"
                       : "text-zinc-300 hover:text-white hover:bg-white/10"
                   }`}
-                  title="Server 1: CineSrc (Utama)"
+                  title="Server 1 (Default)"
                 >
                   <span className={`w-1.5 h-1.5 rounded-full ${activeServer === "cinesrc" ? "bg-white" : "bg-emerald-400"}`} />
-                  <span><span className="hidden sm:inline">Server 1: </span>CineSrc</span>
+                  <span>Server 1</span>
                 </button>
 
-                {/* Server 2: VidLink */}
+                {/* Server 2 */}
                 <button
                   type="button"
                   onClick={() => setActiveServer("vidlink")}
@@ -810,13 +810,13 @@ export default function NetflixPreviewModal() {
                       ? "bg-red-600 text-white font-bold shadow-md"
                       : "text-zinc-300 hover:text-white hover:bg-white/10"
                   }`}
-                  title="Server 2: VidLink"
+                  title="Server 2"
                 >
                   <span className={`w-1.5 h-1.5 rounded-full ${activeServer === "vidlink" ? "bg-white" : "bg-amber-400"}`} />
-                  <span><span className="hidden sm:inline">Server 2: </span>VidLink</span>
+                  <span>Server 2</span>
                 </button>
 
-                {/* Server 3: VidSrc Wiki */}
+                {/* Server 3 */}
                 <button
                   type="button"
                   onClick={() => setActiveServer("vidsrcwiki")}
@@ -825,10 +825,10 @@ export default function NetflixPreviewModal() {
                       ? "bg-red-600 text-white font-bold shadow-md"
                       : "text-zinc-300 hover:text-white hover:bg-white/10"
                   }`}
-                  title="Server 3: VidSrc Wiki"
+                  title="Server 3"
                 >
                   <span className={`w-1.5 h-1.5 rounded-full ${activeServer === "vidsrcwiki" ? "bg-white" : "bg-blue-400"}`} />
-                  <span><span className="hidden sm:inline">Server 3: </span>VidSrc</span>
+                  <span>Server 3</span>
                 </button>
               </div>
 
@@ -852,7 +852,7 @@ export default function NetflixPreviewModal() {
             <div className="absolute top-14 sm:top-16 right-3 sm:right-6 z-40 pointer-events-none animate-fade-in">
               <div className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-black/90 border border-white/20 text-white text-[11px] sm:text-xs font-medium shadow-2xl backdrop-blur-md">
                 <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                <span>Video macet atau buffering? Coba ganti Server 1, 2, atau 3 di atas</span>
+                <span>Video buffering or slow? Try Server 1, 2, or 3 above</span>
               </div>
             </div>
           )}
@@ -982,7 +982,7 @@ export default function NetflixPreviewModal() {
                         : "text-zinc-300 hover:text-white hover:bg-white/10"
                     }`}
                   >
-                    CineSrc (Utama)
+                    Server 1 (Default)
                   </button>
                   <button
                     type="button"
@@ -993,7 +993,7 @@ export default function NetflixPreviewModal() {
                         : "text-zinc-300 hover:text-white hover:bg-white/10"
                     }`}
                   >
-                    VidLink
+                    Server 2
                   </button>
                   <button
                     type="button"
@@ -1004,7 +1004,7 @@ export default function NetflixPreviewModal() {
                         : "text-zinc-300 hover:text-white hover:bg-white/10"
                     }`}
                   >
-                    VidSrc
+                    Server 3
                   </button>
                 </div>
               </div>

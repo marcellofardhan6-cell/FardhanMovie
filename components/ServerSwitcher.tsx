@@ -49,9 +49,9 @@ function buildServerUrl(server: Server, props: Props, isAnimeTheme?: boolean, st
 }
 
 const SERVERS: Server[] = [
-  { id: 1, name: "CineSrc", key: "cinesrc", badge: "Primary" },
-  { id: 2, name: "VidLink", key: "vidlink", badge: "Server 2" },
-  { id: 3, name: "VidSrc Wiki", key: "vidsrcwiki", badge: "Server 3" },
+  { id: 1, name: "Server 1", key: "cinesrc", badge: "Default" },
+  { id: 2, name: "Server 2", key: "vidlink", badge: "Backup" },
+  { id: 3, name: "Server 3", key: "vidsrcwiki", badge: "Backup" },
 ];
 
 export default function ServerSwitcher(props: Props) {

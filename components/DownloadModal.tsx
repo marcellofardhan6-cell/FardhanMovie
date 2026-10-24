@@ -297,11 +297,11 @@ export default function DownloadModal({
             </div>
 
             <div className="space-y-2">
-              {/* CineSrc */}
+              {/* Server 1 */}
               <div className="p-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-between gap-2">
                 <div className="min-w-0">
-                  <span className="font-bold text-white text-xs block truncate">CineSrc</span>
-                  <span className="text-[10px] text-emerald-400">Server Utama (Fast Stream)</span>
+                  <span className="font-bold text-white text-xs block truncate">Server 1</span>
+                  <span className="text-[10px] text-emerald-400">Primary (Fast Stream)</span>
                 </div>
 
                 <div className="flex items-center gap-1.5 shrink-0">
@@ -323,11 +323,11 @@ export default function DownloadModal({
                 </div>
               </div>
 
-              {/* VidLink */}
+              {/* Server 2 */}
               <div className="p-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-between gap-2">
                 <div className="min-w-0">
-                  <span className="font-bold text-white text-xs block truncate">VidLink</span>
-                  <span className="text-[10px] text-zinc-400">Server 2 (Backup Stream / Autoplay)</span>
+                  <span className="font-bold text-white text-xs block truncate">Server 2</span>
+                  <span className="text-[10px] text-zinc-400">Backup Stream (Autoplay)</span>
                 </div>
 
                 <div className="flex items-center gap-1.5 shrink-0">
@@ -349,11 +349,11 @@ export default function DownloadModal({
                 </div>
               </div>
 
-              {/* VidSrc Wiki */}
+              {/* Server 3 */}
               <div className="p-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06] flex items-center justify-between gap-2">
                 <div className="min-w-0">
-                  <span className="font-bold text-white text-xs block truncate">VidSrc Wiki</span>
-                  <span className="text-[10px] text-zinc-400">Server Cadangan (CineJoy / HD Stream)</span>
+                  <span className="font-bold text-white text-xs block truncate">Server 3</span>
+                  <span className="text-[10px] text-zinc-400">Backup Stream (HD Mirror)</span>
                 </div>
 
                 <div className="flex items-center gap-1.5 shrink-0">
