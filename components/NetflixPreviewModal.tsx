@@ -480,8 +480,6 @@ export default function NetflixPreviewModal() {
           setIsForcedLandscape(true);
         }
       } else {
-        setIsForcedLandscape(false);
-        unlockOrientation();
         if (document.exitFullscreen) {
           document.exitFullscreen().catch(() => {});
         } else if ((document as any).webkitExitFullscreen) {
@@ -499,6 +497,22 @@ export default function NetflixPreviewModal() {
       setControlsVisible(false);
     }, 3800);
   }, []);
+
+  // Quick-switch server sequentially without touching orientation or bubbling
+  const handleQuickSwitchServer = useCallback(
+    (e: React.SyntheticEvent) => {
+      e.stopPropagation();
+      e.preventDefault();
+      setActiveServer((prev) => {
+        if (prev === "cinesrc") return "vidlink";
+        if (prev === "vidlink") return "vidsrcwiki";
+        if (prev === "vidsrcwiki") return "rivestream";
+        return "cinesrc";
+      });
+      handleUserActivity();
+    },
+    [handleUserActivity]
+  );
 
   // Listen for window-level mouse movement, touches & iframe focus changes when theater is open
   useEffect(() => {
@@ -717,12 +731,10 @@ export default function NetflixPreviewModal() {
           >
             <button
               type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleUserActivity();
-              }}
+              onClick={handleQuickSwitchServer}
+              onTouchEnd={handleQuickSwitchServer}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/80 hover:bg-black text-white text-[11px] sm:text-xs font-semibold border border-white/25 shadow-2xl backdrop-blur-md cursor-pointer active:scale-95 transition-all"
-              title="Change Streaming Server"
+              title="Switch to Next Server"
             >
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <span>
@@ -784,7 +796,7 @@ export default function NetflixPreviewModal() {
             <div className="flex items-center gap-2 shrink-0 pointer-events-auto">
               {/* Direct Server Switcher Tabs */}
               <div
-                className="flex items-center gap-1 sm:gap-1.5 bg-black/80 p-1 sm:p-1.5 rounded-xl border border-white/20 backdrop-blur-md shadow-2xl"
+                className="flex items-center gap-1 sm:gap-1.5 bg-black/80 p-1 sm:p-1.5 rounded-xl border border-white/20 backdrop-blur-md shadow-2xl max-w-[calc(100vw-80px)] overflow-x-auto scrollbar-none"
                 role="group"
                 aria-label="Select Streaming Server"
               >
@@ -795,7 +807,10 @@ export default function NetflixPreviewModal() {
                 {/* Server 1 */}
                 <button
                   type="button"
-                  onClick={() => setActiveServer("cinesrc")}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveServer("cinesrc");
+                  }}
                   className={`flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition-all cursor-pointer active:scale-95 ${
                     activeServer === "cinesrc"
                       ? "bg-red-600 text-white font-bold shadow-md"
@@ -810,7 +825,10 @@ export default function NetflixPreviewModal() {
                 {/* Server 2 */}
                 <button
                   type="button"
-                  onClick={() => setActiveServer("vidlink")}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveServer("vidlink");
+                  }}
                   className={`flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition-all cursor-pointer active:scale-95 ${
                     activeServer === "vidlink"
                       ? "bg-red-600 text-white font-bold shadow-md"
@@ -825,7 +843,10 @@ export default function NetflixPreviewModal() {
                 {/* Server 3 */}
                 <button
                   type="button"
-                  onClick={() => setActiveServer("vidsrcwiki")}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveServer("vidsrcwiki");
+                  }}
                   className={`flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition-all cursor-pointer active:scale-95 ${
                     activeServer === "vidsrcwiki"
                       ? "bg-red-600 text-white font-bold shadow-md"
@@ -840,7 +861,10 @@ export default function NetflixPreviewModal() {
                 {/* Server 4 */}
                 <button
                   type="button"
-                  onClick={() => setActiveServer("rivestream")}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveServer("rivestream");
+                  }}
                   className={`flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition-all cursor-pointer active:scale-95 ${
                     activeServer === "rivestream"
                       ? "bg-red-600 text-white font-bold shadow-md"
@@ -853,11 +877,11 @@ export default function NetflixPreviewModal() {
                 </button>
               </div>
 
-              {/* Fullscreen Toggle */}
+              {/* Fullscreen Toggle (desktop only, theater is already 100% fullscreen on mobile) */}
               <button
                 type="button"
                 onClick={toggleFullscreen}
-                className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-white/10 hover:bg-white/20 active:bg-white/30 text-white flex items-center justify-center transition-all cursor-pointer shrink-0 shadow-md active:scale-95"
+                className="hidden sm:flex w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-white/10 hover:bg-white/20 active:bg-white/30 text-white items-center justify-center transition-all cursor-pointer shrink-0 shadow-md active:scale-95"
                 title={isNativeFullscreen ? "Exit Fullscreen" : "Toggle Fullscreen"}
                 aria-label="Fullscreen"
               >
