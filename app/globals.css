@@ -93,16 +93,13 @@ body.theater-active::-webkit-scrollbar {
   border-radius: 4px;
 }
 
-/* Carousel scroll with GPU hardware acceleration */
+/* Carousel scroll */
 .scroll-snap-x {
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
-  transform: translateZ(0);
 }
 .scroll-snap-item {
   scroll-snap-align: start;
-  transform: translateZ(0);
-  backface-visibility: hidden;
 }
 
 /* Line clamp utility */
