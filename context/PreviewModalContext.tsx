@@ -37,6 +37,25 @@ export function PreviewModalProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const closePreview = useCallback(() => {
+    if (typeof window !== "undefined") {
+      try {
+        sessionStorage.removeItem("fardtv_active_session");
+        sessionStorage.removeItem("fardtv_active_server");
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.delete("movie");
+        currentUrl.searchParams.delete("series");
+        currentUrl.searchParams.delete("play");
+        currentUrl.searchParams.delete("season");
+        currentUrl.searchParams.delete("episode");
+        currentUrl.searchParams.delete("server");
+        currentUrl.searchParams.delete("startAt");
+        window.history.replaceState(
+          {},
+          "",
+          currentUrl.pathname + (currentUrl.search ? currentUrl.search : "") + currentUrl.hash
+        );
+      } catch {}
+    }
     setIsOpen(false);
     setIsPlaying(false);
     setAutoPlay(false);

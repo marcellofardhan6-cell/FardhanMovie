@@ -43,12 +43,18 @@ interface DetailApiResponse {
   cast: CastMember[];
 }
 
+let hasRestoredInitialUrl = false;
+let userDismissedId: string | null = null;
+
 function UrlPreviewListener() {
   const searchParams = useSearchParams();
   const { openPreview, isOpen } = usePreviewModal();
   const isFetchingRef = useRef(false);
 
   useEffect(() => {
+    // Only execute on initial mount / page reload
+    if (hasRestoredInitialUrl) return;
+
     let movieId = searchParams.get("movie");
     let seriesId = searchParams.get("series");
     let playParam = searchParams.get("play");
@@ -82,8 +88,14 @@ function UrlPreviewListener() {
       } catch {}
     }
 
-    if ((movieId || seriesId) && !isOpen && !isFetchingRef.current) {
-      const id = movieId || seriesId;
+    const id = movieId || seriesId;
+    if (!id || userDismissedId === id) {
+      hasRestoredInitialUrl = true;
+      return;
+    }
+
+    if (!isOpen && !isFetchingRef.current) {
+      hasRestoredInitialUrl = true;
       const type = seriesId ? "tv" : "movie";
       const season = seasonParam ? parseInt(seasonParam, 10) : 1;
       const episode = episodeParam ? parseInt(episodeParam, 10) : 1;
@@ -628,6 +640,7 @@ export default function NetflixPreviewModal() {
 
     if (isOpen && activeItem) {
       wasOpenRef.current = true;
+      userDismissedId = null;
       const isTv = activeItem.media_type === "tv" || resolvedType === "tv";
       const currentUrl = new URL(window.location.href);
 
@@ -752,6 +765,14 @@ export default function NetflixPreviewModal() {
     };
   }, [isOpen, activeItem?.id, resolvedType, autoPlay, initialSeason, initialEpisode, fetchDetail]);
 
+  const handleModalClose = useCallback(() => {
+    if (activeItem) {
+      userDismissedId = String(activeItem.id);
+    }
+    hasRestoredInitialUrl = true;
+    closePreview();
+  }, [activeItem, closePreview]);
+
   // Keyboard navigation
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -759,7 +780,7 @@ export default function NetflixPreviewModal() {
         if (isTheaterOpen) {
           handleExitTheater();
         } else {
-          closePreview();
+          handleModalClose();
         }
       }
       if (e.key === "Backspace" && (isTheaterOpen || isOpen)) {
@@ -772,7 +793,7 @@ export default function NetflixPreviewModal() {
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, isTheaterOpen, closePreview, handleExitTheater]);
+  }, [isOpen, isTheaterOpen, handleModalClose, handleExitTheater]);
 
   if (!isOpen || !activeItem) {
     return (
@@ -1078,7 +1099,11 @@ export default function NetflixPreviewModal() {
         role="dialog"
         aria-modal="true"
         aria-label={`Netflix Preview: ${title}`}
-        onClick={closePreview}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            handleModalClose();
+          }
+        }}
       >
         <div
           className="relative w-full max-w-4xl max-h-[100vh] sm:max-h-[92vh] overflow-y-auto rounded-none sm:rounded-xl my-auto bg-[#181818] text-white shadow-[0_25px_80px_rgba(0,0,0,0.95)] select-none scrollbar-thin scrollbar-thumb-zinc-700 animate-netflix-modal"
@@ -1086,12 +1111,17 @@ export default function NetflixPreviewModal() {
         >
           {/* Netflix Circular Close Button */}
           <button
-            onClick={closePreview}
-            className="absolute top-4 right-4 z-30 w-9 h-9 rounded-full flex items-center justify-center bg-[#181818] hover:bg-[#2a2a2a] text-white transition-all cursor-pointer shadow-xl active:scale-95"
-            aria-label="Close"
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleModalClose();
+            }}
+            className="absolute top-3 right-3 sm:top-4 sm:right-4 z-50 w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center bg-[#181818]/90 hover:bg-[#2a2a2a] text-white border border-white/20 transition-all cursor-pointer shadow-2xl active:scale-95"
+            aria-label="Close modal"
             title="Close (Esc)"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
               <path d="M18 6 6 18M6 6l12 12" />
             </svg>
           </button>
