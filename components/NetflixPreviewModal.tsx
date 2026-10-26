@@ -46,22 +46,51 @@ interface DetailApiResponse {
 function UrlPreviewListener() {
   const searchParams = useSearchParams();
   const { openPreview, isOpen } = usePreviewModal();
+  const isFetchingRef = useRef(false);
 
   useEffect(() => {
-    const movieId = searchParams.get("movie");
-    const seriesId = searchParams.get("series");
-    const playParam = searchParams.get("play");
-    const seasonParam = searchParams.get("season");
-    const episodeParam = searchParams.get("episode");
+    let movieId = searchParams.get("movie");
+    let seriesId = searchParams.get("series");
+    let playParam = searchParams.get("play");
+    let seasonParam = searchParams.get("season");
+    let episodeParam = searchParams.get("episode");
 
-    if ((movieId || seriesId) && !isOpen) {
+    // Also check window.location.search directly in case searchParams hasn't hydrated/updated yet
+    if (typeof window !== "undefined") {
+      const rawParams = new URLSearchParams(window.location.search);
+      if (!movieId && rawParams.get("movie")) movieId = rawParams.get("movie");
+      if (!seriesId && rawParams.get("series")) seriesId = rawParams.get("series");
+      if (!playParam && rawParams.get("play")) playParam = rawParams.get("play");
+      if (!seasonParam && rawParams.get("season")) seasonParam = rawParams.get("season");
+      if (!episodeParam && rawParams.get("episode")) episodeParam = rawParams.get("episode");
+    }
+
+    // Check sessionStorage fallback if query params were cleared by mobile pull-to-refresh
+    if (!movieId && !seriesId && typeof window !== "undefined") {
+      try {
+        const saved = sessionStorage.getItem("fardtv_active_session");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed && (parsed.movieId || parsed.seriesId)) {
+            movieId = parsed.movieId ? String(parsed.movieId) : null;
+            seriesId = parsed.seriesId ? String(parsed.seriesId) : null;
+            playParam = parsed.play ? "1" : "0";
+            seasonParam = parsed.season ? String(parsed.season) : "1";
+            episodeParam = parsed.episode ? String(parsed.episode) : "1";
+          }
+        }
+      } catch {}
+    }
+
+    if ((movieId || seriesId) && !isOpen && !isFetchingRef.current) {
       const id = movieId || seriesId;
       const type = seriesId ? "tv" : "movie";
       const season = seasonParam ? parseInt(seasonParam, 10) : 1;
       const episode = episodeParam ? parseInt(episodeParam, 10) : 1;
       const shouldPlay = playParam === "1";
 
-      fetch(`/api/detail?id=${id}&type=${type}`)
+      isFetchingRef.current = true;
+      fetch(`/api/detail?id=${id}&type=${type}&season=${season}`)
         .then((res) => (res.ok ? res.json() : null))
         .then((data) => {
           if (data) {
@@ -79,20 +108,12 @@ function UrlPreviewListener() {
               first_air_date: data.year ?? "",
             };
             openPreview(movieItem, shouldPlay, season, episode);
-
-            if (typeof window !== "undefined") {
-              const url = new URL(window.location.href);
-              url.searchParams.delete("movie");
-              url.searchParams.delete("series");
-              url.searchParams.delete("play");
-              url.searchParams.delete("season");
-              url.searchParams.delete("episode");
-              url.searchParams.delete("startAt");
-              window.history.replaceState({}, "", url.pathname + (url.search ? url.search : ""));
-            }
           }
         })
-        .catch(() => {});
+        .catch(() => {})
+        .finally(() => {
+          isFetchingRef.current = false;
+        });
     }
   }, [searchParams, isOpen, openPreview]);
 
@@ -504,6 +525,11 @@ export default function NetflixPreviewModal() {
   const handleSwitchServer = useCallback(
     async (serverKey: "cinesrc" | "vidlink" | "vidsrcwiki" | "rivestream") => {
       setActiveServer(serverKey);
+      if (typeof window !== "undefined") {
+        try {
+          sessionStorage.setItem("fardtv_active_server", serverKey);
+        } catch {}
+      }
       handleUserActivity();
       try {
         await enterNativeFullscreen();
@@ -594,6 +620,88 @@ export default function NetflixPreviewModal() {
   }, [handleStartPlay]);
 
   const lastProcessedIdRef = useRef<number | null>(null);
+  const wasOpenRef = useRef<boolean>(false);
+
+  // Synchronize active preview and playback state with URL search params and sessionStorage
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    if (isOpen && activeItem) {
+      wasOpenRef.current = true;
+      const isTv = activeItem.media_type === "tv" || resolvedType === "tv";
+      const currentUrl = new URL(window.location.href);
+
+      if (isTv) {
+        currentUrl.searchParams.delete("movie");
+        currentUrl.searchParams.set("series", String(activeItem.id));
+        currentUrl.searchParams.set("season", String(selectedSeason));
+        currentUrl.searchParams.set("episode", String(selectedEpisode));
+      } else {
+        currentUrl.searchParams.delete("series");
+        currentUrl.searchParams.delete("season");
+        currentUrl.searchParams.delete("episode");
+        currentUrl.searchParams.set("movie", String(activeItem.id));
+      }
+
+      if (isTheaterOpen) {
+        currentUrl.searchParams.set("play", "1");
+        currentUrl.searchParams.set("server", activeServer);
+      } else {
+        currentUrl.searchParams.delete("play");
+        currentUrl.searchParams.delete("server");
+      }
+
+      window.history.replaceState(
+        { ...window.history.state, fardTvModal: true },
+        "",
+        currentUrl.pathname + (currentUrl.search ? currentUrl.search : "") + currentUrl.hash
+      );
+
+      try {
+        sessionStorage.setItem(
+          "fardtv_active_session",
+          JSON.stringify({
+            movieId: !isTv ? activeItem.id : null,
+            seriesId: isTv ? activeItem.id : null,
+            play: isTheaterOpen,
+            season: selectedSeason,
+            episode: selectedEpisode,
+            server: activeServer,
+          })
+        );
+      } catch {}
+    } else if (!isOpen && wasOpenRef.current) {
+      wasOpenRef.current = false;
+      const currentUrl = new URL(window.location.href);
+      const hadParams =
+        currentUrl.searchParams.has("movie") ||
+        currentUrl.searchParams.has("series") ||
+        currentUrl.searchParams.has("play") ||
+        currentUrl.searchParams.has("season") ||
+        currentUrl.searchParams.has("episode") ||
+        currentUrl.searchParams.has("server");
+
+      if (hadParams) {
+        currentUrl.searchParams.delete("movie");
+        currentUrl.searchParams.delete("series");
+        currentUrl.searchParams.delete("play");
+        currentUrl.searchParams.delete("season");
+        currentUrl.searchParams.delete("episode");
+        currentUrl.searchParams.delete("server");
+        currentUrl.searchParams.delete("startAt");
+        window.history.replaceState(
+          {},
+          "",
+          currentUrl.pathname + (currentUrl.search ? currentUrl.search : "") + currentUrl.hash
+        );
+      }
+
+      try {
+        sessionStorage.removeItem("fardtv_active_session");
+        sessionStorage.removeItem("fardtv_active_server");
+      } catch {}
+    }
+  }, [isOpen, activeItem, resolvedType, isTheaterOpen, selectedSeason, selectedEpisode, activeServer]);
 
   useEffect(() => {
     if (isOpen && activeItem) {
@@ -604,7 +712,21 @@ export default function NetflixPreviewModal() {
         setSelectedSeason(initialSeason || 1);
         setSelectedEpisode(initialEpisode || 1);
         setIsTheaterOpen(false);
-        setActiveServer("cinesrc");
+
+        // Restore server from URL or sessionStorage if previously selected
+        const validServers = ["cinesrc", "vidlink", "vidsrcwiki", "rivestream"] as const;
+        let chosenServer: typeof validServers[number] = "cinesrc";
+        if (typeof window !== "undefined") {
+          const urlServer = new URLSearchParams(window.location.search).get("server");
+          const sessionServer = sessionStorage.getItem("fardtv_active_server");
+          if (urlServer && (validServers as readonly string[]).includes(urlServer)) {
+            chosenServer = urlServer as typeof validServers[number];
+          } else if (sessionServer && (validServers as readonly string[]).includes(sessionServer)) {
+            chosenServer = sessionServer as typeof validServers[number];
+          }
+        }
+        setActiveServer(chosenServer);
+
         fetchDetail(activeItem.id, resolvedType, initialSeason || 1);
 
         if (autoPlay) {
