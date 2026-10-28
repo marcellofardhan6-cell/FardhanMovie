@@ -43,6 +43,13 @@ interface DetailApiResponse {
   cast: CastMember[];
 }
 
+const SERVERS = [
+  { id: "cinesrc", name: "Server 1" },
+  { id: "vidlink", name: "Server 2" },
+  { id: "vidsrcwiki", name: "Server 3" },
+  { id: "rivestream", name: "Server 4" },
+] as const;
+
 let hasRestoredInitialUrl = false;
 let userDismissedId: string | null = null;
 
@@ -151,70 +158,25 @@ export default function NetflixPreviewModal() {
   const [isTheaterOpen, setIsTheaterOpen] = useState(false);
   const [activeServer, setActiveServer] = useState<"cinesrc" | "vidlink" | "vidsrcwiki" | "rivestream">("cinesrc");
   const [controlsVisible, setControlsVisible] = useState(true);
-  const [serverHintVisible, setServerHintVisible] = useState(false);
   const [isNativeFullscreen, setIsNativeFullscreen] = useState(false);
-  const [windowDimensions, setWindowDimensions] = useState<{ width: number; height: number }>({
-    width: typeof window !== "undefined" ? window.innerWidth : 1280,
-    height: typeof window !== "undefined" ? window.innerHeight : 720,
-  });
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const serverHintTimerRef = useRef<NodeJS.Timeout | null>(null);
   const theaterContainerRef = useRef<HTMLDivElement | null>(null);
   const currentTimeRef = useRef<number>(0);
-  const theaterPushedRef = useRef<boolean>(false);
 
-  // Reliably track window dimensions, physical orientation, and native fullscreen state
+  // Track native fullscreen state changes reliably
   useEffect(() => {
-    const handleResize = () => {
-      if (typeof window !== "undefined") {
-        setWindowDimensions({
-          width: window.innerWidth,
-          height: window.innerHeight,
-        });
-        setIsNativeFullscreen(Boolean(document.fullscreenElement || (document as any).webkitFullscreenElement));
-      }
+    const handleFullscreenChange = () => {
+      const isFs = Boolean(document.fullscreenElement || (document as any).webkitFullscreenElement);
+      setIsNativeFullscreen(isFs);
     };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    window.addEventListener("orientationchange", handleResize);
-    document.addEventListener("fullscreenchange", handleResize);
-    document.addEventListener("webkitfullscreenchange", handleResize);
+    handleFullscreenChange();
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
     return () => {
-      window.removeEventListener("resize", handleResize);
-      window.removeEventListener("orientationchange", handleResize);
-      document.removeEventListener("fullscreenchange", handleResize);
-      document.removeEventListener("webkitfullscreenchange", handleResize);
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
     };
   }, []);
-
-  const isPortraitNow = windowDimensions.height > windowDimensions.width;
-  const isTouchDevice =
-    typeof window !== "undefined" &&
-    ("ontouchstart" in window || navigator.maxTouchPoints > 0 || windowDimensions.width < 1024);
-  // Whenever the phone is held in portrait while theater is open, ALWAYS force landscape rotation!
-  const shouldForceLandscape = isTheaterOpen && isTouchDevice && isPortraitNow && !isNativeFullscreen;
-
-  const lockLandscape = async () => {
-    try {
-      if (typeof screen !== "undefined" && screen.orientation && typeof (screen.orientation as any).lock === "function") {
-        await (screen.orientation as any).lock("landscape");
-        return true;
-      } else if (typeof screen !== "undefined" && (screen as any).lockOrientation) {
-        return (screen as any).lockOrientation("landscape");
-      }
-    } catch {}
-    return false;
-  };
-
-  const unlockOrientation = () => {
-    try {
-      if (typeof screen !== "undefined" && screen.orientation && typeof (screen.orientation as any).unlock === "function") {
-        (screen.orientation as any).unlock();
-      } else if (typeof screen !== "undefined" && (screen as any).unlockOrientation) {
-        (screen as any).unlockOrientation();
-      }
-    } catch {}
-  };
 
   const resolvedType = activeItem
     ? activeItem.media_type === "tv" || isTV(activeItem)
@@ -270,7 +232,44 @@ export default function NetflixPreviewModal() {
     [seasonEpisodesMap, activeItem]
   );
 
-  // Request browser fullscreen synchronously on user click and auto lock landscape
+  const enterNativeFullscreen = useCallback(async () => {
+    try {
+      const el = theaterContainerRef.current || document.documentElement;
+      if (!document.fullscreenElement && !(document as any).webkitFullscreenElement) {
+        if (el.requestFullscreen) {
+          await el.requestFullscreen().catch(() => {});
+        } else if ((el as any).webkitRequestFullscreen) {
+          (el as any).webkitRequestFullscreen();
+        }
+      }
+      setIsNativeFullscreen(true);
+    } catch {
+      setIsNativeFullscreen(true);
+    }
+  }, []);
+
+  const exitNativeFullscreen = useCallback(async () => {
+    try {
+      if (document.fullscreenElement || (document as any).webkitFullscreenElement) {
+        if (document.exitFullscreen) {
+          await document.exitFullscreen().catch(() => {});
+        } else if ((document as any).webkitExitFullscreen) {
+          (document as any).webkitExitFullscreen();
+        }
+      }
+    } catch {}
+    setIsNativeFullscreen(false);
+  }, []);
+
+  const toggleFullscreen = useCallback(async () => {
+    if (isNativeFullscreen || document.fullscreenElement || (document as any).webkitFullscreenElement) {
+      await exitNativeFullscreen();
+    } else {
+      await enterNativeFullscreen();
+    }
+  }, [isNativeFullscreen, enterNativeFullscreen, exitNativeFullscreen]);
+
+  // Start playing in embedded player mode
   const handleStartPlay = useCallback(
     async (seasonNum?: number, episodeNum?: number) => {
       const sNum = seasonNum !== undefined ? seasonNum : selectedSeason;
@@ -279,15 +278,6 @@ export default function NetflixPreviewModal() {
       if (episodeNum !== undefined) setSelectedEpisode(episodeNum);
       setIsTheaterOpen(true);
       setControlsVisible(true);
-      setServerHintVisible(true);
-      if (serverHintTimerRef.current) clearTimeout(serverHintTimerRef.current);
-      serverHintTimerRef.current = setTimeout(() => {
-        setServerHintVisible(false);
-      }, 5500);
-      if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
-      controlsTimeoutRef.current = setTimeout(() => {
-        setControlsVisible(false);
-      }, 3800);
 
       // Record to Watch History immediately so Continue Watching reflects the new watch
       if (activeItem) {
@@ -317,81 +307,37 @@ export default function NetflixPreviewModal() {
           progress: existing?.progress || 5,
         });
       }
-
-      try {
-        const docEl = document.documentElement;
-        if (docEl.requestFullscreen) {
-          docEl.requestFullscreen().catch(() => {});
-        } else if ((docEl as any).webkitRequestFullscreen) {
-          (docEl as any).webkitRequestFullscreen();
-        }
-      } catch {}
-      try {
-        lockLandscape();
-      } catch {}
-
-      try {
-        if (typeof window !== "undefined") {
-          window.history.pushState({ fardTvTheater: true }, "");
-          theaterPushedRef.current = true;
-        }
-      } catch {}
     },
     [activeItem, detailData, resolvedType, selectedSeason, selectedEpisode, addHistory, getHistoryItem]
   );
 
-  const handleExitTheater = useCallback(
-    (fromPopState: boolean = false) => {
-      if (activeItem && currentTimeRef.current > 0) {
-        const itemTitle = detailData?.title || displayTitle(activeItem);
-        const estDuration =
-          detailData?.runtime && detailData.runtime.includes("j")
-            ? 7200
-            : resolvedType === "tv"
-            ? 2700
-            : 7200;
+  const handleStopPlay = useCallback(() => {
+    if (activeItem && currentTimeRef.current > 0) {
+      const itemTitle = detailData?.title || displayTitle(activeItem);
+      const estDuration =
+        detailData?.runtime && detailData.runtime.includes("j")
+          ? 7200
+          : resolvedType === "tv"
+          ? 2700
+          : 7200;
 
-        updateProgress(
-          activeItem.id,
-          resolvedType,
-          currentTimeRef.current,
-          estDuration,
-          {
-            title: itemTitle,
-            poster_path: activeItem.poster_path,
-            backdrop_path: detailData?.backdrop_path || activeItem.backdrop_path || null,
-            season: resolvedType === "tv" ? selectedSeason : undefined,
-            episode: resolvedType === "tv" ? selectedEpisode : undefined,
-          }
-        );
-      }
-      setIsTheaterOpen(false);
-      setServerHintVisible(false);
-      if (serverHintTimerRef.current) clearTimeout(serverHintTimerRef.current);
-      unlockOrientation();
-      try {
-        if (document.fullscreenElement) {
-          if (document.exitFullscreen) {
-            document.exitFullscreen().catch(() => {});
-          } else if ((document as any).webkitExitFullscreen) {
-            (document as any).webkitExitFullscreen();
-          }
+      updateProgress(
+        activeItem.id,
+        resolvedType,
+        currentTimeRef.current,
+        estDuration,
+        {
+          title: itemTitle,
+          poster_path: activeItem.poster_path,
+          backdrop_path: detailData?.backdrop_path || activeItem.backdrop_path || null,
+          season: resolvedType === "tv" ? selectedSeason : undefined,
+          episode: resolvedType === "tv" ? selectedEpisode : undefined,
         }
-      } catch {}
-
-      if (!fromPopState && theaterPushedRef.current) {
-        theaterPushedRef.current = false;
-        try {
-          if (typeof window !== "undefined" && window.history.state?.fardTvTheater) {
-            window.history.back();
-          }
-        } catch {}
-      } else {
-        theaterPushedRef.current = false;
-      }
-    },
-    [activeItem, detailData, resolvedType, selectedSeason, selectedEpisode, updateProgress]
-  );
+      );
+    }
+    exitNativeFullscreen();
+    setIsTheaterOpen(false);
+  }, [activeItem, detailData, resolvedType, selectedSeason, selectedEpisode, updateProgress, exitNativeFullscreen]);
 
   // Active watch progress tracking in theater mode
   useEffect(() => {
@@ -483,10 +429,14 @@ export default function NetflixPreviewModal() {
 
   // Handle mobile / browser back button or swipe gesture safely
   useEffect(() => {
-    if (!isTheaterOpen) return;
+    if (!isTheaterOpen && !isOpen) return;
 
     const onPopState = () => {
-      handleExitTheater(true);
+      if (isNativeFullscreen) {
+        exitNativeFullscreen();
+      } else if (isTheaterOpen) {
+        handleStopPlay();
+      }
     };
 
     window.addEventListener("popstate", onPopState);
@@ -494,78 +444,28 @@ export default function NetflixPreviewModal() {
     return () => {
       window.removeEventListener("popstate", onPopState);
     };
-  }, [isTheaterOpen, handleExitTheater]);
+  }, [isTheaterOpen, isOpen, isNativeFullscreen, exitNativeFullscreen, handleStopPlay]);
 
-  const enterNativeFullscreen = useCallback(async () => {
-    try {
-      const docEl = document.documentElement;
-      if (!document.fullscreenElement && !(document as any).webkitFullscreenElement) {
-        if (docEl.requestFullscreen) {
-          await docEl.requestFullscreen().catch(() => {});
-        } else if ((docEl as any).webkitRequestFullscreen) {
-          (docEl as any).webkitRequestFullscreen();
-        }
-      }
-      await lockLandscape();
-    } catch {}
-  }, []);
-
-  const toggleFullscreen = useCallback(async () => {
-    try {
-      if (!document.fullscreenElement && !(document as any).webkitFullscreenElement) {
-        await enterNativeFullscreen();
-      } else {
-        if (document.exitFullscreen) {
-          document.exitFullscreen().catch(() => {});
-        } else if ((document as any).webkitExitFullscreen) {
-          (document as any).webkitExitFullscreen();
-        }
-      }
-    } catch {}
-  }, [enterNativeFullscreen]);
-
-  // Show / hide floating controls on mouse movement or touch in theater mode
+  // Show / hide floating controls on mouse movement or touch in fullscreen mode
   const handleUserActivity = useCallback(() => {
     setControlsVisible(true);
     if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
     controlsTimeoutRef.current = setTimeout(() => {
       setControlsVisible(false);
-    }, 3800);
+    }, 4000);
   }, []);
 
-  // Switch server reliably without dropping fullscreen or orientation
+  // Switch server reliably
   const handleSwitchServer = useCallback(
-    async (serverKey: "cinesrc" | "vidlink" | "vidsrcwiki" | "rivestream") => {
+    (serverKey: "cinesrc" | "vidlink" | "vidsrcwiki" | "rivestream") => {
       setActiveServer(serverKey);
       if (typeof window !== "undefined") {
         try {
           sessionStorage.setItem("fardtv_active_server", serverKey);
         } catch {}
       }
-      handleUserActivity();
-      try {
-        await enterNativeFullscreen();
-      } catch {}
     },
-    [handleUserActivity, enterNativeFullscreen]
-  );
-
-  // Quick-switch server sequentially without touching orientation or bubbling
-  const handleQuickSwitchServer = useCallback(
-    async (e: React.SyntheticEvent) => {
-      e.stopPropagation();
-      e.preventDefault();
-      const nextServer =
-        activeServer === "cinesrc"
-          ? "vidlink"
-          : activeServer === "vidlink"
-          ? "vidsrcwiki"
-          : activeServer === "vidsrcwiki"
-          ? "rivestream"
-          : "cinesrc";
-      await handleSwitchServer(nextServer);
-    },
-    [activeServer, handleSwitchServer]
+    []
   );
 
   // Listen for window-level mouse movement, touches & iframe focus changes when theater is open
@@ -761,7 +661,6 @@ export default function NetflixPreviewModal() {
       document.documentElement.style.overflow = "";
       document.body.style.overflow = "";
       if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
-      if (serverHintTimerRef.current) clearTimeout(serverHintTimerRef.current);
     };
   }, [isOpen, activeItem?.id, resolvedType, autoPlay, initialSeason, initialEpisode, fetchDetail]);
 
@@ -770,15 +669,19 @@ export default function NetflixPreviewModal() {
       userDismissedId = String(activeItem.id);
     }
     hasRestoredInitialUrl = true;
+    exitNativeFullscreen();
+    setIsTheaterOpen(false);
     closePreview();
-  }, [activeItem, closePreview]);
+  }, [activeItem, closePreview, exitNativeFullscreen]);
 
   // Keyboard navigation
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape" && isOpen) {
-        if (isTheaterOpen) {
-          handleExitTheater();
+        if (isNativeFullscreen) {
+          exitNativeFullscreen();
+        } else if (isTheaterOpen) {
+          handleStopPlay();
         } else {
           handleModalClose();
         }
@@ -793,7 +696,7 @@ export default function NetflixPreviewModal() {
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, isTheaterOpen, handleModalClose, handleExitTheater]);
+  }, [isOpen, isNativeFullscreen, isTheaterOpen, exitNativeFullscreen, handleStopPlay, handleModalClose]);
 
   if (!isOpen || !activeItem) {
     return (
@@ -839,245 +742,70 @@ export default function NetflixPreviewModal() {
       <Suspense fallback={null}>
         <UrlPreviewListener />
       </Suspense>
-      {/* 1. TRUE FULLSCREEN THEATER PLAYER OVERLAY */}
-      {isTheaterOpen && (
+      {/* 1. NATIVE FULLSCREEN PLAYER OVERLAY */}
+      {isNativeFullscreen && isTheaterOpen && (
         <div
           ref={theaterContainerRef}
-          className="fixed inset-0 w-screen h-screen z-[9999] bg-black overflow-hidden flex flex-col select-none overscroll-none touch-manipulation [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden transition-all duration-300"
-          style={
-            shouldForceLandscape
-              ? {
-                  position: "fixed",
-                  top: "50%",
-                  left: "50%",
-                  width: "100dvh",
-                  height: "100dvw",
-                  transform: "translate(-50%, -50%) rotate(90deg)",
-                  transformOrigin: "center center",
-                  overscrollBehavior: "none",
-                }
-              : {
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  width: "100vw",
-                  height: "100dvh",
-                  overscrollBehavior: "none",
-                }
-          }
+          className="fixed inset-0 z-[9999] w-screen h-screen bg-black overflow-hidden flex flex-col select-none"
           onMouseMove={handleUserActivity}
           onClick={handleUserActivity}
           onTouchStart={handleUserActivity}
         >
-          {/* Invisible Top Hotspot Bar: Always catches mouse movements and touches across the top 64px even when controls are hidden */}
+          {/* Floating Fullscreen Top Controls */}
           <div
-            className="absolute top-0 inset-x-0 h-16 z-30 pointer-events-auto cursor-pointer"
-            onMouseEnter={handleUserActivity}
-            onMouseMove={handleUserActivity}
-            onTouchStart={handleUserActivity}
-            onClick={handleUserActivity}
-            aria-hidden="true"
-          />
-
-          {/* Persistent Floating Quick-Server Pill: Always accessible when controls auto-hide */}
-          <div
-            className={`absolute top-3 right-3 z-40 transition-all duration-300 pointer-events-auto ${
-              controlsVisible
-                ? "opacity-0 pointer-events-none translate-y-[-6px]"
-                : "opacity-85 hover:opacity-100 translate-y-0"
+            className={`absolute top-0 inset-x-0 z-50 flex items-center justify-between p-3 sm:px-6 bg-gradient-to-b from-black/90 via-black/50 to-transparent transition-opacity duration-300 ${
+              controlsVisible ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
             }`}
           >
-            <button
-              type="button"
-              onClick={handleQuickSwitchServer}
-              onTouchEnd={handleQuickSwitchServer}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#12141a]/95 hover:bg-black text-white text-[11px] sm:text-xs font-semibold border border-white/25 shadow-2xl backdrop-blur-md cursor-pointer active:scale-95 transition-all"
-              title="Switch to Next Server"
-            >
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>
-                Server:{" "}
-                <strong className="text-white font-bold">
-                  {activeServer === "cinesrc"
-                    ? "Server 1"
-                    : activeServer === "vidlink"
-                    ? "Server 2"
-                    : activeServer === "vidsrcwiki"
-                    ? "Server 3"
-                    : "Server 4"}
-                </strong>
-              </span>
-              <span className="text-[10px] bg-red-600 hover:bg-red-500 text-white font-bold px-2 py-0.5 rounded-full transition-colors ml-0.5">
-                Switch
-              </span>
-            </button>
-          </div>
-
-          {/* Floating Top Control Bar (Clean, direct, and non-blocking) */}
-          <div
-            onMouseEnter={handleUserActivity}
-            onMouseMove={handleUserActivity}
-            onTouchStart={handleUserActivity}
-            className={`absolute top-0 inset-x-0 z-40 flex items-center justify-between p-2.5 sm:px-6 sm:py-3.5 bg-gradient-to-b from-black/90 via-black/40 to-transparent transition-all duration-300 transform pointer-events-none ${
-              controlsVisible
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 -translate-y-3"
-            }`}
-          >
-            {/* Left: Solid Exit Pill (High contrast, completely covers embed's underlying back button) */}
-            <div className="flex items-center gap-2 pointer-events-auto shrink-0">
+            <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => handleExitTheater(false)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#12141a]/95 hover:bg-black text-white text-xs font-bold border border-white/25 shadow-2xl backdrop-blur-md cursor-pointer active:scale-95 transition-all"
-                title="Exit player (Esc)"
-                aria-label="Exit"
+                onClick={exitNativeFullscreen}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#12141a]/95 hover:bg-black text-white text-xs font-bold border border-white/25 shadow-xl backdrop-blur-md cursor-pointer active:scale-95 transition-all"
+                title="Exit Fullscreen"
               >
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M19 12H5M12 19l-7-7 7-7" />
                 </svg>
-                <span>Exit</span>
+                <span>Exit Fullscreen</span>
               </button>
-
-              <div className="hidden md:block min-w-0 px-2.5 py-1 rounded-full bg-[#12141a]/90 border border-white/15 backdrop-blur-md">
-                <h2 className="text-xs font-semibold text-white truncate max-w-xs">
-                  {title}
-                  {resolvedType === "tv" && (
-                    <span className="text-zinc-400 font-normal ml-1.5 text-[11px]">
-                      S{selectedSeason} E{selectedEpisode}
-                    </span>
-                  )}
-                </h2>
-              </div>
+              <span className="text-white text-xs font-semibold truncate max-w-xs hidden sm:inline">
+                {title} {resolvedType === "tv" && `S${selectedSeason} E${selectedEpisode}`}
+              </span>
             </div>
 
-            {/* Right: Direct 1-Click Server Switcher + Fullscreen Toggle */}
-            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 pointer-events-auto">
-              {/* Direct Server Switcher Tabs */}
-              <div
-                className="flex items-center gap-1 sm:gap-1.5 bg-[#12141a]/95 p-1 rounded-xl border border-white/20 backdrop-blur-md shadow-2xl overflow-x-auto scrollbar-none"
-                role="group"
-                aria-label="Select Streaming Server"
-              >
-                {/* Server 1 */}
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleSwitchServer("cinesrc");
-                  }}
-                  className={`flex items-center gap-1.5 px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition-all cursor-pointer active:scale-95 ${
-                    activeServer === "cinesrc"
-                      ? "bg-red-600 text-white font-bold shadow-md"
-                      : "text-zinc-300 hover:text-white hover:bg-white/10"
-                  }`}
-                  title="Server 1 (Default)"
-                >
-                  <span className={`w-1.5 h-1.5 rounded-full ${activeServer === "cinesrc" ? "bg-white" : "bg-emerald-400"}`} />
-                  <span>Server 1</span>
-                </button>
-
-                {/* Server 2 */}
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleSwitchServer("vidlink");
-                  }}
-                  className={`flex items-center gap-1.5 px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition-all cursor-pointer active:scale-95 ${
-                    activeServer === "vidlink"
-                      ? "bg-red-600 text-white font-bold shadow-md"
-                      : "text-zinc-300 hover:text-white hover:bg-white/10"
-                  }`}
-                  title="Server 2"
-                >
-                  <span className={`w-1.5 h-1.5 rounded-full ${activeServer === "vidlink" ? "bg-white" : "bg-amber-400"}`} />
-                  <span>Server 2</span>
-                </button>
-
-                {/* Server 3 */}
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleSwitchServer("vidsrcwiki");
-                  }}
-                  className={`flex items-center gap-1.5 px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition-all cursor-pointer active:scale-95 ${
-                    activeServer === "vidsrcwiki"
-                      ? "bg-red-600 text-white font-bold shadow-md"
-                      : "text-zinc-300 hover:text-white hover:bg-white/10"
-                  }`}
-                  title="Server 3"
-                >
-                  <span className={`w-1.5 h-1.5 rounded-full ${activeServer === "vidsrcwiki" ? "bg-white" : "bg-blue-400"}`} />
-                  <span>Server 3</span>
-                </button>
-
-                {/* Server 4 */}
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleSwitchServer("rivestream");
-                  }}
-                  className={`flex items-center gap-1.5 px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition-all cursor-pointer active:scale-95 ${
-                    activeServer === "rivestream"
-                      ? "bg-red-600 text-white font-bold shadow-md"
-                      : "text-zinc-300 hover:text-white hover:bg-white/10"
-                  }`}
-                  title="Server 4"
-                >
-                  <span className={`w-1.5 h-1.5 rounded-full ${activeServer === "rivestream" ? "bg-white" : "bg-purple-400"}`} />
-                  <span>Server 4</span>
-                </button>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 bg-[#12141a]/95 p-1 rounded-xl border border-white/20 backdrop-blur-md">
+                {SERVERS.map((s) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => handleSwitchServer(s.id)}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                      activeServer === s.id
+                        ? "bg-red-600 text-white font-bold"
+                        : "text-zinc-300 hover:text-white"
+                    }`}
+                  >
+                    {s.name}
+                  </button>
+                ))}
               </div>
-
-              {/* Fullscreen Toggle (Prominent, safe margins from screen edge, hides browser bars) */}
               <button
                 type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleFullscreen();
-                }}
-                className="flex items-center gap-1 px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-xl bg-[#12141a]/95 hover:bg-black text-white text-xs font-bold border border-white/20 shadow-xl backdrop-blur-md cursor-pointer active:scale-95 transition-all shrink-0"
-                title={isNativeFullscreen ? "Exit Fullscreen" : "Fullscreen (Hide Browser Bars)"}
-                aria-label="Fullscreen"
+                onClick={exitNativeFullscreen}
+                className="p-2 rounded-xl bg-[#12141a]/95 hover:bg-black text-white border border-white/20 shadow-xl backdrop-blur-md cursor-pointer active:scale-95 transition-all"
+                title="Exit Fullscreen"
+                aria-label="Exit Fullscreen"
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  {isNativeFullscreen ? (
-                    <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
-                  ) : (
-                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
-                  )}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                  <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
                 </svg>
-                <span className="hidden sm:inline text-[11px]">{isNativeFullscreen ? "Exit" : "Full"}</span>
               </button>
             </div>
           </div>
 
-          {/* Subtle Onboarding Hint: Informs viewers they can switch servers if buffering */}
-          {serverHintVisible && (
-            <div className="absolute top-14 sm:top-16 right-3 sm:right-6 z-40 pointer-events-none animate-fade-in">
-              <div className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-black/90 border border-white/20 text-white text-[11px] sm:text-xs font-medium shadow-2xl backdrop-blur-md">
-                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                <span>Video buffering or slow? Try Server 1, 2, 3, or 4 above</span>
-              </div>
-            </div>
-          )}
-
-          {/* 100% Screen Video Stream */}
-          <div
-            className="absolute inset-0 w-full h-full bg-black overflow-hidden overscroll-none touch-manipulation [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
-            style={
-              !isNativeFullscreen && isTouchDevice && !shouldForceLandscape
-                ? {
-                    paddingBottom: "env(safe-area-inset-bottom, 56px)",
-                    height: "100dvh",
-                  }
-                : undefined
-            }
-          >
+          <div className="relative w-full h-full bg-black">
             <iframe
               src={streamUrl}
               title={title}
@@ -1091,14 +819,14 @@ export default function NetflixPreviewModal() {
         </div>
       )}
 
-      {/* 2. AUTHENTIC NETFLIX PREVIEW MODAL */}
+      {/* 2. AUTHENTIC PREVIEW MODAL */}
       <div
         className={`fixed inset-0 z-[120] items-center justify-center p-0 sm:p-4 md:p-6 bg-black/80 backdrop-blur-sm overflow-y-auto animate-netflix-backdrop ${
-          isTheaterOpen ? "hidden" : "flex"
+          isNativeFullscreen ? "hidden" : "flex"
         }`}
         role="dialog"
         aria-modal="true"
-        aria-label={`Netflix Preview: ${title}`}
+        aria-label={`Preview: ${title}`}
         onClick={(e) => {
           if (e.target === e.currentTarget) {
             handleModalClose();
@@ -1109,7 +837,7 @@ export default function NetflixPreviewModal() {
           className="relative w-full max-w-4xl max-h-[100vh] sm:max-h-[92vh] overflow-y-auto rounded-none sm:rounded-xl my-auto bg-[#181818] text-white shadow-[0_25px_80px_rgba(0,0,0,0.95)] select-none scrollbar-thin scrollbar-thumb-zinc-700 animate-netflix-modal"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Netflix Circular Close Button */}
+          {/* Close Modal Button */}
           <button
             type="button"
             onClick={(e) => {
@@ -1126,77 +854,123 @@ export default function NetflixPreviewModal() {
             </svg>
           </button>
 
-          {/* Cinematic Backdrop Header (Compact & balanced so content and episodes are visible) */}
-          <div className="relative w-full h-[210px] sm:h-[280px] md:h-[320px] overflow-hidden bg-black">
-            {backdropUrl ? (
-              <Image
-                src={`https://image.tmdb.org/t/p/original${backdropUrl}`}
-                alt={title}
-                fill
-                priority
-                className="object-cover object-top sm:object-center"
-                sizes="(max-width: 1024px) 100vw, 900px"
-              />
-            ) : (
-              <div className="w-full h-full bg-[#12141a] flex items-center justify-center text-zinc-500 text-sm">
-                No preview available
+          {/* Media Header (Embedded Player or Backdrop) */}
+          <div className="relative w-full aspect-video sm:h-[340px] md:h-[420px] bg-black overflow-hidden">
+            {isTheaterOpen ? (
+              <div className="relative w-full h-full">
+                <iframe
+                  src={streamUrl}
+                  title={title}
+                  className="w-full h-full border-0 block"
+                  scrolling="no"
+                  referrerPolicy="origin"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen *"
+                  allowFullScreen
+                />
               </div>
+            ) : (
+              <>
+                {backdropUrl ? (
+                  <Image
+                    src={`https://image.tmdb.org/t/p/original${backdropUrl}`}
+                    alt={title}
+                    fill
+                    priority
+                    className="object-cover object-top sm:object-center"
+                    sizes="(max-width: 1024px) 100vw, 900px"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-[#12141a] flex items-center justify-center text-zinc-500 text-sm">
+                    No preview available
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#181818] via-[#181818]/40 via-50% to-transparent pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#181818]/80 via-transparent to-transparent pointer-events-none" />
+
+                <div className="absolute bottom-4 left-4 right-4 sm:bottom-5 sm:left-8 sm:right-8 z-20">
+                  <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-tight leading-snug mb-2.5 drop-shadow-2xl max-w-2xl">
+                    {title}
+                  </h1>
+
+                  <div className="flex items-center gap-2.5 sm:gap-3">
+                    <button
+                      type="button"
+                      onClick={() => handleStartPlay()}
+                      className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-2 sm:py-2.5 rounded bg-white hover:bg-white/80 text-black font-extrabold text-xs sm:text-sm transition-all cursor-pointer shadow-xl active:scale-95"
+                      title="Play"
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M5 3l14 9-14 9V3z" />
+                      </svg>
+                      <span>Play</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => toggleFavorite(activeItem)}
+                      className={`inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full border transition-all cursor-pointer shadow-lg active:scale-95 ${
+                        fav
+                          ? "bg-red-600/20 text-red-500 border-red-500/80 shadow-red-500/30"
+                          : "bg-black/60 hover:bg-black/80 text-white hover:text-red-400 border-white/40 hover:border-white"
+                      }`}
+                      title={fav ? "Remove from Favorites" : "Add to Favorites"}
+                      aria-label={fav ? "Remove from Favorites" : "Add to Favorites"}
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill={fav ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </>
             )}
+          </div>
 
-            {/* Seamless Netflix Gradient Overlays */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#181818] via-[#181818]/40 via-50% to-transparent pointer-events-none" />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#181818]/80 via-transparent to-transparent pointer-events-none" />
+          {/* Embedded Player Control Toolbar */}
+          {isTheaterOpen && (
+            <div className="flex flex-wrap items-center justify-between gap-2 px-3 sm:px-6 py-2.5 bg-[#141414] border-b border-white/10">
+              <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
+                <span className="text-[11px] font-semibold text-zinc-400 mr-1 hidden sm:inline">Server:</span>
+                {SERVERS.map((s) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => handleSwitchServer(s.id)}
+                    className={`px-2.5 sm:px-3 py-1 rounded-lg text-[11px] sm:text-xs font-semibold transition-all cursor-pointer ${
+                      activeServer === s.id
+                        ? "bg-red-600 text-white font-bold shadow-md shadow-red-950/40"
+                        : "bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white border border-white/10"
+                    }`}
+                  >
+                    {s.name}
+                  </button>
+                ))}
+              </div>
 
-            {/* Bottom Content on Backdrop */}
-            <div className="absolute bottom-4 left-4 right-4 sm:bottom-5 sm:left-8 sm:right-8 z-20">
-              {/* Title in Clean Modern Sans */}
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-tight leading-snug mb-2.5 drop-shadow-2xl max-w-2xl">
-                {title}
-              </h1>
-
-              {/* Action Buttons */}
-              <div className="flex items-center gap-2.5 sm:gap-3">
-                {/* Large White Play Button */}
+              <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => handleStartPlay()}
-                  className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-2 sm:py-2.5 rounded bg-white hover:bg-white/80 text-black font-extrabold text-xs sm:text-sm transition-all cursor-pointer shadow-xl active:scale-95"
-                  title="Play Fullscreen"
+                  onClick={enterNativeFullscreen}
+                  className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-semibold border border-white/15 transition-all cursor-pointer active:scale-95"
+                  title="Fullscreen (Expand)"
                 >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M5 3l14 9-14 9V3z" />
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
                   </svg>
-                  <span>Play</span>
+                  <span className="hidden sm:inline">Fullscreen</span>
                 </button>
 
-                {/* Favorite / Love Button */}
                 <button
                   type="button"
-                  onClick={() => toggleFavorite(activeItem)}
-                  className={`inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full border transition-all cursor-pointer shadow-lg active:scale-95 ${
-                    fav
-                      ? "bg-red-600/20 text-red-500 border-red-500/80 shadow-red-500/30"
-                      : "bg-black/60 hover:bg-black/80 text-white hover:text-red-400 border-white/40 hover:border-white"
-                  }`}
-                  title={fav ? "Remove from Favorites" : "Add to Favorites"}
-                  aria-label={fav ? "Remove from Favorites" : "Add to Favorites"}
+                  onClick={handleStopPlay}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white text-xs font-medium border border-white/10 transition-all cursor-pointer"
+                  title="Stop Video and View Details"
                 >
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill={fav ? "currentColor" : "none"}
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                  </svg>
+                  <span>Details</span>
                 </button>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Netflix Two-Column Detail Body */}
           <div className="p-4 sm:p-7 space-y-6">
