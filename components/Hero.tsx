@@ -159,7 +159,7 @@ export default function Hero({ items, item, isAnime }: Props) {
               <div className="absolute inset-0 bg-gradient-to-t from-[#06070a] via-[#06070a]/80 via-30% to-transparent pointer-events-none z-[2]" />
 
               {/* Left focused vignette behind movie logo and details */}
-              <div className="hidden md:block absolute inset-0 bg-gradient-to-r from-[#06070a]/90 via-[#06070a]/40 to-transparent max-w-2xl pointer-events-none z-[2]" />
+              <div className="hidden md:block absolute inset-0 bg-gradient-to-r from-[#06070a]/90 via-[#06070a]/40 to-transparent max-w-2xl lg:max-w-3xl pointer-events-none z-[2]" />
             </div>
           );
         })}
@@ -168,7 +168,7 @@ export default function Hero({ items, item, isAnime }: Props) {
         <div
           className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-end z-10 h-full pb-9 sm:pb-8 pt-16 sm:pt-20"
         >
-          <div className="w-full max-w-2xl mx-auto md:mx-0 flex flex-col items-center md:items-start text-center md:text-left">
+          <div className="w-full max-w-2xl lg:max-w-3xl mx-auto md:mx-0 flex flex-col items-center md:items-start text-center md:text-left">
             {/* Tag / Category Badge */}
             <div className="inline-flex items-center gap-2 mb-1.5 sm:mb-2">
               <span className="px-2.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider shadow-sm transition-colors bg-red-600 text-white">
@@ -180,22 +180,22 @@ export default function Hero({ items, item, isAnime }: Props) {
             </div>
 
             {/* Title: Official TMDB Graphic Logo (if available) or Stylized Fraunces Typography */}
-            <div className="mb-2 sm:mb-2.5 min-h-[44px] sm:min-h-[52px] md:min-h-[65px] flex items-center justify-center md:justify-start">
+            <div className="mb-2 sm:mb-2.5 min-h-[54px] sm:min-h-[66px] md:min-h-[82px] lg:min-h-[100px] flex items-center justify-center md:justify-start">
               {currentLogo ? (
-                <div className="relative h-[46px] sm:h-[54px] md:h-[65px] lg:h-[75px] max-w-[210px] sm:max-w-[270px] md:max-w-[340px] lg:max-w-[370px] w-auto">
+                <div className="relative h-[54px] sm:h-[66px] md:h-[82px] lg:h-[100px] max-w-[250px] sm:max-w-[330px] md:max-w-[420px] lg:max-w-[480px] w-auto">
                   <Image
                     key={`hero-logo-${currentItem.id}`}
                     src={`https://image.tmdb.org/t/p/original${currentLogo}`}
                     alt={`Logo ${title}`}
-                    width={370}
-                    height={105}
+                    width={480}
+                    height={130}
                     priority={currentIndex === 0}
-                    className="h-full w-auto max-h-[46px] sm:max-h-[54px] md:max-h-[65px] lg:max-h-[75px] object-contain object-center md:object-left drop-shadow-[0_4px_20px_rgba(0,0,0,0.95)] animate-fade-in"
+                    className="h-full w-auto max-h-[54px] sm:max-h-[66px] md:max-h-[82px] lg:max-h-[100px] object-contain object-center md:object-left drop-shadow-[0_4px_20px_rgba(0,0,0,0.95)] animate-fade-in"
                   />
                 </div>
               ) : (
                 <h1
-                  className="text-2xl sm:text-3xl md:text-[34px] lg:text-[42px] font-black text-white tracking-tight leading-[1.1] drop-shadow-2xl animate-fade-in"
+                  className="text-2xl sm:text-3xl md:text-[38px] lg:text-[48px] font-black text-white tracking-tight leading-[1.1] drop-shadow-2xl animate-fade-in"
                   style={{ fontFamily: "var(--font-fraunces)" }}
                 >
                   {title}
