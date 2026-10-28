@@ -136,10 +136,10 @@ export default function Footer() {
               target="_blank"
               rel="noopener noreferrer"
               className="group inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-950/40 hover:bg-red-900/50 border border-red-800/40 text-[11px] font-semibold text-red-400 hover:text-red-300 transition-all hover:scale-105 cursor-pointer"
-              title="Koleksi Khusus 18+ (VIP Uncensored)"
+              title="Koleksi Khusus (VIP Uncensored)"
             >
               <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-              <span>Koleksi Khusus 18+ (VIP Uncensored)</span>
+              <span>Koleksi Khusus (VIP Uncensored)</span>
               <span className="text-zinc-500 group-hover:text-red-300 transition-colors">&rarr;</span>
             </a>
           </div>
