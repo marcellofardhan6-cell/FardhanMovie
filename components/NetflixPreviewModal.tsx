@@ -761,13 +761,13 @@ export default function NetflixPreviewModal() {
               <button
                 type="button"
                 onClick={exitNativeFullscreen}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#12141a]/95 hover:bg-black text-white text-xs font-bold border border-white/25 shadow-xl backdrop-blur-md cursor-pointer active:scale-95 transition-all"
+                className="flex items-center justify-center w-8 h-8 rounded-full bg-[#12141a]/95 hover:bg-black text-white border border-white/25 shadow-xl backdrop-blur-md cursor-pointer active:scale-95 transition-all shrink-0"
                 title="Exit Fullscreen"
+                aria-label="Exit Fullscreen"
               >
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M19 12H5M12 19l-7-7 7-7" />
                 </svg>
-                <span>Exit Fullscreen</span>
               </button>
               <span className="text-white text-xs font-semibold truncate max-w-xs hidden sm:inline">
                 {title} {resolvedType === "tv" && `S${selectedSeason} E${selectedEpisode}`}
@@ -951,19 +951,19 @@ export default function NetflixPreviewModal() {
                 <button
                   type="button"
                   onClick={enterNativeFullscreen}
-                  className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-semibold border border-white/15 transition-all cursor-pointer active:scale-95"
-                  title="Fullscreen (Expand)"
+                  className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/15 transition-all cursor-pointer active:scale-95 shrink-0"
+                  title="Fullscreen"
+                  aria-label="Fullscreen"
                 >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
                   </svg>
-                  <span className="hidden sm:inline">Fullscreen</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={handleStopPlay}
-                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white text-xs font-medium border border-white/10 transition-all cursor-pointer"
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white text-xs font-medium border border-white/10 transition-all cursor-pointer shrink-0"
                   title="Stop Video and View Details"
                 >
                   <span>Details</span>

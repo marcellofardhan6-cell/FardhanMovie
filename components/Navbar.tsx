@@ -505,25 +505,24 @@ export default function Navbar() {
               )}
             </Link>
 
-            {/* Support Creator Button - Attractive yet clean and simple */}
+            {/* Support Creator Button - Love Icon Only */}
             <button
               type="button"
               onClick={openSupport}
-              className="group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-white bg-gradient-to-r from-red-600 to-[#d61f26] hover:from-red-500 hover:to-red-600 border border-white/20 shadow-sm shadow-red-950/50 transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer select-none shrink-0"
+              className="group p-2 rounded-full text-white bg-gradient-to-r from-red-600 to-[#d61f26] hover:from-red-500 hover:to-red-600 border border-white/20 shadow-sm shadow-red-950/50 transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer select-none shrink-0 flex items-center justify-center"
               aria-label="Support FardTV"
               title="Support FardTV"
             >
               <svg
-                width="12"
-                height="12"
+                width="16"
+                height="16"
                 viewBox="0 0 24 24"
                 fill="currentColor"
-                className="transition-transform duration-200 group-hover:scale-110 shrink-0 text-white/90"
+                className="transition-transform duration-200 group-hover:scale-110 shrink-0 text-white"
                 aria-hidden="true"
               >
                 <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
               </svg>
-              <span className="tracking-wide">Support</span>
             </button>
 
             {/* Mobile Hamburger Button */}
@@ -815,8 +814,13 @@ export default function Navbar() {
                 }}
                 className="w-full mt-2 px-3 py-2.5 rounded-xl text-sm font-semibold text-white bg-red-600 hover:bg-red-500 transition-colors flex items-center justify-between cursor-pointer"
               >
-                <span>Support</span>
-                <span className="text-xs text-red-200">QRIS &rarr;</span>
+                <div className="flex items-center gap-2">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
+                  </svg>
+                  <span>QRIS</span>
+                </div>
+                <span className="text-xs text-red-200">&rarr;</span>
               </button>
             </nav>
           </div>
