@@ -5,7 +5,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { Movie, img, displayTitle, displayYear, isTV } from "@/lib/tmdb";
 import { useFavorites } from "@/context/FavoritesContext";
-import { usePreviewModal } from "@/context/PreviewModalContext";
 
 interface Props {
   item: Movie;
@@ -14,7 +13,6 @@ interface Props {
 
 export default function MovieCard({ item, priority = false }: Props) {
   const { isFavorite, toggleFavorite } = useFavorites();
-  const { openPreview } = usePreviewModal();
   const fav = isFavorite(item.id);
   const title = displayTitle(item);
   const year = displayYear(item);
@@ -24,22 +22,9 @@ export default function MovieCard({ item, priority = false }: Props) {
   const [imgSrc, setImgSrc] = useState(posterUrl);
   const rating = item.vote_average ? item.vote_average.toFixed(1) : null;
 
-  const handleCardClick = (e: React.MouseEvent) => {
-    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
-    e.preventDefault();
-    openPreview(item, false);
-  };
-
-  const handlePlayClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    openPreview(item, true);
-  };
-
   return (
     <Link
       href={href}
-      onClick={handleCardClick}
       className="group block relative rounded-xl overflow-hidden transition-all duration-300 ease-out hover:-translate-y-1.5 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-red-500 cursor-pointer select-none"
       style={{
         background: "var(--surface)",
@@ -106,17 +91,14 @@ export default function MovieCard({ item, priority = false }: Props) {
 
         {/* Center Play Button Reveal on Hover */}
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/40 backdrop-blur-[1px] z-20 pointer-events-none">
-          <button
-            type="button"
-            onClick={handlePlayClick}
-            className="w-11 h-11 rounded-full flex items-center justify-center bg-red-600 text-white shadow-[0_0_25px_rgba(229,9,20,0.8)] transform scale-90 group-hover:scale-100 hover:scale-110 hover:bg-red-500 transition-all duration-200 cursor-pointer pointer-events-auto"
-            aria-label="Play movie directly"
-            title="Play Now"
+          <div
+            className="w-11 h-11 rounded-full flex items-center justify-center bg-red-600 text-white shadow-[0_0_25px_rgba(229,9,20,0.8)] transform scale-90 group-hover:scale-100 hover:scale-110 hover:bg-red-500 transition-all duration-200"
+            aria-hidden="true"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" className="ml-0.5" aria-hidden>
               <path d="M5 3l14 9-14 9V3z" />
             </svg>
-          </button>
+          </div>
         </div>
 
         {/* Bottom Title & Details on Poster (Reveals on Hover) */}

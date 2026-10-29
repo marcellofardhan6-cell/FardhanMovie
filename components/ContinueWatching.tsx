@@ -3,8 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useWatchHistory } from "@/context/WatchHistoryContext";
-import { usePreviewModal } from "@/context/PreviewModalContext";
-import { img, backdrop, Movie } from "@/lib/tmdb";
+import { img, backdrop } from "@/lib/tmdb";
 
 function formatMinutes(seconds?: number): string {
   if (!seconds || seconds <= 0) return "0m";
@@ -19,7 +18,6 @@ function formatMinutes(seconds?: number): string {
 
 export default function ContinueWatching() {
   const { history, removeHistory, isLoaded } = useWatchHistory();
-  const { openPreview } = usePreviewModal();
 
   if (!isLoaded || history.length === 0) return null;
 
@@ -72,25 +70,7 @@ export default function ContinueWatching() {
               ? durSec > 0
                 ? `${formatMinutes(currentSec)} / ${formatMinutes(durSec)}`
                 : `${Math.floor(currentSec / 60)}m`
-              : "Start watching";
-
-          const handleResume = (e: React.MouseEvent) => {
-            if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
-            e.preventDefault();
-            const movieItem: Movie = {
-              id: item.id,
-              title: item.title,
-              name: item.title,
-              poster_path: item.poster_path ?? null,
-              backdrop_path: item.backdrop_path ?? null,
-              media_type: item.type === "tv" ? "tv" : "movie",
-              vote_average: item.vote_average ?? 0,
-              vote_count: 0,
-              overview: "",
-              genre_ids: [],
-            };
-            openPreview(movieItem, true, item.season || 1, item.episode || 1);
-          };
+              : "Resume";
 
           return (
             <div
@@ -100,7 +80,6 @@ export default function ContinueWatching() {
             >
               <Link
                 href={href}
-                onClick={handleResume}
                 className="block relative aspect-video bg-zinc-900 overflow-hidden cursor-pointer"
               >
                 <Image
@@ -122,12 +101,14 @@ export default function ContinueWatching() {
                   </div>
                 </div>
 
-                {/* Badges: Season/Episode & Real Time Status */}
+                {/* Badges: Season/Episode & Rating */}
                 <div className="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between gap-1.5 pointer-events-none">
                   <div className="flex items-center gap-1.5">
-                    <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-red-600 text-white shadow-md">
-                      {isSeries ? `S${item.season || 1} : E${item.episode || 1}` : "MOVIE"}
-                    </span>
+                    {isSeries && (
+                      <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-red-600 text-white shadow-md">
+                        {`S${item.season || 1} · E${item.episode || 1}`}
+                      </span>
+                    )}
                     {item.vote_average ? (
                       <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-black/70 text-amber-400 backdrop-blur-sm">
                         ★ {item.vote_average.toFixed(1)}
@@ -170,7 +151,7 @@ export default function ContinueWatching() {
 
               {/* Card Title & Real Watch Minutes */}
               <div className="p-3">
-                <Link href={href} onClick={handleResume} className="block cursor-pointer">
+                <Link href={href} className="block cursor-pointer">
                   <h3 className="text-xs sm:text-sm font-semibold text-white group-hover:text-red-400 transition-colors truncate">
                     {item.title}
                   </h3>
@@ -180,9 +161,7 @@ export default function ContinueWatching() {
                         ? durSec > 0
                           ? `${formatMinutes(currentSec)} of ${formatMinutes(durSec)} (${percent}%)`
                           : `${Math.floor(currentSec / 60)}m`
-                        : isSeries
-                        ? "Start episode"
-                        : "Start movie"}
+                        : "Resume"}
                     </span>
                     <span className="text-red-400 font-bold shrink-0 ml-2 group-hover:translate-x-0.5 transition-transform">
                       Resume &rarr;

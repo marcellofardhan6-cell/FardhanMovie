@@ -54,87 +54,26 @@ let hasRestoredInitialUrl = false;
 let userDismissedId: string | null = null;
 
 function UrlPreviewListener() {
-  const searchParams = useSearchParams();
-  const { openPreview, isOpen } = usePreviewModal();
-  const isFetchingRef = useRef(false);
-
   useEffect(() => {
-    // Only execute on initial mount / page reload
-    if (hasRestoredInitialUrl) return;
-
-    let movieId = searchParams.get("movie");
-    let seriesId = searchParams.get("series");
-    let playParam = searchParams.get("play");
-    let seasonParam = searchParams.get("season");
-    let episodeParam = searchParams.get("episode");
-
-    // Also check window.location.search directly in case searchParams hasn't hydrated/updated yet
-    if (typeof window !== "undefined") {
+    if (typeof window === "undefined") return;
+    try {
+      sessionStorage.removeItem("fardtv_active_session");
+      sessionStorage.removeItem("fardtv_active_server");
       const rawParams = new URLSearchParams(window.location.search);
-      if (!movieId && rawParams.get("movie")) movieId = rawParams.get("movie");
-      if (!seriesId && rawParams.get("series")) seriesId = rawParams.get("series");
-      if (!playParam && rawParams.get("play")) playParam = rawParams.get("play");
-      if (!seasonParam && rawParams.get("season")) seasonParam = rawParams.get("season");
-      if (!episodeParam && rawParams.get("episode")) episodeParam = rawParams.get("episode");
-    }
+      const movieId = rawParams.get("movie");
+      const seriesId = rawParams.get("series");
+      const season = rawParams.get("season") || "1";
+      const episode = rawParams.get("episode") || "1";
+      const startAt = rawParams.get("startAt");
+      const startParam = startAt ? `?startAt=${encodeURIComponent(startAt)}` : "";
 
-    // Check sessionStorage fallback if query params were cleared by mobile pull-to-refresh
-    if (!movieId && !seriesId && typeof window !== "undefined") {
-      try {
-        const saved = sessionStorage.getItem("fardtv_active_session");
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (parsed && (parsed.movieId || parsed.seriesId)) {
-            movieId = parsed.movieId ? String(parsed.movieId) : null;
-            seriesId = parsed.seriesId ? String(parsed.seriesId) : null;
-            playParam = parsed.play ? "1" : "0";
-            seasonParam = parsed.season ? String(parsed.season) : "1";
-            episodeParam = parsed.episode ? String(parsed.episode) : "1";
-          }
-        }
-      } catch {}
-    }
-
-    const id = movieId || seriesId;
-    if (!id || userDismissedId === id) {
-      hasRestoredInitialUrl = true;
-      return;
-    }
-
-    if (!isOpen && !isFetchingRef.current) {
-      hasRestoredInitialUrl = true;
-      const type = seriesId ? "tv" : "movie";
-      const season = seasonParam ? parseInt(seasonParam, 10) : 1;
-      const episode = episodeParam ? parseInt(episodeParam, 10) : 1;
-      const shouldPlay = playParam === "1";
-
-      isFetchingRef.current = true;
-      fetch(`/api/detail?id=${id}&type=${type}&season=${season}`)
-        .then((res) => (res.ok ? res.json() : null))
-        .then((data) => {
-          if (data) {
-            const movieItem: Movie = {
-              id: data.id,
-              title: data.title || data.name || "Movie",
-              name: data.name || data.title,
-              poster_path: data.poster_path ?? null,
-              backdrop_path: data.backdrop_path ?? null,
-              media_type: type,
-              vote_average: data.vote_average ?? 0,
-              vote_count: data.vote_count ?? 0,
-              overview: data.overview || "",
-              release_date: data.year ?? "",
-              first_air_date: data.year ?? "",
-            };
-            openPreview(movieItem, shouldPlay, season, episode);
-          }
-        })
-        .catch(() => {})
-        .finally(() => {
-          isFetchingRef.current = false;
-        });
-    }
-  }, [searchParams, isOpen, openPreview]);
+      if (movieId) {
+        window.location.replace(`/film/${movieId}${startParam}`);
+      } else if (seriesId) {
+        window.location.replace(`/series/${seriesId}?season=${season}&episode=${episode}${startAt ? `&startAt=${encodeURIComponent(startAt)}` : ""}`);
+      }
+    } catch {}
+  }, []);
 
   return null;
 }

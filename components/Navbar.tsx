@@ -396,13 +396,12 @@ export default function Navbar() {
                   ) : (
                     <div className="max-h-80 overflow-y-auto space-y-1 pr-1">
                       {searchResults.map((item) => (
-                        <button
-                          type="button"
+                        <Link
                           key={`desktop-${item.media_type}-${item.id}`}
+                          href={`/${item.media_type === "tv" ? "series" : "film"}/${item.id}`}
                           onClick={() => {
                             setSearchDropdownOpen(false);
                             setSearchQuery("");
-                            openPreview(item as any, false);
                           }}
                           className="w-full flex items-center gap-2.5 p-2 rounded-xl hover:bg-white/[0.08] transition-colors text-left group cursor-pointer"
                         >
@@ -431,7 +430,7 @@ export default function Navbar() {
                               ) : null}
                             </div>
                           </div>
-                        </button>
+                        </Link>
                       ))}
                     </div>
                   )}
@@ -626,13 +625,12 @@ export default function Navbar() {
                 ) : (
                   <div className="space-y-1">
                     {searchResults.map((item) => (
-                      <button
-                        type="button"
+                      <Link
                         key={`mobile-${item.media_type}-${item.id}`}
+                        href={`/${item.media_type === "tv" ? "series" : "film"}/${item.id}`}
                         onClick={() => {
                           setMobileSearchOpen(false);
                           setSearchQuery("");
-                          openPreview(item as any, false);
                         }}
                         className="w-full flex items-center gap-2.5 p-2 rounded-xl active:bg-white/[0.1] transition-colors text-left"
                       >
@@ -661,7 +659,7 @@ export default function Navbar() {
                             ) : null}
                           </div>
                         </div>
-                      </button>
+                      </Link>
                     ))}
                   </div>
                 )}
