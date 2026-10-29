@@ -140,12 +140,17 @@ export default function NetflixPreviewModal() {
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const theaterContainerRef = useRef<HTMLDivElement | null>(null);
   const currentTimeRef = useRef<number>(0);
+  const playStartTimeRef = useRef<number>(0);
+  const handleStopPlayRef = useRef<() => void>(() => {});
 
   // Track native fullscreen state changes reliably
   useEffect(() => {
     const handleFullscreenChange = () => {
       const isFs = Boolean(document.fullscreenElement || (document as any).webkitFullscreenElement);
       setIsNativeFullscreen(isFs);
+      if (!isFs && isTheaterOpen && Date.now() - playStartTimeRef.current > 1000) {
+        handleStopPlayRef.current();
+      }
     };
     handleFullscreenChange();
     document.addEventListener("fullscreenchange", handleFullscreenChange);
@@ -154,7 +159,7 @@ export default function NetflixPreviewModal() {
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
       document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
     };
-  }, []);
+  }, [isTheaterOpen]);
 
   const resolvedType = activeItem
     ? activeItem.media_type === "tv" || isTV(activeItem)
@@ -250,6 +255,7 @@ export default function NetflixPreviewModal() {
   // Start playing in embedded player mode and enter fullscreen directly
   const handleStartPlay = useCallback(
     async (seasonNum?: number, episodeNum?: number) => {
+      playStartTimeRef.current = Date.now();
       const sNum = seasonNum !== undefined ? seasonNum : selectedSeason;
       const eNum = episodeNum !== undefined ? episodeNum : selectedEpisode;
       if (seasonNum !== undefined) setSelectedSeason(seasonNum);
@@ -328,6 +334,20 @@ export default function NetflixPreviewModal() {
     exitNativeFullscreen();
     setIsTheaterOpen(false);
   }, [activeItem, detailData, resolvedType, selectedSeason, selectedEpisode, updateProgress, exitNativeFullscreen]);
+
+  useEffect(() => {
+    handleStopPlayRef.current = handleStopPlay;
+  }, [handleStopPlay]);
+
+  const handleModalClose = useCallback(() => {
+    if (activeItem) {
+      userDismissedId = String(activeItem.id);
+    }
+    hasRestoredInitialUrl = true;
+    exitNativeFullscreen();
+    setIsTheaterOpen(false);
+    closePreview();
+  }, [activeItem, closePreview, exitNativeFullscreen]);
 
   // Active watch progress tracking in theater mode
   useEffect(() => {
@@ -422,10 +442,10 @@ export default function NetflixPreviewModal() {
     if (!isTheaterOpen && !isOpen) return;
 
     const onPopState = () => {
-      if (isNativeFullscreen) {
-        exitNativeFullscreen();
-      } else if (isTheaterOpen) {
+      if (isTheaterOpen) {
         handleStopPlay();
+      } else if (isOpen) {
+        handleModalClose();
       }
     };
 
@@ -434,7 +454,7 @@ export default function NetflixPreviewModal() {
     return () => {
       window.removeEventListener("popstate", onPopState);
     };
-  }, [isTheaterOpen, isOpen, isNativeFullscreen, exitNativeFullscreen, handleStopPlay]);
+  }, [isTheaterOpen, isOpen, handleStopPlay, handleModalClose]);
 
   // Show / hide floating controls on mouse movement or touch in fullscreen mode
   const handleUserActivity = useCallback(() => {
@@ -654,23 +674,11 @@ export default function NetflixPreviewModal() {
     };
   }, [isOpen, activeItem?.id, resolvedType, autoPlay, initialSeason, initialEpisode, fetchDetail]);
 
-  const handleModalClose = useCallback(() => {
-    if (activeItem) {
-      userDismissedId = String(activeItem.id);
-    }
-    hasRestoredInitialUrl = true;
-    exitNativeFullscreen();
-    setIsTheaterOpen(false);
-    closePreview();
-  }, [activeItem, closePreview, exitNativeFullscreen]);
-
   // Keyboard navigation
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape" && isOpen) {
-        if (isNativeFullscreen) {
-          exitNativeFullscreen();
-        } else if (isTheaterOpen) {
+        if (isTheaterOpen) {
           handleStopPlay();
         } else {
           handleModalClose();
@@ -686,7 +694,7 @@ export default function NetflixPreviewModal() {
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, isNativeFullscreen, isTheaterOpen, exitNativeFullscreen, handleStopPlay, handleModalClose]);
+  }, [isOpen, isTheaterOpen, handleStopPlay, handleModalClose]);
 
   if (!isOpen || !activeItem) {
     return (
@@ -733,7 +741,7 @@ export default function NetflixPreviewModal() {
         <UrlPreviewListener />
       </Suspense>
       {/* 1. NATIVE FULLSCREEN PLAYER OVERLAY */}
-      {isNativeFullscreen && isTheaterOpen && (
+      {isTheaterOpen && (
         <div
           ref={theaterContainerRef}
           className="fixed inset-0 z-[9999] w-screen h-screen bg-black overflow-hidden flex flex-col select-none"
@@ -750,10 +758,10 @@ export default function NetflixPreviewModal() {
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={exitNativeFullscreen}
+                onClick={handleStopPlay}
                 className="flex items-center justify-center w-8 h-8 rounded-full bg-[#12141a]/95 hover:bg-black text-white border border-white/25 shadow-xl backdrop-blur-md cursor-pointer active:scale-95 transition-all shrink-0"
-                title="Exit Fullscreen"
-                aria-label="Exit Fullscreen"
+                title="Back to Details"
+                aria-label="Back to Details"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M19 12H5M12 19l-7-7 7-7" />
@@ -783,7 +791,7 @@ export default function NetflixPreviewModal() {
               </div>
               <button
                 type="button"
-                onClick={exitNativeFullscreen}
+                onClick={handleStopPlay}
                 className="p-2 rounded-xl bg-[#12141a]/95 hover:bg-black text-white border border-white/20 shadow-xl backdrop-blur-md cursor-pointer active:scale-95 transition-all"
                 title="Exit Fullscreen"
                 aria-label="Exit Fullscreen"
@@ -812,7 +820,7 @@ export default function NetflixPreviewModal() {
       {/* 2. AUTHENTIC PREVIEW MODAL */}
       <div
         className={`fixed inset-0 z-[120] items-center justify-center p-0 sm:p-4 md:p-6 bg-black/80 backdrop-blur-sm overflow-y-auto animate-netflix-backdrop ${
-          isNativeFullscreen ? "hidden" : "flex"
+          isTheaterOpen ? "hidden" : "flex"
         }`}
         role="dialog"
         aria-modal="true"
@@ -844,123 +852,61 @@ export default function NetflixPreviewModal() {
             </svg>
           </button>
 
-          {/* Media Header (Embedded Player or Backdrop) */}
+          {/* Media Header (Clean Backdrop Banner with Title & Action Buttons) */}
           <div className="relative w-full aspect-video sm:h-[340px] md:h-[420px] bg-black overflow-hidden">
-            {isTheaterOpen ? (
-              <div className="relative w-full h-full">
-                <iframe
-                  src={streamUrl}
-                  title={title}
-                  className="w-full h-full border-0 block"
-                  scrolling="no"
-                  referrerPolicy="origin"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen *"
-                  allowFullScreen
-                />
-              </div>
+            {backdropUrl ? (
+              <Image
+                src={`https://image.tmdb.org/t/p/original${backdropUrl}`}
+                alt={title}
+                fill
+                priority
+                className="object-cover object-top sm:object-center"
+                sizes="(max-width: 1024px) 100vw, 900px"
+              />
             ) : (
-              <>
-                {backdropUrl ? (
-                  <Image
-                    src={`https://image.tmdb.org/t/p/original${backdropUrl}`}
-                    alt={title}
-                    fill
-                    priority
-                    className="object-cover object-top sm:object-center"
-                    sizes="(max-width: 1024px) 100vw, 900px"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-[#12141a] flex items-center justify-center text-zinc-500 text-sm">
-                    No preview available
-                  </div>
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#181818] via-[#181818]/40 via-50% to-transparent pointer-events-none" />
-                <div className="absolute inset-0 bg-gradient-to-r from-[#181818]/80 via-transparent to-transparent pointer-events-none" />
-
-                <div className="absolute bottom-4 left-4 right-4 sm:bottom-5 sm:left-8 sm:right-8 z-20">
-                  <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-tight leading-snug mb-2.5 drop-shadow-2xl max-w-2xl">
-                    {title}
-                  </h1>
-
-                  <div className="flex items-center gap-2.5 sm:gap-3">
-                    <button
-                      type="button"
-                      onClick={() => handleStartPlay()}
-                      className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-2 sm:py-2.5 rounded bg-white hover:bg-white/80 text-black font-extrabold text-xs sm:text-sm transition-all cursor-pointer shadow-xl active:scale-95"
-                      title="Play"
-                    >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M5 3l14 9-14 9V3z" />
-                      </svg>
-                      <span>Play</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => toggleFavorite(activeItem)}
-                      className={`inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full border transition-all cursor-pointer shadow-lg active:scale-95 ${
-                        fav
-                          ? "bg-red-600/20 text-red-500 border-red-500/80 shadow-red-500/30"
-                          : "bg-black/60 hover:bg-black/80 text-white hover:text-red-400 border-white/40 hover:border-white"
-                      }`}
-                      title={fav ? "Remove from Favorites" : "Add to Favorites"}
-                      aria-label={fav ? "Remove from Favorites" : "Add to Favorites"}
-                    >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill={fav ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* Embedded Player Control Toolbar */}
-          {isTheaterOpen && (
-            <div className="flex flex-wrap items-center justify-between gap-2 px-3 sm:px-6 py-2.5 bg-[#141414] border-b border-white/10">
-              <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
-                <span className="text-[11px] font-semibold text-zinc-400 mr-1 hidden sm:inline">Server:</span>
-                {SERVERS.map((s) => (
-                  <button
-                    key={s.id}
-                    type="button"
-                    onClick={() => handleSwitchServer(s.id)}
-                    className={`px-2.5 sm:px-3 py-1 rounded-lg text-[11px] sm:text-xs font-semibold transition-all cursor-pointer ${
-                      activeServer === s.id
-                        ? "bg-red-600 text-white font-bold shadow-md shadow-red-950/40"
-                        : "bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white border border-white/10"
-                    }`}
-                  >
-                    {s.name}
-                  </button>
-                ))}
+              <div className="w-full h-full bg-[#12141a] flex items-center justify-center text-zinc-500 text-sm">
+                No preview available
               </div>
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#181818] via-[#181818]/40 via-50% to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#181818]/80 via-transparent to-transparent pointer-events-none" />
 
-              <div className="flex items-center gap-2">
+            <div className="absolute bottom-4 left-4 right-4 sm:bottom-5 sm:left-8 sm:right-8 z-20">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-tight leading-snug mb-2.5 drop-shadow-2xl max-w-2xl">
+                {title}
+              </h1>
+
+              <div className="flex items-center gap-2.5 sm:gap-3">
                 <button
                   type="button"
-                  onClick={enterNativeFullscreen}
-                  className="flex items-center justify-center w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/15 transition-all cursor-pointer active:scale-95 shrink-0"
-                  title="Fullscreen"
-                  aria-label="Fullscreen"
+                  onClick={() => handleStartPlay()}
+                  className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-2 sm:py-2.5 rounded bg-white hover:bg-white/80 text-black font-extrabold text-xs sm:text-sm transition-all cursor-pointer shadow-xl active:scale-95"
+                  title="Play"
                 >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M5 3l14 9-14 9V3z" />
                   </svg>
+                  <span>Play</span>
                 </button>
 
                 <button
                   type="button"
-                  onClick={handleStopPlay}
-                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white text-xs font-medium border border-white/10 transition-all cursor-pointer shrink-0"
-                  title="Stop Video and View Details"
+                  onClick={() => toggleFavorite(activeItem)}
+                  className={`inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full border transition-all cursor-pointer shadow-lg active:scale-95 ${
+                    fav
+                      ? "bg-red-600/20 text-red-500 border-red-500/80 shadow-red-500/30"
+                      : "bg-black/60 hover:bg-black/80 text-white hover:text-red-400 border-white/40 hover:border-white"
+                  }`}
+                  title={fav ? "Remove from Favorites" : "Add to Favorites"}
+                  aria-label={fav ? "Remove from Favorites" : "Add to Favorites"}
                 >
-                  <span>Details</span>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill={fav ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                  </svg>
                 </button>
               </div>
             </div>
-          )}
+          </div>
 
           {/* Netflix Two-Column Detail Body */}
           <div className="p-4 sm:p-7 space-y-6">
