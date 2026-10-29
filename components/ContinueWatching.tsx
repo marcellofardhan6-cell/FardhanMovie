@@ -3,7 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useWatchHistory } from "@/context/WatchHistoryContext";
-import { img, backdrop } from "@/lib/tmdb";
+import { usePreviewModal } from "@/context/PreviewModalContext";
+import { img, backdrop, Movie } from "@/lib/tmdb";
 
 function formatMinutes(seconds?: number): string {
   if (!seconds || seconds <= 0) return "0m";
@@ -18,6 +19,7 @@ function formatMinutes(seconds?: number): string {
 
 export default function ContinueWatching() {
   const { history, removeHistory, isLoaded } = useWatchHistory();
+  const { openPreview } = usePreviewModal();
 
   if (!isLoaded || history.length === 0) return null;
 
@@ -72,6 +74,24 @@ export default function ContinueWatching() {
                 : `${Math.floor(currentSec / 60)}m`
               : "Resume";
 
+          const handleCardClick = (e: React.MouseEvent) => {
+            if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+            e.preventDefault();
+            const movieItem: Movie = {
+              id: item.id,
+              title: item.title,
+              name: item.title,
+              poster_path: item.poster_path ?? null,
+              backdrop_path: item.backdrop_path ?? null,
+              media_type: item.type === "tv" ? "tv" : "movie",
+              vote_average: item.vote_average ?? 0,
+              vote_count: 0,
+              overview: "",
+              genre_ids: [],
+            };
+            openPreview(movieItem, false, item.season || 1, item.episode || 1);
+          };
+
           return (
             <div
               key={`${item.type}-${item.id}`}
@@ -80,6 +100,7 @@ export default function ContinueWatching() {
             >
               <Link
                 href={href}
+                onClick={handleCardClick}
                 className="block relative aspect-video bg-zinc-900 overflow-hidden cursor-pointer"
               >
                 <Image
@@ -151,7 +172,7 @@ export default function ContinueWatching() {
 
               {/* Card Title & Real Watch Minutes */}
               <div className="p-3">
-                <Link href={href} className="block cursor-pointer">
+                <Link href={href} onClick={handleCardClick} className="block cursor-pointer">
                   <h3 className="text-xs sm:text-sm font-semibold text-white group-hover:text-red-400 transition-colors truncate">
                     {item.title}
                   </h3>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Movie, img, displayTitle, displayYear, isTV } from "@/lib/tmdb";
 import { useFavorites } from "@/context/FavoritesContext";
+import { usePreviewModal } from "@/context/PreviewModalContext";
 
 interface Props {
   item: Movie;
@@ -14,6 +15,7 @@ interface Props {
 
 export default function Top10Card({ item, rank, priority = false }: Props) {
   const { isFavorite, toggleFavorite } = useFavorites();
+  const { openPreview } = usePreviewModal();
   const fav = isFavorite(item.id);
   const title = displayTitle(item);
   const year = displayYear(item);
@@ -23,9 +25,16 @@ export default function Top10Card({ item, rank, priority = false }: Props) {
   const [imgSrc, setImgSrc] = useState(posterUrl);
   const rating = item.vote_average ? item.vote_average.toFixed(1) : null;
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+    e.preventDefault();
+    openPreview(item, false);
+  };
+
   return (
     <Link
       href={href}
+      onClick={handleCardClick}
       className="group flex items-end relative transition-all duration-300 ease-out hover:-translate-y-2 active:scale-[0.97] select-none cursor-pointer"
       aria-label={`Rank ${rank}: ${title}${year ? " (" + year + ")" : ""}`}
     >

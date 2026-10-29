@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Movie, img, displayTitle } from "@/lib/tmdb";
+import { usePreviewModal } from "@/context/PreviewModalContext";
 
 interface Props {
   items: Movie[];
@@ -117,6 +118,7 @@ export default function AnimeSchedule({ items }: Props) {
 }
 
 function ScheduleCard({ item, idx }: { item: Movie; idx: number }) {
+  const { openPreview } = usePreviewModal();
   const title = displayTitle(item);
   const posterUrl = img(item.poster_path, "w780");
   const [imgSrc, setImgSrc] = useState(posterUrl);
@@ -125,9 +127,16 @@ function ScheduleCard({ item, idx }: { item: Movie; idx: number }) {
     (item.id + idx) % 6
   ];
 
+  const handleClick = (e: React.MouseEvent) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+    e.preventDefault();
+    openPreview(item, false);
+  };
+
   return (
     <Link
       href={`/series/${item.id}`}
+      onClick={handleClick}
       className="group block rounded-xl overflow-hidden bg-[#131620] border border-white/[0.08] hover:border-red-500/60 transition-all duration-300 hover:-translate-y-1 cursor-pointer select-none"
     >
       {/* Poster with Airing Badge */}

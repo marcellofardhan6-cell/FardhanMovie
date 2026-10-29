@@ -54,26 +54,65 @@ let hasRestoredInitialUrl = false;
 let userDismissedId: string | null = null;
 
 function UrlPreviewListener() {
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      sessionStorage.removeItem("fardtv_active_session");
-      sessionStorage.removeItem("fardtv_active_server");
-      const rawParams = new URLSearchParams(window.location.search);
-      const movieId = rawParams.get("movie");
-      const seriesId = rawParams.get("series");
-      const season = rawParams.get("season") || "1";
-      const episode = rawParams.get("episode") || "1";
-      const startAt = rawParams.get("startAt");
-      const startParam = startAt ? `?startAt=${encodeURIComponent(startAt)}` : "";
+  const searchParams = useSearchParams();
+  const { openPreview, isOpen } = usePreviewModal();
+  const isFetchingRef = useRef(false);
 
-      if (movieId) {
-        window.location.replace(`/film/${movieId}${startParam}`);
-      } else if (seriesId) {
-        window.location.replace(`/series/${seriesId}?season=${season}&episode=${episode}${startAt ? `&startAt=${encodeURIComponent(startAt)}` : ""}`);
-      }
-    } catch {}
-  }, []);
+  useEffect(() => {
+    if (hasRestoredInitialUrl) return;
+
+    let movieId = searchParams.get("movie");
+    let seriesId = searchParams.get("series");
+    let seasonParam = searchParams.get("season");
+    let episodeParam = searchParams.get("episode");
+
+    if (typeof window !== "undefined") {
+      const rawParams = new URLSearchParams(window.location.search);
+      if (!movieId && rawParams.get("movie")) movieId = rawParams.get("movie");
+      if (!seriesId && rawParams.get("series")) seriesId = rawParams.get("series");
+      if (!seasonParam && rawParams.get("season")) seasonParam = rawParams.get("season");
+      if (!episodeParam && rawParams.get("episode")) episodeParam = rawParams.get("episode");
+    }
+
+    const id = movieId || seriesId;
+    if (!id || userDismissedId === id) {
+      hasRestoredInitialUrl = true;
+      return;
+    }
+
+    if (!isOpen && !isFetchingRef.current) {
+      hasRestoredInitialUrl = true;
+      const type = seriesId ? "tv" : "movie";
+      const season = seasonParam ? parseInt(seasonParam, 10) : 1;
+      const episode = episodeParam ? parseInt(episodeParam, 10) : 1;
+
+      isFetchingRef.current = true;
+      fetch(`/api/detail?id=${id}&type=${type}&season=${season}`)
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data) {
+            const movieItem: Movie = {
+              id: data.id,
+              title: data.title || data.name || "Movie",
+              name: data.name || data.title,
+              poster_path: data.poster_path ?? null,
+              backdrop_path: data.backdrop_path ?? null,
+              media_type: type,
+              vote_average: data.vote_average ?? 0,
+              vote_count: data.vote_count ?? 0,
+              overview: data.overview || "",
+              release_date: data.year ?? "",
+              first_air_date: data.year ?? "",
+            };
+            openPreview(movieItem, false, season, episode);
+          }
+        })
+        .catch(() => {})
+        .finally(() => {
+          isFetchingRef.current = false;
+        });
+    }
+  }, [searchParams, isOpen, openPreview]);
 
   return null;
 }
@@ -208,7 +247,7 @@ export default function NetflixPreviewModal() {
     }
   }, [isNativeFullscreen, enterNativeFullscreen, exitNativeFullscreen]);
 
-  // Start playing in embedded player mode
+  // Start playing in embedded player mode and enter fullscreen directly
   const handleStartPlay = useCallback(
     async (seasonNum?: number, episodeNum?: number) => {
       const sNum = seasonNum !== undefined ? seasonNum : selectedSeason;
@@ -217,6 +256,18 @@ export default function NetflixPreviewModal() {
       if (episodeNum !== undefined) setSelectedEpisode(episodeNum);
       setIsTheaterOpen(true);
       setControlsVisible(true);
+      setIsNativeFullscreen(true);
+
+      try {
+        const el = document.documentElement;
+        if (!document.fullscreenElement && !(document as any).webkitFullscreenElement) {
+          if (el.requestFullscreen) {
+            await el.requestFullscreen().catch(() => {});
+          } else if ((el as any).webkitRequestFullscreen) {
+            (el as any).webkitRequestFullscreen();
+          }
+        }
+      } catch {}
 
       // Record to Watch History immediately so Continue Watching reflects the new watch
       if (activeItem) {

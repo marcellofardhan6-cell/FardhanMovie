@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Movie, backdrop, img, displayTitle, displayYear, isTV } from "@/lib/tmdb";
 import { useFavorites } from "@/context/FavoritesContext";
+import { usePreviewModal } from "@/context/PreviewModalContext";
 
 interface Props {
   item: Movie;
@@ -13,6 +14,7 @@ interface Props {
 
 export default function LandscapeCard({ item, priority = false }: Props) {
   const { isFavorite, toggleFavorite } = useFavorites();
+  const { openPreview } = usePreviewModal();
   const fav = isFavorite(item.id);
   const title = displayTitle(item);
   const year = displayYear(item);
@@ -24,9 +26,16 @@ export default function LandscapeCard({ item, priority = false }: Props) {
   const [imgSrc, setImgSrc] = useState(imageUrl);
   const rating = item.vote_average ? item.vote_average.toFixed(1) : null;
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+    e.preventDefault();
+    openPreview(item, false);
+  };
+
   return (
     <Link
       href={href}
+      onClick={handleCardClick}
       className="group block relative rounded-xl overflow-hidden bg-[#0c0e15] border border-white/[0.08] hover:border-red-500/40 transition-all duration-300 ease-out hover:-translate-y-1.5 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-red-500 shadow-lg select-none cursor-pointer"
       aria-label={`${title}${year ? " (" + year + ")" : ""}`}
     >

@@ -399,9 +399,11 @@ export default function Navbar() {
                         <Link
                           key={`desktop-${item.media_type}-${item.id}`}
                           href={`/${item.media_type === "tv" ? "series" : "film"}/${item.id}`}
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.preventDefault();
                             setSearchDropdownOpen(false);
                             setSearchQuery("");
+                            openPreview(item as any, false);
                           }}
                           className="w-full flex items-center gap-2.5 p-2 rounded-xl hover:bg-white/[0.08] transition-colors text-left group cursor-pointer"
                         >
@@ -628,9 +630,11 @@ export default function Navbar() {
                       <Link
                         key={`mobile-${item.media_type}-${item.id}`}
                         href={`/${item.media_type === "tv" ? "series" : "film"}/${item.id}`}
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.preventDefault();
                           setMobileSearchOpen(false);
                           setSearchQuery("");
+                          openPreview(item as any, false);
                         }}
                         className="w-full flex items-center gap-2.5 p-2 rounded-xl active:bg-white/[0.1] transition-colors text-left"
                       >
