@@ -53,6 +53,54 @@ const SERVERS = [
 let hasRestoredInitialUrl = false;
 let userDismissedId: string | null = null;
 
+const lockLandscape = async () => {
+  if (typeof window === "undefined") return;
+  try {
+    const orientation = window.screen?.orientation;
+    if (orientation && typeof (orientation as any).lock === "function") {
+      await (orientation as any).lock("landscape").catch(() => {});
+      return;
+    }
+    const scr = window.screen as any;
+    if (typeof scr?.lockOrientation === "function") {
+      scr.lockOrientation("landscape");
+      return;
+    }
+    if (typeof scr?.mozLockOrientation === "function") {
+      scr.mozLockOrientation("landscape");
+      return;
+    }
+    if (typeof scr?.msLockOrientation === "function") {
+      scr.msLockOrientation("landscape");
+      return;
+    }
+  } catch {}
+};
+
+const unlockOrientation = () => {
+  if (typeof window === "undefined") return;
+  try {
+    const orientation = window.screen?.orientation;
+    if (orientation && typeof (orientation as any).unlock === "function") {
+      (orientation as any).unlock();
+      return;
+    }
+    const scr = window.screen as any;
+    if (typeof scr?.unlockOrientation === "function") {
+      scr.unlockOrientation();
+      return;
+    }
+    if (typeof scr?.mozUnlockOrientation === "function") {
+      scr.mozUnlockOrientation();
+      return;
+    }
+    if (typeof scr?.msUnlockOrientation === "function") {
+      scr.msUnlockOrientation();
+      return;
+    }
+  } catch {}
+};
+
 function UrlPreviewListener() {
   const searchParams = useSearchParams();
   const { openPreview, isOpen } = usePreviewModal();
@@ -137,6 +185,7 @@ export default function NetflixPreviewModal() {
   const [activeServer, setActiveServer] = useState<"cinesrc" | "vidlink" | "vidsrcwiki" | "rivestream">("cinesrc");
   const [controlsVisible, setControlsVisible] = useState(true);
   const [isNativeFullscreen, setIsNativeFullscreen] = useState(false);
+  const [isForceLandscape, setIsForceLandscape] = useState(false);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const theaterContainerRef = useRef<HTMLDivElement | null>(null);
   const currentTimeRef = useRef<number>(0);
@@ -146,6 +195,11 @@ export default function NetflixPreviewModal() {
     const handleFullscreenChange = () => {
       const isFs = Boolean(document.fullscreenElement || (document as any).webkitFullscreenElement);
       setIsNativeFullscreen(isFs);
+      if (isFs) {
+        lockLandscape();
+      } else {
+        unlockOrientation();
+      }
     };
     handleFullscreenChange();
     document.addEventListener("fullscreenchange", handleFullscreenChange);
@@ -153,6 +207,23 @@ export default function NetflixPreviewModal() {
     return () => {
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
       document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
+    };
+  }, []);
+
+  // Sync orientation changes when user physically turns device
+  useEffect(() => {
+    const handleResizeOrOrientation = () => {
+      if (typeof window !== "undefined") {
+        if (window.innerWidth > window.innerHeight) {
+          setIsForceLandscape(false);
+        }
+      }
+    };
+    window.addEventListener("resize", handleResizeOrOrientation);
+    window.addEventListener("orientationchange", handleResizeOrOrientation);
+    return () => {
+      window.removeEventListener("resize", handleResizeOrOrientation);
+      window.removeEventListener("orientationchange", handleResizeOrOrientation);
     };
   }, []);
 
@@ -221,8 +292,10 @@ export default function NetflixPreviewModal() {
         }
       }
       setIsNativeFullscreen(true);
+      await lockLandscape();
     } catch {
       setIsNativeFullscreen(true);
+      await lockLandscape();
     }
   }, []);
 
@@ -237,6 +310,7 @@ export default function NetflixPreviewModal() {
       }
     } catch {}
     setIsNativeFullscreen(false);
+    unlockOrientation();
   }, []);
 
   const toggleFullscreen = useCallback(async () => {
@@ -246,6 +320,18 @@ export default function NetflixPreviewModal() {
       await enterNativeFullscreen();
     }
   }, [isNativeFullscreen, enterNativeFullscreen, exitNativeFullscreen]);
+
+  const handleToggleRotate = useCallback(async () => {
+    if (isForceLandscape) {
+      setIsForceLandscape(false);
+      unlockOrientation();
+    } else {
+      await lockLandscape();
+      if (typeof window !== "undefined" && window.innerWidth <= window.innerHeight) {
+        setIsForceLandscape(true);
+      }
+    }
+  }, [isForceLandscape]);
 
   // Start playing in embedded player mode and enter fullscreen directly
   const handleStartPlay = useCallback(
@@ -257,7 +343,19 @@ export default function NetflixPreviewModal() {
       setIsTheaterOpen(true);
       setControlsVisible(true);
 
-      enterNativeFullscreen();
+      // On mobile in portrait, automatically orient to landscape
+      if (typeof window !== "undefined") {
+        const isMobile = window.innerWidth <= 768 || (typeof navigator !== "undefined" && navigator.maxTouchPoints > 0);
+        const isPortrait = window.innerWidth <= window.innerHeight;
+        if (isMobile && isPortrait) {
+          if (!window.screen?.orientation || !("lock" in window.screen.orientation)) {
+            setIsForceLandscape(true);
+          }
+        }
+      }
+
+      await enterNativeFullscreen();
+      await lockLandscape();
 
       // Record to Watch History immediately so Continue Watching reflects the new watch
       if (activeItem) {
@@ -315,6 +413,8 @@ export default function NetflixPreviewModal() {
         }
       );
     }
+    unlockOrientation();
+    setIsForceLandscape(false);
     exitNativeFullscreen();
     setIsTheaterOpen(false);
   }, [activeItem, detailData, resolvedType, selectedSeason, selectedEpisode, updateProgress, exitNativeFullscreen]);
@@ -324,6 +424,8 @@ export default function NetflixPreviewModal() {
       userDismissedId = String(activeItem.id);
     }
     hasRestoredInitialUrl = true;
+    unlockOrientation();
+    setIsForceLandscape(false);
     exitNativeFullscreen();
     setIsTheaterOpen(false);
     closePreview();
@@ -648,6 +750,8 @@ export default function NetflixPreviewModal() {
     }
 
     return () => {
+      unlockOrientation();
+      setIsForceLandscape(false);
       document.documentElement.style.overflow = "";
       document.body.style.overflow = "";
       if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
@@ -726,19 +830,35 @@ export default function NetflixPreviewModal() {
       {isTheaterOpen && (
         <div
           ref={theaterContainerRef}
-          className="fixed inset-0 z-[9999] w-screen h-screen bg-black overflow-hidden flex flex-col select-none"
+          className={`fixed inset-0 z-[9999] bg-black overflow-hidden flex flex-col select-none ${
+            isForceLandscape ? "" : "w-screen h-screen"
+          }`}
+          style={
+            isForceLandscape
+              ? {
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  width: "100vh",
+                  height: "100vw",
+                  transform: "rotate(90deg) translateY(-100%)",
+                  transformOrigin: "top left",
+                  zIndex: 9999,
+                }
+              : undefined
+          }
           onMouseMove={handleUserActivity}
           onClick={handleUserActivity}
           onTouchStart={handleUserActivity}
         >
           {/* Floating Fullscreen Top Controls */}
           <div
-            className={`absolute top-0 inset-x-0 z-50 flex items-center justify-between p-3 sm:px-6 bg-gradient-to-b from-black/90 via-black/50 to-transparent transition-opacity duration-300 ${
+            className={`absolute top-0 inset-x-0 z-50 flex items-center justify-between p-2.5 sm:p-3 sm:px-6 bg-gradient-to-b from-black/90 via-black/50 to-transparent transition-opacity duration-300 ${
               controlsVisible ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
             }`}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 min-w-0">
               <button
                 type="button"
                 onClick={handleStopPlay}
@@ -750,19 +870,19 @@ export default function NetflixPreviewModal() {
                   <path d="M19 12H5M12 19l-7-7 7-7" />
                 </svg>
               </button>
-              <span className="text-white text-xs font-semibold truncate max-w-xs hidden sm:inline">
+              <span className="text-white text-xs font-semibold truncate max-w-[120px] sm:max-w-xs hidden sm:inline">
                 {title} {resolvedType === "tv" && `S${selectedSeason} E${selectedEpisode}`}
               </span>
             </div>
 
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1 bg-[#12141a]/95 p-1 rounded-xl border border-white/20 backdrop-blur-md">
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+              <div className="flex items-center gap-1 bg-[#12141a]/95 p-0.5 sm:p-1 rounded-xl border border-white/20 backdrop-blur-md">
                 {SERVERS.map((s) => (
                   <button
                     key={s.id}
                     type="button"
                     onClick={() => handleSwitchServer(s.id)}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                    className={`px-2 sm:px-2.5 py-1 rounded-lg text-[11px] sm:text-xs font-semibold transition-all cursor-pointer ${
                       activeServer === s.id
                         ? "bg-red-600 text-white font-bold"
                         : "text-zinc-300 hover:text-white"
@@ -772,10 +892,27 @@ export default function NetflixPreviewModal() {
                   </button>
                 ))}
               </div>
+
+              <button
+                type="button"
+                onClick={handleToggleRotate}
+                className={`p-1.5 sm:p-2 rounded-xl border shadow-xl backdrop-blur-md cursor-pointer active:scale-95 transition-all ${
+                  isForceLandscape
+                    ? "bg-red-600 text-white border-red-500 shadow-red-900/40"
+                    : "bg-[#12141a]/95 hover:bg-black text-white border-white/20"
+                }`}
+                title="Rotasi Layar (Landscape)"
+                aria-label="Rotasi Layar"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+                </svg>
+              </button>
+
               <button
                 type="button"
                 onClick={toggleFullscreen}
-                className="p-2 rounded-xl bg-[#12141a]/95 hover:bg-black text-white border border-white/20 shadow-xl backdrop-blur-md cursor-pointer active:scale-95 transition-all"
+                className="p-1.5 sm:p-2 rounded-xl bg-[#12141a]/95 hover:bg-black text-white border border-white/20 shadow-xl backdrop-blur-md cursor-pointer active:scale-95 transition-all"
                 title={isNativeFullscreen ? "Exit Fullscreen" : "Fullscreen"}
                 aria-label={isNativeFullscreen ? "Exit Fullscreen" : "Fullscreen"}
               >
