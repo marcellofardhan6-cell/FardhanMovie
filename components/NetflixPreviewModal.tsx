@@ -189,6 +189,10 @@ export default function NetflixPreviewModal() {
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const theaterContainerRef = useRef<HTMLDivElement | null>(null);
   const currentTimeRef = useRef<number>(0);
+  const modalPushedRef = useRef(false);
+  const theaterPushedRef = useRef(false);
+  const isProgrammaticBackRef = useRef(false);
+  const synthesizedRef = useRef(false);
 
   // Track native fullscreen state changes reliably
   useEffect(() => {
@@ -389,7 +393,7 @@ export default function NetflixPreviewModal() {
     [activeItem, detailData, resolvedType, selectedSeason, selectedEpisode, enterNativeFullscreen, addHistory, getHistoryItem]
   );
 
-  const handleStopPlay = useCallback(() => {
+  const stopPlaybackLocally = useCallback(() => {
     if (activeItem && currentTimeRef.current > 0) {
       const itemTitle = detailData?.title || displayTitle(activeItem);
       const estDuration =
@@ -419,7 +423,7 @@ export default function NetflixPreviewModal() {
     setIsTheaterOpen(false);
   }, [activeItem, detailData, resolvedType, selectedSeason, selectedEpisode, updateProgress, exitNativeFullscreen]);
 
-  const handleModalClose = useCallback(() => {
+  const closeModalLocally = useCallback(() => {
     if (activeItem) {
       userDismissedId = String(activeItem.id);
     }
@@ -430,6 +434,35 @@ export default function NetflixPreviewModal() {
     setIsTheaterOpen(false);
     closePreview();
   }, [activeItem, closePreview, exitNativeFullscreen]);
+
+  const handleStopPlay = useCallback(() => {
+    if (theaterPushedRef.current) {
+      theaterPushedRef.current = false;
+      isProgrammaticBackRef.current = true;
+      stopPlaybackLocally();
+      if (typeof window !== "undefined") {
+        window.history.back();
+      }
+    } else {
+      stopPlaybackLocally();
+    }
+  }, [stopPlaybackLocally]);
+
+  const handleModalClose = useCallback(() => {
+    if (theaterPushedRef.current) {
+      theaterPushedRef.current = false;
+    }
+    if (modalPushedRef.current) {
+      modalPushedRef.current = false;
+      isProgrammaticBackRef.current = true;
+      closeModalLocally();
+      if (typeof window !== "undefined") {
+        window.history.back();
+      }
+    } else {
+      closeModalLocally();
+    }
+  }, [closeModalLocally]);
 
   // Active watch progress tracking in theater mode
   useEffect(() => {
@@ -519,15 +552,26 @@ export default function NetflixPreviewModal() {
     };
   }, [isTheaterOpen, activeItem, resolvedType, selectedSeason, selectedEpisode, detailData, updateProgress]);
 
-  // Handle mobile / browser back button or swipe gesture safely
+  // Handle mobile / browser back button (undo) or swipe gesture safely
   useEffect(() => {
-    if (!isTheaterOpen && !isOpen) return;
-
     const onPopState = () => {
+      if (isProgrammaticBackRef.current) {
+        isProgrammaticBackRef.current = false;
+        return;
+      }
+
+      // If theater was open, clicking browser Back exits fullscreen video and returns to the modal details
       if (isTheaterOpen) {
-        handleStopPlay();
-      } else if (isOpen) {
-        handleModalClose();
+        theaterPushedRef.current = false;
+        stopPlaybackLocally();
+        return;
+      }
+
+      // If modal was open, clicking browser Back closes modal and returns to the home page
+      if (isOpen) {
+        modalPushedRef.current = false;
+        closeModalLocally();
+        return;
       }
     };
 
@@ -536,7 +580,7 @@ export default function NetflixPreviewModal() {
     return () => {
       window.removeEventListener("popstate", onPopState);
     };
-  }, [isTheaterOpen, isOpen, handleStopPlay, handleModalClose]);
+  }, [isTheaterOpen, isOpen, stopPlaybackLocally, closeModalLocally]);
 
   // Show / hide floating controls on mouse movement or touch in fullscreen mode
   const handleUserActivity = useCallback(() => {
@@ -626,7 +670,7 @@ export default function NetflixPreviewModal() {
   const lastProcessedIdRef = useRef<number | null>(null);
   const wasOpenRef = useRef<boolean>(false);
 
-  // Synchronize active preview and playback state with URL search params and sessionStorage
+  // Synchronize active preview and playback state with URL search params and history stack
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -636,31 +680,62 @@ export default function NetflixPreviewModal() {
       const isTv = activeItem.media_type === "tv" || resolvedType === "tv";
       const currentUrl = new URL(window.location.href);
 
+      const modalParams = new URLSearchParams();
       if (isTv) {
-        currentUrl.searchParams.delete("movie");
-        currentUrl.searchParams.set("series", String(activeItem.id));
-        currentUrl.searchParams.set("season", String(selectedSeason));
-        currentUrl.searchParams.set("episode", String(selectedEpisode));
+        modalParams.set("series", String(activeItem.id));
+        modalParams.set("season", String(selectedSeason));
+        modalParams.set("episode", String(selectedEpisode));
       } else {
-        currentUrl.searchParams.delete("series");
-        currentUrl.searchParams.delete("season");
-        currentUrl.searchParams.delete("episode");
-        currentUrl.searchParams.set("movie", String(activeItem.id));
+        modalParams.set("movie", String(activeItem.id));
+      }
+      const modalSearch = "?" + modalParams.toString();
+      const modalUrl = currentUrl.pathname + modalSearch + currentUrl.hash;
+
+      const playParams = new URLSearchParams(modalParams);
+      playParams.set("play", "1");
+      playParams.set("server", activeServer);
+      const playSearch = "?" + playParams.toString();
+      const playUrl = currentUrl.pathname + playSearch + currentUrl.hash;
+
+      // Handle initial direct page load with query params (e.g. user arrived with ?series=... or ?play=1)
+      if (!synthesizedRef.current) {
+        synthesizedRef.current = true;
+        const initialHadParams =
+          currentUrl.searchParams.has("movie") ||
+          currentUrl.searchParams.has("series");
+
+        if (initialHadParams) {
+          // Synthesize base history entry so browser Back button won't navigate away from FardTV
+          try {
+            window.history.replaceState({ fardTvHome: true }, "", currentUrl.pathname);
+            window.history.pushState({ fardTvModal: true, itemId: activeItem.id }, "", modalUrl);
+            modalPushedRef.current = true;
+            if (isTheaterOpen) {
+              window.history.pushState({ fardTvTheater: true, fardTvModal: true, itemId: activeItem.id }, "", playUrl);
+              theaterPushedRef.current = true;
+            }
+          } catch {}
+          return;
+        }
       }
 
-      if (isTheaterOpen) {
-        currentUrl.searchParams.set("play", "1");
-        currentUrl.searchParams.set("server", activeServer);
+      // Normal navigation on site: push state on entry, replaceState on internal parameter changes
+      if (!modalPushedRef.current) {
+        modalPushedRef.current = true;
+        window.history.pushState({ fardTvModal: true, itemId: activeItem.id }, "", isTheaterOpen ? playUrl : modalUrl);
+        if (isTheaterOpen) {
+          theaterPushedRef.current = true;
+        }
+      } else if (isTheaterOpen && !theaterPushedRef.current) {
+        theaterPushedRef.current = true;
+        window.history.pushState({ fardTvTheater: true, fardTvModal: true, itemId: activeItem.id }, "", playUrl);
       } else {
-        currentUrl.searchParams.delete("play");
-        currentUrl.searchParams.delete("server");
+        const targetUrl = isTheaterOpen ? playUrl : modalUrl;
+        const targetState = isTheaterOpen
+          ? { fardTvTheater: true, fardTvModal: true, itemId: activeItem.id }
+          : { fardTvModal: true, itemId: activeItem.id };
+        window.history.replaceState(targetState, "", targetUrl);
       }
-
-      window.history.replaceState(
-        { ...window.history.state, fardTvModal: true },
-        "",
-        currentUrl.pathname + (currentUrl.search ? currentUrl.search : "") + currentUrl.hash
-      );
 
       try {
         sessionStorage.setItem(
@@ -677,6 +752,9 @@ export default function NetflixPreviewModal() {
       } catch {}
     } else if (!isOpen && wasOpenRef.current) {
       wasOpenRef.current = false;
+      modalPushedRef.current = false;
+      theaterPushedRef.current = false;
+
       const currentUrl = new URL(window.location.href);
       const hadParams =
         currentUrl.searchParams.has("movie") ||
@@ -687,18 +765,7 @@ export default function NetflixPreviewModal() {
         currentUrl.searchParams.has("server");
 
       if (hadParams) {
-        currentUrl.searchParams.delete("movie");
-        currentUrl.searchParams.delete("series");
-        currentUrl.searchParams.delete("play");
-        currentUrl.searchParams.delete("season");
-        currentUrl.searchParams.delete("episode");
-        currentUrl.searchParams.delete("server");
-        currentUrl.searchParams.delete("startAt");
-        window.history.replaceState(
-          {},
-          "",
-          currentUrl.pathname + (currentUrl.search ? currentUrl.search : "") + currentUrl.hash
-        );
+        window.history.replaceState({}, "", currentUrl.pathname + currentUrl.hash);
       }
 
       try {
