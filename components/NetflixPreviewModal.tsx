@@ -140,17 +140,12 @@ export default function NetflixPreviewModal() {
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const theaterContainerRef = useRef<HTMLDivElement | null>(null);
   const currentTimeRef = useRef<number>(0);
-  const playStartTimeRef = useRef<number>(0);
-  const handleStopPlayRef = useRef<() => void>(() => {});
 
   // Track native fullscreen state changes reliably
   useEffect(() => {
     const handleFullscreenChange = () => {
       const isFs = Boolean(document.fullscreenElement || (document as any).webkitFullscreenElement);
       setIsNativeFullscreen(isFs);
-      if (!isFs && isTheaterOpen && Date.now() - playStartTimeRef.current > 1000) {
-        handleStopPlayRef.current();
-      }
     };
     handleFullscreenChange();
     document.addEventListener("fullscreenchange", handleFullscreenChange);
@@ -159,7 +154,7 @@ export default function NetflixPreviewModal() {
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
       document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
     };
-  }, [isTheaterOpen]);
+  }, []);
 
   const resolvedType = activeItem
     ? activeItem.media_type === "tv" || isTV(activeItem)
@@ -255,25 +250,14 @@ export default function NetflixPreviewModal() {
   // Start playing in embedded player mode and enter fullscreen directly
   const handleStartPlay = useCallback(
     async (seasonNum?: number, episodeNum?: number) => {
-      playStartTimeRef.current = Date.now();
       const sNum = seasonNum !== undefined ? seasonNum : selectedSeason;
       const eNum = episodeNum !== undefined ? episodeNum : selectedEpisode;
       if (seasonNum !== undefined) setSelectedSeason(seasonNum);
       if (episodeNum !== undefined) setSelectedEpisode(episodeNum);
       setIsTheaterOpen(true);
       setControlsVisible(true);
-      setIsNativeFullscreen(true);
 
-      try {
-        const el = document.documentElement;
-        if (!document.fullscreenElement && !(document as any).webkitFullscreenElement) {
-          if (el.requestFullscreen) {
-            await el.requestFullscreen().catch(() => {});
-          } else if ((el as any).webkitRequestFullscreen) {
-            (el as any).webkitRequestFullscreen();
-          }
-        }
-      } catch {}
+      enterNativeFullscreen();
 
       // Record to Watch History immediately so Continue Watching reflects the new watch
       if (activeItem) {
@@ -304,7 +288,7 @@ export default function NetflixPreviewModal() {
         });
       }
     },
-    [activeItem, detailData, resolvedType, selectedSeason, selectedEpisode, addHistory, getHistoryItem]
+    [activeItem, detailData, resolvedType, selectedSeason, selectedEpisode, enterNativeFullscreen, addHistory, getHistoryItem]
   );
 
   const handleStopPlay = useCallback(() => {
@@ -334,10 +318,6 @@ export default function NetflixPreviewModal() {
     exitNativeFullscreen();
     setIsTheaterOpen(false);
   }, [activeItem, detailData, resolvedType, selectedSeason, selectedEpisode, updateProgress, exitNativeFullscreen]);
-
-  useEffect(() => {
-    handleStopPlayRef.current = handleStopPlay;
-  }, [handleStopPlay]);
 
   const handleModalClose = useCallback(() => {
     if (activeItem) {
@@ -678,7 +658,9 @@ export default function NetflixPreviewModal() {
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape" && isOpen) {
-        if (isTheaterOpen) {
+        if (isNativeFullscreen) {
+          exitNativeFullscreen();
+        } else if (isTheaterOpen) {
           handleStopPlay();
         } else {
           handleModalClose();
@@ -694,7 +676,7 @@ export default function NetflixPreviewModal() {
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, isTheaterOpen, handleStopPlay, handleModalClose]);
+  }, [isOpen, isNativeFullscreen, isTheaterOpen, exitNativeFullscreen, handleStopPlay, handleModalClose]);
 
   if (!isOpen || !activeItem) {
     return (
@@ -754,6 +736,7 @@ export default function NetflixPreviewModal() {
             className={`absolute top-0 inset-x-0 z-50 flex items-center justify-between p-3 sm:px-6 bg-gradient-to-b from-black/90 via-black/50 to-transparent transition-opacity duration-300 ${
               controlsVisible ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
             }`}
+            onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center gap-2">
               <button
@@ -791,14 +774,20 @@ export default function NetflixPreviewModal() {
               </div>
               <button
                 type="button"
-                onClick={handleStopPlay}
+                onClick={toggleFullscreen}
                 className="p-2 rounded-xl bg-[#12141a]/95 hover:bg-black text-white border border-white/20 shadow-xl backdrop-blur-md cursor-pointer active:scale-95 transition-all"
-                title="Exit Fullscreen"
-                aria-label="Exit Fullscreen"
+                title={isNativeFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+                aria-label={isNativeFullscreen ? "Exit Fullscreen" : "Fullscreen"}
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-                  <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
-                </svg>
+                {isNativeFullscreen ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                    <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
+                  </svg>
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                  </svg>
+                )}
               </button>
             </div>
           </div>
