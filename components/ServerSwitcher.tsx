@@ -29,6 +29,10 @@ function buildServerUrl(server: Server, props: Props, isAnimeTheme?: boolean, st
   const id = String(tmdbId);
 
   switch (server.key) {
+    case "cinesrc":
+      return type === "movie"
+        ? `https://cinesrc.st/embed/movie/${id}`
+        : `https://cinesrc.st/embed/tv/${id}?s=${season}&e=${episode}`;
     case "vidlink":
       return type === "movie"
         ? `https://vidlink.pro/movie/${id}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914&player=jw`
@@ -45,23 +49,19 @@ function buildServerUrl(server: Server, props: Props, isAnimeTheme?: boolean, st
       return type === "movie"
         ? `https://vidsrc.pm/embed/movie/${id}`
         : `https://vidsrc.pm/embed/tv/${id}/${season}/${episode}`;
-    case "cinesrc":
+    default:
       return type === "movie"
         ? `https://cinesrc.st/embed/movie/${id}`
         : `https://cinesrc.st/embed/tv/${id}?s=${season}&e=${episode}`;
-    default:
-      return type === "movie"
-        ? `https://vidlink.pro/movie/${id}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914&player=jw`
-        : `https://vidlink.pro/tv/${id}/${season}/${episode}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914&player=jw`;
   }
 }
 
 const SERVERS: Server[] = [
-  { id: 1, name: "Server 1", key: "vidlink" },
-  { id: 2, name: "Server 2", key: "vidsrcsu" },
-  { id: 3, name: "Server 3", key: "vidsrcto" },
-  { id: 4, name: "Server 4", key: "vidsrcpm" },
-  { id: 5, name: "Server 5", key: "cinesrc" },
+  { id: 1, name: "Server 1", key: "cinesrc" },
+  { id: 2, name: "Server 2", key: "vidlink" },
+  { id: 3, name: "Server 3", key: "vidsrcsu" },
+  { id: 4, name: "Server 4", key: "vidsrcto" },
+  { id: 5, name: "Server 5", key: "vidsrcpm" },
 ];
 
 export default function ServerSwitcher(props: Props) {
@@ -550,10 +550,10 @@ export default function ServerSwitcher(props: Props) {
             src={src}
             title={isTrailerActive ? "Official Trailer" : `Streaming Player - ${currentServer.name}`}
             className="absolute inset-0 w-full h-full border-0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen *"
+            allow="accelerometer *; autoplay *; clipboard-write *; encrypted-media *; gyroscope *; picture-in-picture *; web-share *; fullscreen *"
             allowFullScreen={true}
             loading="eager"
-            referrerPolicy="origin"
+            referrerPolicy="no-referrer-when-downgrade"
             onLoad={handleLoad}
             onError={handleIframeError}
           />
