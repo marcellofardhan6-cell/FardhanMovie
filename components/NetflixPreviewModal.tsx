@@ -45,10 +45,13 @@ interface DetailApiResponse {
 
 const SERVERS = [
   { id: "cinesrc", name: "Server 1" },
-  { id: "vidlink", name: "Server 2" },
-  { id: "vidsrcwiki", name: "Server 3" },
-  { id: "rivestream", name: "Server 4" },
+  { id: "vidsrcsu", name: "Server 2" },
+  { id: "vidlink", name: "Server 3" },
+  { id: "vidsrcpm", name: "Server 4" },
+  { id: "vidsrcto", name: "Server 5" },
 ] as const;
+
+type ServerId = (typeof SERVERS)[number]["id"];
 
 let hasRestoredInitialUrl = false;
 let userDismissedId: string | null = null;
@@ -182,13 +185,14 @@ export default function NetflixPreviewModal() {
   const [selectedSeason, setSelectedSeason] = useState(1);
   const [selectedEpisode, setSelectedEpisode] = useState(1);
   const [isTheaterOpen, setIsTheaterOpen] = useState(false);
-  const [activeServer, setActiveServer] = useState<"cinesrc" | "vidlink" | "vidsrcwiki" | "rivestream">("cinesrc");
+  const [activeServer, setActiveServer] = useState<ServerId>("cinesrc");
   const [controlsVisible, setControlsVisible] = useState(true);
   const [isNativeFullscreen, setIsNativeFullscreen] = useState(false);
   const [isForceLandscape, setIsForceLandscape] = useState(false);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const theaterContainerRef = useRef<HTMLDivElement | null>(null);
   const currentTimeRef = useRef<number>(0);
+  const lastProgressSaveRef = useRef<number>(0);
   const modalPushedRef = useRef(false);
   const theaterPushedRef = useRef(false);
   const isProgrammaticBackRef = useRef(false);
@@ -486,41 +490,49 @@ export default function NetflixPreviewModal() {
           const { currentTime, duration } = data.data;
           if (typeof currentTime === "number" && currentTime > 0) {
             currentTimeRef.current = Math.round(currentTime);
-            updateProgress(
-              activeItem.id,
-              resolvedType,
-              currentTimeRef.current,
-              typeof duration === "number" && duration > 0 ? duration : estDuration,
-              {
-                title: itemTitle,
-                poster_path: activeItem.poster_path,
-                backdrop_path: detailData?.backdrop_path || activeItem.backdrop_path || null,
-                season: resolvedType === "tv" ? selectedSeason : undefined,
-                episode: resolvedType === "tv" ? selectedEpisode : undefined,
-              }
-            );
+            const now = Date.now();
+            if (now - lastProgressSaveRef.current > 15000) {
+              lastProgressSaveRef.current = now;
+              updateProgress(
+                activeItem.id,
+                resolvedType,
+                currentTimeRef.current,
+                typeof duration === "number" && duration > 0 ? duration : estDuration,
+                {
+                  title: itemTitle,
+                  poster_path: activeItem.poster_path,
+                  backdrop_path: detailData?.backdrop_path || activeItem.backdrop_path || null,
+                  season: resolvedType === "tv" ? selectedSeason : undefined,
+                  episode: resolvedType === "tv" ? selectedEpisode : undefined,
+                }
+              );
+            }
           }
         }
 
-        // Generic timeupdate
+        // Generic timeupdate - throttled to prevent CPU lag and frame drops
         if (data.event === "timeupdate" || data.type === "timeupdate") {
           const time = Number(data.currentTime ?? data.time ?? data.data?.currentTime);
           const dur = Number(data.duration ?? data.data?.duration ?? estDuration);
           if (!isNaN(time) && time > 0) {
             currentTimeRef.current = Math.round(time);
-            updateProgress(
-              activeItem.id,
-              resolvedType,
-              currentTimeRef.current,
-              dur,
-              {
-                title: itemTitle,
-                poster_path: activeItem.poster_path,
-                backdrop_path: detailData?.backdrop_path || activeItem.backdrop_path || null,
-                season: resolvedType === "tv" ? selectedSeason : undefined,
-                episode: resolvedType === "tv" ? selectedEpisode : undefined,
-              }
-            );
+            const now = Date.now();
+            if (now - lastProgressSaveRef.current > 15000) {
+              lastProgressSaveRef.current = now;
+              updateProgress(
+                activeItem.id,
+                resolvedType,
+                currentTimeRef.current,
+                dur,
+                {
+                  title: itemTitle,
+                  poster_path: activeItem.poster_path,
+                  backdrop_path: detailData?.backdrop_path || activeItem.backdrop_path || null,
+                  season: resolvedType === "tv" ? selectedSeason : undefined,
+                  episode: resolvedType === "tv" ? selectedEpisode : undefined,
+                }
+              );
+            }
           }
         }
       } catch {}
@@ -530,21 +542,25 @@ export default function NetflixPreviewModal() {
 
     const interval = setInterval(() => {
       if (typeof document !== "undefined" && document.hidden) return;
-      currentTimeRef.current += 10;
-      updateProgress(
-        activeItem.id,
-        resolvedType,
-        currentTimeRef.current,
-        estDuration,
-        {
-          title: itemTitle,
-          poster_path: activeItem.poster_path,
-          backdrop_path: detailData?.backdrop_path || activeItem.backdrop_path || null,
-          season: resolvedType === "tv" ? selectedSeason : undefined,
-          episode: resolvedType === "tv" ? selectedEpisode : undefined,
-        }
-      );
-    }, 10000);
+      currentTimeRef.current += 15;
+      const now = Date.now();
+      if (now - lastProgressSaveRef.current > 15000) {
+        lastProgressSaveRef.current = now;
+        updateProgress(
+          activeItem.id,
+          resolvedType,
+          currentTimeRef.current,
+          estDuration,
+          {
+            title: itemTitle,
+            poster_path: activeItem.poster_path,
+            backdrop_path: detailData?.backdrop_path || activeItem.backdrop_path || null,
+            season: resolvedType === "tv" ? selectedSeason : undefined,
+            episode: resolvedType === "tv" ? selectedEpisode : undefined,
+          }
+        );
+      }
+    }, 15000);
 
     return () => {
       window.removeEventListener("message", handleMessage);
@@ -593,7 +609,7 @@ export default function NetflixPreviewModal() {
 
   // Switch server reliably
   const handleSwitchServer = useCallback(
-    (serverKey: "cinesrc" | "vidlink" | "vidsrcwiki" | "rivestream") => {
+    (serverKey: ServerId) => {
       setActiveServer(serverKey);
       if (typeof window !== "undefined") {
         try {
@@ -786,7 +802,7 @@ export default function NetflixPreviewModal() {
         setIsTheaterOpen(false);
 
         // Restore server from URL or sessionStorage if previously selected
-        const validServers = ["cinesrc", "vidlink", "vidsrcwiki", "rivestream"] as const;
+        const validServers = ["cinesrc", "vidsrcsu", "vidlink", "vidsrcpm", "vidsrcto"] as const;
         let chosenServer: typeof validServers[number] = "cinesrc";
         if (typeof window !== "undefined") {
           const urlServer = new URLSearchParams(window.location.search).get("server");
@@ -869,24 +885,28 @@ export default function NetflixPreviewModal() {
   const seasonEpisodes = seasonEpisodesMap[selectedSeason] || [];
   const matchPercent = Math.min(99, Math.max(85, Math.round((rating || 7.5) * 10) + 12));
 
-  // Build stream URL for active servers (CineSrc, VidLink, VidSrc Wiki, RiveStream)
+  // Build stream URL for active servers (CineSrc, VidSrc SU, VidLink, VidSrc PM, VidSrc TO)
   const idStr = String(activeItem.id);
   const streamUrl =
     activeServer === "cinesrc"
       ? resolvedType === "tv"
         ? `https://cinesrc.st/embed/tv/${idStr}?s=${selectedSeason}&e=${selectedEpisode}`
         : `https://cinesrc.st/embed/movie/${idStr}`
+      : activeServer === "vidsrcsu"
+      ? resolvedType === "tv"
+        ? `https://vidsrc.su/embed/tv/${idStr}/${selectedSeason}/${selectedEpisode}`
+        : `https://vidsrc.su/embed/movie/${idStr}`
       : activeServer === "vidlink"
       ? resolvedType === "tv"
-        ? `https://vidlink.pro/tv/${idStr}/${selectedSeason}/${selectedEpisode}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914`
-        : `https://vidlink.pro/movie/${idStr}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914`
-      : activeServer === "vidsrcwiki"
+        ? `https://vidlink.pro/tv/${idStr}/${selectedSeason}/${selectedEpisode}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914&player=jw`
+        : `https://vidlink.pro/movie/${idStr}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914&player=jw`
+      : activeServer === "vidsrcpm"
       ? resolvedType === "tv"
-        ? `https://vidsrc.wiki/embed/tv/${idStr}/${selectedSeason}/${selectedEpisode}`
-        : `https://vidsrc.wiki/embed/movie/${idStr}`
+        ? `https://vidsrc.pm/embed/tv/${idStr}/${selectedSeason}/${selectedEpisode}`
+        : `https://vidsrc.pm/embed/movie/${idStr}`
       : resolvedType === "tv"
-      ? `https://rivestream.ru/embed?type=tv&id=${idStr}&season=${selectedSeason}&episode=${selectedEpisode}`
-      : `https://rivestream.ru/embed?type=movie&id=${idStr}`;
+      ? `https://vidsrc.to/embed/tv/${idStr}/${selectedSeason}/${selectedEpisode}`
+      : `https://vidsrc.to/embed/movie/${idStr}`;
 
   return (
     <>
@@ -998,13 +1018,22 @@ export default function NetflixPreviewModal() {
 
           <div className="relative w-full h-full bg-black">
             <iframe
+              key={`${activeServer}-${idStr}-${selectedSeason}-${selectedEpisode}`}
               src={streamUrl}
               title={title}
               className="w-full h-full border-0 block"
               scrolling="no"
               referrerPolicy="origin"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen *"
+              loading="eager"
+              // @ts-ignore
+              fetchpriority="high"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen *; display-capture"
               allowFullScreen
+              style={{
+                willChange: "transform",
+                transform: "translateZ(0)",
+                backfaceVisibility: "hidden",
+              }}
             />
           </div>
         </div>

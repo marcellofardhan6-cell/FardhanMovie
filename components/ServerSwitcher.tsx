@@ -33,18 +33,22 @@ function buildServerUrl(server: Server, props: Props, isAnimeTheme?: boolean, st
       return type === "movie"
         ? `https://cinesrc.st/embed/movie/${id}`
         : `https://cinesrc.st/embed/tv/${id}?s=${season}&e=${episode}`;
+    case "vidsrcsu":
+      return type === "movie"
+        ? `https://vidsrc.su/embed/movie/${id}`
+        : `https://vidsrc.su/embed/tv/${id}/${season}/${episode}`;
     case "vidlink":
       return type === "movie"
-        ? `https://vidlink.pro/movie/${id}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914`
-        : `https://vidlink.pro/tv/${id}/${season}/${episode}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914`;
-    case "vidsrcwiki":
+        ? `https://vidlink.pro/movie/${id}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914&player=jw`
+        : `https://vidlink.pro/tv/${id}/${season}/${episode}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914&player=jw`;
+    case "vidsrcpm":
       return type === "movie"
-        ? `https://vidsrc.wiki/embed/movie/${id}`
-        : `https://vidsrc.wiki/embed/tv/${id}/${season}/${episode}`;
-    case "rivestream":
+        ? `https://vidsrc.pm/embed/movie/${id}`
+        : `https://vidsrc.pm/embed/tv/${id}/${season}/${episode}`;
+    case "vidsrcto":
       return type === "movie"
-        ? `https://rivestream.ru/embed?type=movie&id=${id}`
-        : `https://rivestream.ru/embed?type=tv&id=${id}&season=${season}&episode=${episode}`;
+        ? `https://vidsrc.to/embed/movie/${id}`
+        : `https://vidsrc.to/embed/tv/${id}/${season}/${episode}`;
     default:
       return type === "movie"
         ? `https://cinesrc.st/embed/movie/${id}`
@@ -54,9 +58,10 @@ function buildServerUrl(server: Server, props: Props, isAnimeTheme?: boolean, st
 
 const SERVERS: Server[] = [
   { id: 1, name: "Server 1", key: "cinesrc", badge: "Default" },
-  { id: 2, name: "Server 2", key: "vidlink", badge: "Backup" },
-  { id: 3, name: "Server 3", key: "vidsrcwiki", badge: "Backup" },
-  { id: 4, name: "Server 4", key: "rivestream", badge: "Backup" },
+  { id: 2, name: "Server 2", key: "vidsrcsu", badge: "Cepat" },
+  { id: 3, name: "Server 3", key: "vidlink", badge: "JWPlayer" },
+  { id: 4, name: "Server 4", key: "vidsrcpm", badge: "Backup" },
+  { id: 5, name: "Server 5", key: "vidsrcto", badge: "Backup" },
 ];
 
 export default function ServerSwitcher(props: Props) {
