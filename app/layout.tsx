@@ -183,17 +183,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${inter.variable} ${fraunces.variable}`}>
       <head>
         <link rel="preconnect" href="https://image.tmdb.org" />
-        <link rel="preconnect" href="https://cinesrc.st" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://vidsrc.su" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://vidlink.pro" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://vidsrc.pm" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://vidsrc.su" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://vidsrc.to" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://vidsrc.pm" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://cinesrc.st" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://image.tmdb.org" />
-        <link rel="dns-prefetch" href="https://cinesrc.st" />
-        <link rel="dns-prefetch" href="https://vidsrc.su" />
         <link rel="dns-prefetch" href="https://vidlink.pro" />
-        <link rel="dns-prefetch" href="https://vidsrc.pm" />
+        <link rel="dns-prefetch" href="https://vidsrc.su" />
         <link rel="dns-prefetch" href="https://vidsrc.to" />
+        <link rel="dns-prefetch" href="https://vidsrc.pm" />
+        <link rel="dns-prefetch" href="https://cinesrc.st" />
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
         <link rel="icon" type="image/png" sizes="192x192" href="/icon" />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon" />

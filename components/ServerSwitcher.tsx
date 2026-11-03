@@ -29,39 +29,39 @@ function buildServerUrl(server: Server, props: Props, isAnimeTheme?: boolean, st
   const id = String(tmdbId);
 
   switch (server.key) {
-    case "cinesrc":
-      return type === "movie"
-        ? `https://cinesrc.st/embed/movie/${id}`
-        : `https://cinesrc.st/embed/tv/${id}?s=${season}&e=${episode}`;
-    case "vidsrcsu":
-      return type === "movie"
-        ? `https://vidsrc.su/embed/movie/${id}`
-        : `https://vidsrc.su/embed/tv/${id}/${season}/${episode}`;
     case "vidlink":
       return type === "movie"
         ? `https://vidlink.pro/movie/${id}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914&player=jw`
         : `https://vidlink.pro/tv/${id}/${season}/${episode}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914&player=jw`;
-    case "vidsrcpm":
+    case "vidsrcsu":
       return type === "movie"
-        ? `https://vidsrc.pm/embed/movie/${id}`
-        : `https://vidsrc.pm/embed/tv/${id}/${season}/${episode}`;
+        ? `https://vidsrc.su/embed/movie/${id}`
+        : `https://vidsrc.su/embed/tv/${id}/${season}/${episode}`;
     case "vidsrcto":
       return type === "movie"
         ? `https://vidsrc.to/embed/movie/${id}`
         : `https://vidsrc.to/embed/tv/${id}/${season}/${episode}`;
-    default:
+    case "vidsrcpm":
+      return type === "movie"
+        ? `https://vidsrc.pm/embed/movie/${id}`
+        : `https://vidsrc.pm/embed/tv/${id}/${season}/${episode}`;
+    case "cinesrc":
       return type === "movie"
         ? `https://cinesrc.st/embed/movie/${id}`
         : `https://cinesrc.st/embed/tv/${id}?s=${season}&e=${episode}`;
+    default:
+      return type === "movie"
+        ? `https://vidlink.pro/movie/${id}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914&player=jw`
+        : `https://vidlink.pro/tv/${id}/${season}/${episode}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914&player=jw`;
   }
 }
 
 const SERVERS: Server[] = [
-  { id: 1, name: "Server 1", key: "cinesrc", badge: "Default" },
+  { id: 1, name: "Server 1", key: "vidlink", badge: "Default" },
   { id: 2, name: "Server 2", key: "vidsrcsu", badge: "Cepat" },
-  { id: 3, name: "Server 3", key: "vidlink", badge: "JWPlayer" },
+  { id: 3, name: "Server 3", key: "vidsrcto", badge: "Resmi" },
   { id: 4, name: "Server 4", key: "vidsrcpm", badge: "Backup" },
-  { id: 5, name: "Server 5", key: "vidsrcto", badge: "Backup" },
+  { id: 5, name: "Server 5", key: "cinesrc", badge: "Backup" },
 ];
 
 export default function ServerSwitcher(props: Props) {

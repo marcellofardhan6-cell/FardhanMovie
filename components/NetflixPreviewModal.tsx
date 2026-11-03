@@ -45,12 +45,12 @@ interface DetailApiResponse {
 
 const SERVERS = [
   {
-    id: "cinesrc",
+    id: "vidlink",
     name: "Server 1",
-    label: "CineSrc",
-    speed: "Paling Cepat",
+    label: "VidLink",
+    speed: "Paling Cepat & Stabil",
     tag: "Rekomendasi",
-    desc: "Cepat, respon stabil, tanpa popup iklan",
+    desc: "Pemutar adaptif HLS, buffer super cepat tanpa macet",
   },
   {
     id: "vidsrcsu",
@@ -58,15 +58,15 @@ const SERVERS = [
     label: "VidSrc SU",
     speed: "Cepat",
     tag: "HD Audio",
-    desc: "Kualitas gambar jernih & streaming lancar",
+    desc: "Kualitas gambar jernih & resolusi tinggi",
   },
   {
-    id: "vidlink",
+    id: "vidsrcto",
     name: "Server 3",
-    label: "VidLink",
+    label: "VidSrc TO",
     speed: "Stabil",
-    tag: "JWPlayer",
-    desc: "Pemutar adaptif HLS, minim buffering",
+    tag: "Resmi",
+    desc: "Server mirror resmi VidSrc",
   },
   {
     id: "vidsrcpm",
@@ -77,9 +77,9 @@ const SERVERS = [
     desc: "Server cadangan jika server utama bermasalah",
   },
   {
-    id: "vidsrcto",
+    id: "cinesrc",
     name: "Server 5",
-    label: "VidSrc TO",
+    label: "CineSrc",
     speed: "Cadangan",
     tag: "Mirror 2",
     desc: "Server cadangan alternatif",
@@ -220,7 +220,7 @@ export default function NetflixPreviewModal() {
   const [selectedSeason, setSelectedSeason] = useState(1);
   const [selectedEpisode, setSelectedEpisode] = useState(1);
   const [isTheaterOpen, setIsTheaterOpen] = useState(false);
-  const [activeServer, setActiveServer] = useState<ServerId>("cinesrc");
+  const [activeServer, setActiveServer] = useState<ServerId>("vidlink");
   const [controlsVisible, setControlsVisible] = useState(true);
   const [isMobileServerDrawerOpen, setIsMobileServerDrawerOpen] = useState(false);
   const [isNativeFullscreen, setIsNativeFullscreen] = useState(false);
@@ -844,14 +844,15 @@ export default function NetflixPreviewModal() {
         setIsTheaterOpen(false);
 
         // Restore server from URL or sessionStorage if previously selected
-        const validServers = ["cinesrc", "vidsrcsu", "vidlink", "vidsrcpm", "vidsrcto"] as const;
-        let chosenServer: typeof validServers[number] = "cinesrc";
+        const validServers = ["vidlink", "vidsrcsu", "vidsrcto", "vidsrcpm", "cinesrc"] as const;
+        let chosenServer: typeof validServers[number] = "vidlink";
         if (typeof window !== "undefined") {
           const urlServer = new URLSearchParams(window.location.search).get("server");
           const sessionServer = sessionStorage.getItem("fardtv_active_server");
-          if (urlServer && (validServers as readonly string[]).includes(urlServer)) {
+          // If previous session or URL was on cinesrc, upgrade to vidlink to prevent loading hang
+          if (urlServer && (validServers as readonly string[]).includes(urlServer) && urlServer !== "cinesrc") {
             chosenServer = urlServer as typeof validServers[number];
-          } else if (sessionServer && (validServers as readonly string[]).includes(sessionServer)) {
+          } else if (sessionServer && (validServers as readonly string[]).includes(sessionServer) && sessionServer !== "cinesrc") {
             chosenServer = sessionServer as typeof validServers[number];
           }
         }
@@ -929,28 +930,28 @@ export default function NetflixPreviewModal() {
   const seasonEpisodes = seasonEpisodesMap[selectedSeason] || [];
   const matchPercent = Math.min(99, Math.max(85, Math.round((rating || 7.5) * 10) + 12));
 
-  // Build stream URL for active servers (CineSrc, VidSrc SU, VidLink, VidSrc PM, VidSrc TO)
+  // Build stream URL for active servers (VidLink, VidSrc SU, VidSrc TO, VidSrc PM, CineSrc)
   const idStr = String(activeItem.id);
   const streamUrl =
-    activeServer === "cinesrc"
+    activeServer === "vidlink"
       ? resolvedType === "tv"
-        ? `https://cinesrc.st/embed/tv/${idStr}?s=${selectedSeason}&e=${selectedEpisode}`
-        : `https://cinesrc.st/embed/movie/${idStr}`
+        ? `https://vidlink.pro/tv/${idStr}/${selectedSeason}/${selectedEpisode}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914&player=jw`
+        : `https://vidlink.pro/movie/${idStr}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914&player=jw`
       : activeServer === "vidsrcsu"
       ? resolvedType === "tv"
         ? `https://vidsrc.su/embed/tv/${idStr}/${selectedSeason}/${selectedEpisode}`
         : `https://vidsrc.su/embed/movie/${idStr}`
-      : activeServer === "vidlink"
+      : activeServer === "vidsrcto"
       ? resolvedType === "tv"
-        ? `https://vidlink.pro/tv/${idStr}/${selectedSeason}/${selectedEpisode}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914&player=jw`
-        : `https://vidlink.pro/movie/${idStr}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914&player=jw`
+        ? `https://vidsrc.to/embed/tv/${idStr}/${selectedSeason}/${selectedEpisode}`
+        : `https://vidsrc.to/embed/movie/${idStr}`
       : activeServer === "vidsrcpm"
       ? resolvedType === "tv"
         ? `https://vidsrc.pm/embed/tv/${idStr}/${selectedSeason}/${selectedEpisode}`
         : `https://vidsrc.pm/embed/movie/${idStr}`
       : resolvedType === "tv"
-      ? `https://vidsrc.to/embed/tv/${idStr}/${selectedSeason}/${selectedEpisode}`
-      : `https://vidsrc.to/embed/movie/${idStr}`;
+      ? `https://cinesrc.st/embed/tv/${idStr}?s=${selectedSeason}&e=${selectedEpisode}`
+      : `https://cinesrc.st/embed/movie/${idStr}`;
 
   const currentServerObj = SERVERS.find((s) => s.id === activeServer) || SERVERS[0];
 
