@@ -639,7 +639,10 @@ export default function NetflixPreviewModal() {
 
   // Show / hide floating controls on mouse movement or touch in fullscreen mode
   const handleUserActivity = useCallback(() => {
-    setControlsVisible(true);
+    setControlsVisible((prev) => {
+      if (!prev) return true;
+      return prev;
+    });
     if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
     controlsTimeoutRef.current = setTimeout(() => {
       setIsMobileServerDrawerOpen((drawerOpen) => {
@@ -673,67 +676,24 @@ export default function NetflixPreviewModal() {
   useEffect(() => {
     if (!isTheaterOpen) return;
 
-    let isRefocusing = false;
-
-    const revealControls = () => {
-      setControlsVisible(true);
-      if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
-      controlsTimeoutRef.current = setTimeout(() => {
-        setIsMobileServerDrawerOpen((drawerOpen) => {
-          if (!drawerOpen) {
-            setControlsVisible(false);
-          }
-          return drawerOpen;
-        });
-      }, 4500);
-    };
-
-    // Continuous iframe click detector:
-    // When user clicks or taps anywhere inside the cross-origin iframe video player,
-    // document.activeElement becomes theaterIframeRef.current.
-    const interval = setInterval(() => {
-      if (document.activeElement === theaterIframeRef.current) {
-        revealControls();
-        if (!isRefocusing) {
-          isRefocusing = true;
-          setTimeout(() => {
-            window.focus();
-            try {
-              theaterIframeRef.current?.blur();
-            } catch {}
-            isRefocusing = false;
-          }, 150);
-        }
-      }
-    }, 120);
-
+    // When the user clicks or taps inside the video player, reveal controls once
+    // Never force blur() or focus() which interrupts video decoding buffers!
     const onWindowBlur = () => {
-      revealControls();
-      if (!isRefocusing) {
-        isRefocusing = true;
-        setTimeout(() => {
-          window.focus();
-          try {
-            theaterIframeRef.current?.blur();
-          } catch {}
-          isRefocusing = false;
-        }, 150);
-      }
+      handleUserActivity();
     };
 
     window.addEventListener("blur", onWindowBlur);
-    window.addEventListener("mousemove", revealControls, { passive: true });
-    window.addEventListener("touchstart", revealControls, { passive: true });
-    window.addEventListener("click", revealControls, { passive: true });
+    window.addEventListener("mousemove", handleUserActivity, { passive: true });
+    window.addEventListener("touchstart", handleUserActivity, { passive: true });
+    window.addEventListener("click", handleUserActivity, { passive: true });
 
     return () => {
-      clearInterval(interval);
       window.removeEventListener("blur", onWindowBlur);
-      window.removeEventListener("mousemove", revealControls);
-      window.removeEventListener("touchstart", revealControls);
-      window.removeEventListener("click", revealControls);
+      window.removeEventListener("mousemove", handleUserActivity);
+      window.removeEventListener("touchstart", handleUserActivity);
+      window.removeEventListener("click", handleUserActivity);
     };
-  }, [isTheaterOpen]);
+  }, [isTheaterOpen, handleUserActivity]);
 
   // Lock both html and body scrolling and hide scrollbars completely in theater mode
   useEffect(() => {
@@ -1207,11 +1167,6 @@ export default function NetflixPreviewModal() {
               fetchpriority="high"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen *; display-capture"
               allowFullScreen
-              style={{
-                willChange: "transform",
-                transform: "translateZ(0)",
-                backfaceVisibility: "hidden",
-              }}
             />
           </div>
 
