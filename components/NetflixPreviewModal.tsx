@@ -44,46 +44,11 @@ interface DetailApiResponse {
 }
 
 const SERVERS = [
-  {
-    id: "vidlink",
-    name: "Server 1",
-    label: "VidLink",
-    speed: "Paling Cepat & Stabil",
-    tag: "Rekomendasi",
-    desc: "Pemutar adaptif HLS, buffer super cepat tanpa macet",
-  },
-  {
-    id: "vidsrcsu",
-    name: "Server 2",
-    label: "VidSrc SU",
-    speed: "Cepat",
-    tag: "HD Audio",
-    desc: "Kualitas gambar jernih & resolusi tinggi",
-  },
-  {
-    id: "vidsrcto",
-    name: "Server 3",
-    label: "VidSrc TO",
-    speed: "Stabil",
-    tag: "Resmi",
-    desc: "Server mirror resmi VidSrc",
-  },
-  {
-    id: "vidsrcpm",
-    name: "Server 4",
-    label: "VidSrc PM",
-    speed: "Cadangan",
-    tag: "Mirror 1",
-    desc: "Server cadangan jika server utama bermasalah",
-  },
-  {
-    id: "cinesrc",
-    name: "Server 5",
-    label: "CineSrc",
-    speed: "Cadangan",
-    tag: "Mirror 2",
-    desc: "Server cadangan alternatif",
-  },
+  { id: "vidlink", name: "Server 1" },
+  { id: "vidsrcsu", name: "Server 2" },
+  { id: "vidsrcto", name: "Server 3" },
+  { id: "vidsrcpm", name: "Server 4" },
+  { id: "cinesrc", name: "Server 5" },
 ] as const;
 
 type ServerId = (typeof SERVERS)[number]["id"];
@@ -1005,13 +970,12 @@ export default function NetflixPreviewModal() {
                   setIsMobileServerDrawerOpen(true);
                 }
               }}
-              className="absolute top-3 right-3 sm:top-4 sm:right-6 z-50 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#12141a]/85 hover:bg-black text-white/90 hover:text-white border border-white/20 backdrop-blur-md shadow-2xl text-xs font-medium transition-all opacity-50 hover:opacity-100 cursor-pointer active:scale-95 animate-in fade-in duration-200"
-              title="Ganti Server Pemutar"
-              aria-label="Ganti Server Pemutar"
+              className="absolute top-3 right-3 sm:top-4 sm:right-6 z-50 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#12141a]/85 hover:bg-black text-white/90 hover:text-white border border-white/20 backdrop-blur-md shadow-2xl text-xs font-semibold transition-all opacity-50 hover:opacity-100 cursor-pointer active:scale-95 animate-in fade-in duration-200"
+              title="Pilih Server"
+              aria-label="Pilih Server"
             >
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-              <span className="font-semibold">{currentServerObj.name}</span>
-              <span className="text-[10px] text-zinc-400 hidden sm:inline">({currentServerObj.label})</span>
+              <span>{currentServerObj.name}</span>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <path d="M6 9l6 6 6-6" />
               </svg>
@@ -1054,43 +1018,16 @@ export default function NetflixPreviewModal() {
 
             {/* Right: Server Controls (Adaptive Desktop vs Mobile) & Actions */}
             <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
-              {/* DESKTOP (>= md): Full segmented buttons with server badges */}
-              <div className="hidden md:flex items-center gap-1 bg-[#12141a]/95 p-1 rounded-xl border border-white/20 backdrop-blur-md">
+              {/* DESKTOP (>= sm): Clean segmented buttons */}
+              <div className="hidden sm:flex items-center gap-1 bg-[#12141a]/95 p-1 rounded-xl border border-white/20 backdrop-blur-md">
                 {SERVERS.map((s) => (
                   <button
                     key={s.id}
                     type="button"
                     onClick={() => handleSwitchServer(s.id)}
-                    title={`${s.label} (${s.speed}) - ${s.desc}`}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                       activeServer === s.id
                         ? "bg-red-600 text-white font-bold shadow-md shadow-red-900/30"
-                        : "text-zinc-300 hover:text-white hover:bg-white/10"
-                    }`}
-                  >
-                    <span>{s.name}</span>
-                    <span
-                      className={`text-[10px] px-1 py-0.2 rounded font-normal ${
-                        activeServer === s.id ? "bg-black/30 text-white" : "bg-white/10 text-zinc-400"
-                      }`}
-                    >
-                      {s.tag}
-                    </span>
-                  </button>
-                ))}
-              </div>
-
-              {/* TABLET (sm to md): Compact segmented buttons */}
-              <div className="hidden sm:flex md:hidden items-center gap-0.5 bg-[#12141a]/95 p-1 rounded-xl border border-white/20 backdrop-blur-md">
-                {SERVERS.map((s) => (
-                  <button
-                    key={s.id}
-                    type="button"
-                    onClick={() => handleSwitchServer(s.id)}
-                    title={`${s.name} - ${s.label}`}
-                    className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
-                      activeServer === s.id
-                        ? "bg-red-600 text-white font-bold"
                         : "text-zinc-300 hover:text-white hover:bg-white/10"
                     }`}
                   >
@@ -1099,17 +1036,16 @@ export default function NetflixPreviewModal() {
                 ))}
               </div>
 
-              {/* MOBILE (< sm): Single prominent Server Pill triggering Bottom Sheet Drawer */}
+              {/* MOBILE (< sm): Single clean button */}
               <button
                 type="button"
                 onClick={() => setIsMobileServerDrawerOpen(true)}
                 className="flex sm:hidden items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[#12141a]/95 hover:bg-black text-white border border-white/25 shadow-xl backdrop-blur-md cursor-pointer active:scale-95 transition-all text-xs font-semibold"
-                title="Pilih Server Pemutar"
-                aria-label="Pilih Server Pemutar"
+                title="Pilih Server"
+                aria-label="Pilih Server"
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
                 <span>{currentServerObj.name}</span>
-                <span className="text-[10px] text-zinc-400 font-normal">({currentServerObj.label})</span>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <path d="M6 9l6 6 6-6" />
                 </svg>
@@ -1186,10 +1122,7 @@ export default function NetflixPreviewModal() {
 
                 {/* Header */}
                 <div className="flex items-center justify-between pb-3 border-b border-white/10">
-                  <div>
-                    <h3 className="text-white font-bold text-base">Pilih Server Pemutar</h3>
-                    <p className="text-zinc-400 text-xs">Pilih server lain jika video lambat atau buffering</p>
-                  </div>
+                  <h3 className="text-white font-bold text-base">Pilih Server</h3>
                   <button
                     type="button"
                     onClick={() => setIsMobileServerDrawerOpen(false)}
@@ -1212,29 +1145,15 @@ export default function NetflixPreviewModal() {
                         key={s.id}
                         type="button"
                         onClick={() => handleSwitchServer(s.id)}
-                        className={`w-full p-3 rounded-xl border flex items-center justify-between text-left transition-all cursor-pointer active:scale-[0.99] ${
+                        className={`w-full p-3.5 rounded-xl border flex items-center justify-between text-left transition-all cursor-pointer active:scale-[0.99] ${
                           isSelected
-                            ? "bg-red-600/15 border-red-500/60 shadow-lg shadow-red-900/20"
+                            ? "bg-red-600/20 border-red-500 shadow-lg shadow-red-900/20"
                             : "bg-[#202020] hover:bg-[#282828] border-white/10"
                         }`}
                       >
-                        <div className="flex flex-col gap-0.5">
-                          <div className="flex items-center gap-2">
-                            <span className={`text-sm font-bold ${isSelected ? "text-white" : "text-zinc-200"}`}>
-                              {s.name} ({s.label})
-                            </span>
-                            <span
-                              className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
-                                isSelected
-                                  ? "bg-red-600 text-white"
-                                  : "bg-white/10 text-zinc-400"
-                              }`}
-                            >
-                              {s.tag}
-                            </span>
-                          </div>
-                          <span className="text-[11px] text-zinc-400">{s.desc}</span>
-                        </div>
+                        <span className={`text-sm font-bold ${isSelected ? "text-white" : "text-zinc-200"}`}>
+                          {s.name}
+                        </span>
                         <div className="shrink-0 ml-2">
                           {isSelected ? (
                             <div className="w-6 h-6 rounded-full bg-red-600 text-white flex items-center justify-center">
