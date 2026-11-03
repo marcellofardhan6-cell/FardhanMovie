@@ -44,11 +44,46 @@ interface DetailApiResponse {
 }
 
 const SERVERS = [
-  { id: "cinesrc", name: "Server 1" },
-  { id: "vidsrcsu", name: "Server 2" },
-  { id: "vidlink", name: "Server 3" },
-  { id: "vidsrcpm", name: "Server 4" },
-  { id: "vidsrcto", name: "Server 5" },
+  {
+    id: "cinesrc",
+    name: "Server 1",
+    label: "CineSrc",
+    speed: "Paling Cepat",
+    tag: "Rekomendasi",
+    desc: "Cepat, respon stabil, tanpa popup iklan",
+  },
+  {
+    id: "vidsrcsu",
+    name: "Server 2",
+    label: "VidSrc SU",
+    speed: "Cepat",
+    tag: "HD Audio",
+    desc: "Kualitas gambar jernih & streaming lancar",
+  },
+  {
+    id: "vidlink",
+    name: "Server 3",
+    label: "VidLink",
+    speed: "Stabil",
+    tag: "JWPlayer",
+    desc: "Pemutar adaptif HLS, minim buffering",
+  },
+  {
+    id: "vidsrcpm",
+    name: "Server 4",
+    label: "VidSrc PM",
+    speed: "Cadangan",
+    tag: "Mirror 1",
+    desc: "Server cadangan jika server utama bermasalah",
+  },
+  {
+    id: "vidsrcto",
+    name: "Server 5",
+    label: "VidSrc TO",
+    speed: "Cadangan",
+    tag: "Mirror 2",
+    desc: "Server cadangan alternatif",
+  },
 ] as const;
 
 type ServerId = (typeof SERVERS)[number]["id"];
@@ -187,10 +222,12 @@ export default function NetflixPreviewModal() {
   const [isTheaterOpen, setIsTheaterOpen] = useState(false);
   const [activeServer, setActiveServer] = useState<ServerId>("cinesrc");
   const [controlsVisible, setControlsVisible] = useState(true);
+  const [isMobileServerDrawerOpen, setIsMobileServerDrawerOpen] = useState(false);
   const [isNativeFullscreen, setIsNativeFullscreen] = useState(false);
   const [isForceLandscape, setIsForceLandscape] = useState(false);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const theaterContainerRef = useRef<HTMLDivElement | null>(null);
+  const theaterIframeRef = useRef<HTMLIFrameElement | null>(null);
   const currentTimeRef = useRef<number>(0);
   const lastProgressSaveRef = useRef<number>(0);
   const modalPushedRef = useRef(false);
@@ -424,6 +461,7 @@ export default function NetflixPreviewModal() {
     unlockOrientation();
     setIsForceLandscape(false);
     exitNativeFullscreen();
+    setIsMobileServerDrawerOpen(false);
     setIsTheaterOpen(false);
   }, [activeItem, detailData, resolvedType, selectedSeason, selectedEpisode, updateProgress, exitNativeFullscreen]);
 
@@ -435,6 +473,7 @@ export default function NetflixPreviewModal() {
     unlockOrientation();
     setIsForceLandscape(false);
     exitNativeFullscreen();
+    setIsMobileServerDrawerOpen(false);
     setIsTheaterOpen(false);
     closePreview();
   }, [activeItem, closePreview, exitNativeFullscreen]);
@@ -603,53 +642,96 @@ export default function NetflixPreviewModal() {
     setControlsVisible(true);
     if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
     controlsTimeoutRef.current = setTimeout(() => {
-      setControlsVisible(false);
-    }, 4000);
+      setIsMobileServerDrawerOpen((drawerOpen) => {
+        if (!drawerOpen) {
+          setControlsVisible(false);
+        }
+        return drawerOpen;
+      });
+    }, 4500);
   }, []);
 
   // Switch server reliably
   const handleSwitchServer = useCallback(
     (serverKey: ServerId) => {
       setActiveServer(serverKey);
+      setIsMobileServerDrawerOpen(false);
+      handleUserActivity();
       if (typeof window !== "undefined") {
         try {
           sessionStorage.setItem("fardtv_active_server", serverKey);
+          const url = new URL(window.location.href);
+          url.searchParams.set("server", serverKey);
+          window.history.replaceState(null, "", url.toString());
         } catch {}
       }
     },
-    []
+    [handleUserActivity]
   );
 
   // Listen for window-level mouse movement, touches & iframe focus changes when theater is open
   useEffect(() => {
     if (!isTheaterOpen) return;
 
-    const onActivity = () => {
-      setControlsVisible(true);
-      if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
-      controlsTimeoutRef.current = setTimeout(() => {
-        setControlsVisible(false);
-      }, 3800);
-    };
+    let isRefocusing = false;
 
-    // When the user clicks or taps inside the cross-origin video iframe, the parent window fires a blur event.
-    // By listening to window blur, clicking on the player reliably reveals the controls!
-    const onWindowBlur = () => {
+    const revealControls = () => {
       setControlsVisible(true);
       if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
       controlsTimeoutRef.current = setTimeout(() => {
-        setControlsVisible(false);
+        setIsMobileServerDrawerOpen((drawerOpen) => {
+          if (!drawerOpen) {
+            setControlsVisible(false);
+          }
+          return drawerOpen;
+        });
       }, 4500);
     };
 
-    window.addEventListener("mousemove", onActivity, { passive: true });
-    window.addEventListener("touchstart", onActivity, { passive: true });
+    // Continuous iframe click detector:
+    // When user clicks or taps anywhere inside the cross-origin iframe video player,
+    // document.activeElement becomes theaterIframeRef.current.
+    const interval = setInterval(() => {
+      if (document.activeElement === theaterIframeRef.current) {
+        revealControls();
+        if (!isRefocusing) {
+          isRefocusing = true;
+          setTimeout(() => {
+            window.focus();
+            try {
+              theaterIframeRef.current?.blur();
+            } catch {}
+            isRefocusing = false;
+          }, 150);
+        }
+      }
+    }, 120);
+
+    const onWindowBlur = () => {
+      revealControls();
+      if (!isRefocusing) {
+        isRefocusing = true;
+        setTimeout(() => {
+          window.focus();
+          try {
+            theaterIframeRef.current?.blur();
+          } catch {}
+          isRefocusing = false;
+        }, 150);
+      }
+    };
+
     window.addEventListener("blur", onWindowBlur);
+    window.addEventListener("mousemove", revealControls, { passive: true });
+    window.addEventListener("touchstart", revealControls, { passive: true });
+    window.addEventListener("click", revealControls, { passive: true });
 
     return () => {
-      window.removeEventListener("mousemove", onActivity);
-      window.removeEventListener("touchstart", onActivity);
+      clearInterval(interval);
       window.removeEventListener("blur", onWindowBlur);
+      window.removeEventListener("mousemove", revealControls);
+      window.removeEventListener("touchstart", revealControls);
+      window.removeEventListener("click", revealControls);
     };
   }, [isTheaterOpen]);
 
@@ -845,7 +927,9 @@ export default function NetflixPreviewModal() {
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape" && isOpen) {
-        if (isNativeFullscreen) {
+        if (isMobileServerDrawerOpen) {
+          setIsMobileServerDrawerOpen(false);
+        } else if (isNativeFullscreen) {
           exitNativeFullscreen();
         } else if (isTheaterOpen) {
           handleStopPlay();
@@ -863,7 +947,7 @@ export default function NetflixPreviewModal() {
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, isNativeFullscreen, isTheaterOpen, exitNativeFullscreen, handleStopPlay, handleModalClose]);
+  }, [isOpen, isNativeFullscreen, isTheaterOpen, isMobileServerDrawerOpen, exitNativeFullscreen, handleStopPlay, handleModalClose]);
 
   if (!isOpen || !activeItem) {
     return (
@@ -908,6 +992,8 @@ export default function NetflixPreviewModal() {
       ? `https://vidsrc.to/embed/tv/${idStr}/${selectedSeason}/${selectedEpisode}`
       : `https://vidsrc.to/embed/movie/${idStr}`;
 
+  const currentServerObj = SERVERS.find((s) => s.id === activeServer) || SERVERS[0];
+
   return (
     <>
       <Suspense fallback={null}>
@@ -938,41 +1024,113 @@ export default function NetflixPreviewModal() {
           onClick={handleUserActivity}
           onTouchStart={handleUserActivity}
         >
+          {/* Invisible/Subtle Top Hover Detection Strip to instantly reveal controls when cursor/finger nears the top */}
+          <div
+            className="absolute top-0 inset-x-0 h-16 sm:h-20 z-40 cursor-pointer pointer-events-auto"
+            onMouseEnter={handleUserActivity}
+            onMouseMove={handleUserActivity}
+            onTouchStart={handleUserActivity}
+            onClick={handleUserActivity}
+          />
+
+          {/* Minimal floating server chip when top bar is hidden - ensures user is never trapped */}
+          {!controlsVisible && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setControlsVisible(true);
+                if (typeof window !== "undefined" && window.innerWidth < 640) {
+                  setIsMobileServerDrawerOpen(true);
+                }
+              }}
+              className="absolute top-3 right-3 sm:top-4 sm:right-6 z-50 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#12141a]/85 hover:bg-black text-white/90 hover:text-white border border-white/20 backdrop-blur-md shadow-2xl text-xs font-medium transition-all opacity-50 hover:opacity-100 cursor-pointer active:scale-95 animate-in fade-in duration-200"
+              title="Ganti Server Pemutar"
+              aria-label="Ganti Server Pemutar"
+            >
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+              <span className="font-semibold">{currentServerObj.name}</span>
+              <span className="text-[10px] text-zinc-400 hidden sm:inline">({currentServerObj.label})</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </button>
+          )}
+
           {/* Floating Fullscreen Top Controls */}
           <div
-            className={`absolute top-0 inset-x-0 z-50 flex items-center justify-between p-2.5 sm:p-3 sm:px-6 bg-gradient-to-b from-black/90 via-black/50 to-transparent transition-opacity duration-300 ${
-              controlsVisible ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+            className={`absolute top-0 inset-x-0 z-50 flex items-center justify-between p-2.5 sm:p-3 sm:px-6 bg-gradient-to-b from-black/95 via-black/70 to-transparent transition-all duration-300 ${
+              controlsVisible
+                ? "opacity-100 translate-y-0 pointer-events-auto"
+                : "opacity-0 -translate-y-2 pointer-events-none"
             }`}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center gap-2 min-w-0">
+            {/* Left: Back & Title info */}
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
               <button
                 type="button"
                 onClick={handleStopPlay}
-                className="flex items-center justify-center w-8 h-8 rounded-full bg-[#12141a]/95 hover:bg-black text-white border border-white/25 shadow-xl backdrop-blur-md cursor-pointer active:scale-95 transition-all shrink-0"
-                title="Back to Details"
-                aria-label="Back to Details"
+                className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#12141a]/95 hover:bg-black text-white border border-white/25 shadow-xl backdrop-blur-md cursor-pointer active:scale-95 transition-all shrink-0"
+                title="Kembali ke Detail"
+                aria-label="Kembali ke Detail"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M19 12H5M12 19l-7-7 7-7" />
                 </svg>
               </button>
-              <span className="text-white text-xs font-semibold truncate max-w-[120px] sm:max-w-xs hidden sm:inline">
-                {title} {resolvedType === "tv" && `S${selectedSeason} E${selectedEpisode}`}
-              </span>
+              <div className="flex flex-col min-w-0">
+                <span className="text-white text-xs sm:text-sm font-semibold truncate max-w-[130px] sm:max-w-xs md:max-w-md">
+                  {title}
+                </span>
+                {resolvedType === "tv" && (
+                  <span className="text-[10px] text-zinc-400 font-medium">
+                    Season {selectedSeason} • Episode {selectedEpisode}
+                  </span>
+                )}
+              </div>
             </div>
 
-            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-              <div className="flex items-center gap-1 bg-[#12141a]/95 p-0.5 sm:p-1 rounded-xl border border-white/20 backdrop-blur-md">
+            {/* Right: Server Controls (Adaptive Desktop vs Mobile) & Actions */}
+            <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+              {/* DESKTOP (>= md): Full segmented buttons with server badges */}
+              <div className="hidden md:flex items-center gap-1 bg-[#12141a]/95 p-1 rounded-xl border border-white/20 backdrop-blur-md">
                 {SERVERS.map((s) => (
                   <button
                     key={s.id}
                     type="button"
                     onClick={() => handleSwitchServer(s.id)}
-                    className={`px-2 sm:px-2.5 py-1 rounded-lg text-[11px] sm:text-xs font-semibold transition-all cursor-pointer ${
+                    title={`${s.label} (${s.speed}) - ${s.desc}`}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+                      activeServer === s.id
+                        ? "bg-red-600 text-white font-bold shadow-md shadow-red-900/30"
+                        : "text-zinc-300 hover:text-white hover:bg-white/10"
+                    }`}
+                  >
+                    <span>{s.name}</span>
+                    <span
+                      className={`text-[10px] px-1 py-0.2 rounded font-normal ${
+                        activeServer === s.id ? "bg-black/30 text-white" : "bg-white/10 text-zinc-400"
+                      }`}
+                    >
+                      {s.tag}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              {/* TABLET (sm to md): Compact segmented buttons */}
+              <div className="hidden sm:flex md:hidden items-center gap-0.5 bg-[#12141a]/95 p-1 rounded-xl border border-white/20 backdrop-blur-md">
+                {SERVERS.map((s) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => handleSwitchServer(s.id)}
+                    title={`${s.name} - ${s.label}`}
+                    className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
                       activeServer === s.id
                         ? "bg-red-600 text-white font-bold"
-                        : "text-zinc-300 hover:text-white"
+                        : "text-zinc-300 hover:text-white hover:bg-white/10"
                     }`}
                   >
                     {s.name}
@@ -980,6 +1138,23 @@ export default function NetflixPreviewModal() {
                 ))}
               </div>
 
+              {/* MOBILE (< sm): Single prominent Server Pill triggering Bottom Sheet Drawer */}
+              <button
+                type="button"
+                onClick={() => setIsMobileServerDrawerOpen(true)}
+                className="flex sm:hidden items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[#12141a]/95 hover:bg-black text-white border border-white/25 shadow-xl backdrop-blur-md cursor-pointer active:scale-95 transition-all text-xs font-semibold"
+                title="Pilih Server Pemutar"
+                aria-label="Pilih Server Pemutar"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                <span>{currentServerObj.name}</span>
+                <span className="text-[10px] text-zinc-400 font-normal">({currentServerObj.label})</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </button>
+
+              {/* Rotate Button (for mobile landscape) */}
               <button
                 type="button"
                 onClick={handleToggleRotate}
@@ -996,6 +1171,7 @@ export default function NetflixPreviewModal() {
                 </svg>
               </button>
 
+              {/* Fullscreen Button */}
               <button
                 type="button"
                 onClick={toggleFullscreen}
@@ -1016,8 +1192,10 @@ export default function NetflixPreviewModal() {
             </div>
           </div>
 
+          {/* Video Iframe Container */}
           <div className="relative w-full h-full bg-black">
             <iframe
+              ref={theaterIframeRef}
               key={`${activeServer}-${idStr}-${selectedSeason}-${selectedEpisode}`}
               src={streamUrl}
               title={title}
@@ -1036,6 +1214,98 @@ export default function NetflixPreviewModal() {
               }}
             />
           </div>
+
+          {/* Mobile Server Drawer / Bottom Sheet */}
+          {isMobileServerDrawerOpen && (
+            <div
+              className="fixed inset-0 z-[10000] flex items-end justify-center bg-black/80 backdrop-blur-sm animate-netflix-backdrop"
+              onClick={() => setIsMobileServerDrawerOpen(false)}
+            >
+              <div
+                className="w-full max-w-lg bg-[#181818] border-t border-white/15 rounded-t-2xl p-4 sm:p-5 pb-8 shadow-2xl animate-in slide-in-from-bottom-5 duration-200 select-none"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Handle bar */}
+                <div className="w-12 h-1 bg-zinc-600 rounded-full mx-auto mb-3" />
+
+                {/* Header */}
+                <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                  <div>
+                    <h3 className="text-white font-bold text-base">Pilih Server Pemutar</h3>
+                    <p className="text-zinc-400 text-xs">Pilih server lain jika video lambat atau buffering</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsMobileServerDrawerOpen(false)}
+                    className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-zinc-300 hover:text-white flex items-center justify-center cursor-pointer transition-all active:scale-95"
+                    aria-label="Tutup"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Server List */}
+                <div className="flex flex-col gap-2 mt-3 max-h-[60vh] overflow-y-auto">
+                  {SERVERS.map((s) => {
+                    const isSelected = activeServer === s.id;
+                    return (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={() => handleSwitchServer(s.id)}
+                        className={`w-full p-3 rounded-xl border flex items-center justify-between text-left transition-all cursor-pointer active:scale-[0.99] ${
+                          isSelected
+                            ? "bg-red-600/15 border-red-500/60 shadow-lg shadow-red-900/20"
+                            : "bg-[#202020] hover:bg-[#282828] border-white/10"
+                        }`}
+                      >
+                        <div className="flex flex-col gap-0.5">
+                          <div className="flex items-center gap-2">
+                            <span className={`text-sm font-bold ${isSelected ? "text-white" : "text-zinc-200"}`}>
+                              {s.name} ({s.label})
+                            </span>
+                            <span
+                              className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
+                                isSelected
+                                  ? "bg-red-600 text-white"
+                                  : "bg-white/10 text-zinc-400"
+                              }`}
+                            >
+                              {s.tag}
+                            </span>
+                          </div>
+                          <span className="text-[11px] text-zinc-400">{s.desc}</span>
+                        </div>
+                        <div className="shrink-0 ml-2">
+                          {isSelected ? (
+                            <div className="w-6 h-6 rounded-full bg-red-600 text-white flex items-center justify-center">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="20 6 9 17 4 12" />
+                              </svg>
+                            </div>
+                          ) : (
+                            <div className="w-6 h-6 rounded-full border border-white/20" />
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Close button at bottom */}
+                <button
+                  type="button"
+                  onClick={() => setIsMobileServerDrawerOpen(false)}
+                  className="w-full mt-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-medium text-xs transition-all cursor-pointer active:scale-95"
+                >
+                  Tutup
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
