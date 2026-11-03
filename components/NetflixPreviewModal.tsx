@@ -128,15 +128,85 @@ function UrlPreviewListener() {
     const id = movieId || seriesId;
     if (!id || userDismissedId === id) {
       hasRestoredInitialUrl = true;
+      if (typeof document !== "undefined") {
+        document.documentElement.classList.remove("preview-loading-ssr");
+      }
       return;
     }
 
     if (!isOpen && !isFetchingRef.current) {
       hasRestoredInitialUrl = true;
-      const type = seriesId ? "tv" : "movie";
+      const type: "tv" | "movie" = seriesId ? "tv" : "movie";
       const season = seasonParam ? parseInt(seasonParam, 10) : 1;
       const episode = episodeParam ? parseInt(episodeParam, 10) : 1;
+      const isPlay = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("play") === "1";
 
+      // 1. Try to read cached preview state from sessionStorage
+      let cachedItem: Movie | null = null;
+      let cachedDetail: DetailApiResponse | null = null;
+      if (typeof window !== "undefined") {
+        try {
+          const raw = sessionStorage.getItem("fardtv_preview_state");
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed.item && String(parsed.item.id) === String(id)) {
+              cachedItem = parsed.item;
+              cachedDetail = parsed.detailData || null;
+            }
+          }
+        } catch {}
+
+        // 2. Fallback to watch history if present
+        if (!cachedItem) {
+          try {
+            const rawHist = localStorage.getItem("fardtv_watch_history");
+            if (rawHist) {
+              const histList = JSON.parse(rawHist);
+              if (Array.isArray(histList)) {
+                const found = histList.find((h: any) => String(h.id) === String(id));
+                if (found) {
+                  cachedItem = {
+                    id: found.id,
+                    title: found.title,
+                    name: found.title,
+                    poster_path: found.poster_path || null,
+                    backdrop_path: found.backdrop_path || null,
+                    media_type: type,
+                    vote_average: found.vote_average || 0,
+                    vote_count: 0,
+                    overview: "",
+                    release_date: "",
+                    first_air_date: "",
+                  };
+                }
+              }
+            }
+          } catch {}
+        }
+      }
+
+      // 3. Fallback placeholder so preview/theater mounts on frame 0 without disappearing
+      const initialItem: Movie = cachedItem || {
+        id: parseInt(id, 10),
+        title: "Memuat...",
+        name: "Memuat...",
+        poster_path: null,
+        backdrop_path: null,
+        media_type: type,
+        vote_average: 0,
+        vote_count: 0,
+        overview: "",
+        release_date: "",
+        first_air_date: "",
+      };
+
+      // Open preview synchronously on mount!
+      openPreview(initialItem, isPlay, season, episode, cachedDetail);
+      if (typeof document !== "undefined") {
+        document.documentElement.classList.remove("preview-loading-ssr");
+      }
+
+      // 4. Fetch full fresh detail in background to update cast, genres & episodes
       isFetchingRef.current = true;
       fetch(`/api/detail?id=${id}&type=${type}&season=${season}`)
         .then((res) => (res.ok ? res.json() : null))
@@ -144,18 +214,18 @@ function UrlPreviewListener() {
           if (data) {
             const movieItem: Movie = {
               id: data.id,
-              title: data.title || data.name || "Movie",
-              name: data.name || data.title,
-              poster_path: data.poster_path ?? null,
-              backdrop_path: data.backdrop_path ?? null,
+              title: data.title || data.name || initialItem.title,
+              name: data.name || data.title || initialItem.name,
+              poster_path: data.poster_path ?? initialItem.poster_path,
+              backdrop_path: data.backdrop_path ?? initialItem.backdrop_path,
               media_type: type,
-              vote_average: data.vote_average ?? 0,
-              vote_count: data.vote_count ?? 0,
-              overview: data.overview || "",
-              release_date: data.year ?? "",
-              first_air_date: data.year ?? "",
+              vote_average: data.vote_average ?? initialItem.vote_average,
+              vote_count: data.vote_count ?? initialItem.vote_count,
+              overview: data.overview || initialItem.overview,
+              release_date: data.year ?? initialItem.release_date,
+              first_air_date: data.year ?? initialItem.first_air_date,
             };
-            openPreview(movieItem, false, season, episode);
+            openPreview(movieItem, isPlay, season, episode, data);
           }
         })
         .catch(() => {})
@@ -175,16 +245,35 @@ export default function NetflixPreviewModal() {
     autoPlay,
     initialSeason,
     initialEpisode,
+    initialDetailData,
     closePreview,
     openPreview,
   } = usePreviewModal();
   const { isFavorite, toggleFavorite } = useFavorites();
   const { addHistory, updateProgress, getHistoryItem } = useWatchHistory();
 
-  const [detailData, setDetailData] = useState<DetailApiResponse | null>(null);
+  const [detailData, setDetailData] = useState<DetailApiResponse | null>(() => {
+    if (initialDetailData) return initialDetailData;
+    if (typeof window !== "undefined") {
+      try {
+        const raw = sessionStorage.getItem("fardtv_preview_state");
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          return parsed.detailData || null;
+        }
+      } catch {}
+    }
+    return null;
+  });
   const [selectedSeason, setSelectedSeason] = useState(1);
   const [selectedEpisode, setSelectedEpisode] = useState(1);
-  const [isTheaterOpen, setIsTheaterOpen] = useState(false);
+  const [isTheaterOpen, setIsTheaterOpen] = useState(() => {
+    if (typeof window !== "undefined") {
+      const rawParams = new URLSearchParams(window.location.search);
+      return rawParams.get("play") === "1";
+    }
+    return false;
+  });
   const [activeServer, setActiveServer] = useState<ServerId>("cinesrc");
   const [controlsVisible, setControlsVisible] = useState(true);
   const [isMobileServerDrawerOpen, setIsMobileServerDrawerOpen] = useState(false);
@@ -247,6 +336,37 @@ export default function NetflixPreviewModal() {
 
   const [seasonEpisodesMap, setSeasonEpisodesMap] = useState<Record<number, EpisodeItem[]>>({});
   const [loadingSeasonEpisodes, setLoadingSeasonEpisodes] = useState(false);
+  // Synchronize initialDetailData when it arrives from cache or UrlPreviewListener
+  useEffect(() => {
+    if (initialDetailData && activeItem && initialDetailData.id === activeItem.id) {
+      setDetailData(initialDetailData);
+      if (initialDetailData.episodes && initialDetailData.episodes.length > 0) {
+        setSeasonEpisodesMap((prev) => ({
+          ...prev,
+          [selectedSeason || initialSeason || 1]: initialDetailData.episodes!,
+        }));
+      }
+    }
+  }, [initialDetailData, activeItem, selectedSeason, initialSeason]);
+
+  // Continuously persist current preview state to sessionStorage
+  useEffect(() => {
+    if (typeof window === "undefined" || !isOpen || !activeItem) return;
+    try {
+      sessionStorage.setItem(
+        "fardtv_preview_state",
+        JSON.stringify({
+          item: activeItem,
+          detailData: detailData,
+          season: selectedSeason,
+          episode: selectedEpisode,
+          play: isTheaterOpen,
+          server: activeServer,
+        })
+      );
+    } catch {}
+  }, [isOpen, activeItem, detailData, selectedSeason, selectedEpisode, isTheaterOpen, activeServer]);
+
 
   // Fetch full details when modal opens
   const fetchDetail = useCallback(async (id: number, type: "movie" | "tv", season: number = 1) => {
@@ -802,11 +922,21 @@ export default function NetflixPreviewModal() {
     if (isOpen && activeItem) {
       if (lastProcessedIdRef.current !== activeItem.id) {
         lastProcessedIdRef.current = activeItem.id;
-        setDetailData(null);
-        setSeasonEpisodesMap({});
+        if (!initialDetailData || initialDetailData.id !== activeItem.id) {
+          setDetailData(null);
+          setSeasonEpisodesMap({});
+        } else {
+          setDetailData(initialDetailData);
+          if (initialDetailData.episodes && initialDetailData.episodes.length > 0) {
+            setSeasonEpisodesMap((prev) => ({
+              ...prev,
+              [initialSeason || 1]: initialDetailData.episodes!,
+            }));
+          }
+        }
         setSelectedSeason(initialSeason || 1);
         setSelectedEpisode(initialEpisode || 1);
-        setIsTheaterOpen(false);
+        setIsTheaterOpen(Boolean(autoPlay));
 
         // Restore server from URL or sessionStorage if previously selected
         const validServers = ["cinesrc", "vidlink", "vidsrcsu", "vidsrcto", "vidsrcpm"] as const;
@@ -846,7 +976,7 @@ export default function NetflixPreviewModal() {
       document.body.style.overflow = "";
       if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
     };
-  }, [isOpen, activeItem?.id, resolvedType, autoPlay, initialSeason, initialEpisode, fetchDetail]);
+  }, [isOpen, activeItem?.id, resolvedType, autoPlay, initialSeason, initialEpisode, fetchDetail, initialDetailData]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -1299,6 +1429,12 @@ export default function NetflixPreviewModal() {
 
               {/* Right Column (Cast & Genres) */}
               <div className="space-y-2.5 text-xs text-zinc-400">
+                {!detailData ? (
+                  <div className="space-y-2 animate-pulse">
+                    <div className="h-3.5 w-3/4 bg-white/10 rounded" />
+                    <div className="h-3.5 w-1/2 bg-white/10 rounded" />
+                  </div>
+                ) : null}
                 {detailData?.cast && detailData.cast.length > 0 && (
                   <div>
                     <span className="text-zinc-500 font-normal">Cast: </span>

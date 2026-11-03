@@ -74,6 +74,19 @@ body.theater-active {
   -ms-overflow-style: none !important;
 }
 
+/* Instant SSR Backdrop to prevent homepage flash on refresh while modal/theater is active */
+html.preview-loading-ssr body {
+  overflow: hidden !important;
+}
+html.preview-loading-ssr body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-color: #06070a;
+  z-index: 99998;
+  pointer-events: all;
+}
+
 :fullscreen::-webkit-scrollbar,
 :-webkit-full-screen::-webkit-scrollbar,
 :-moz-full-screen::-webkit-scrollbar,

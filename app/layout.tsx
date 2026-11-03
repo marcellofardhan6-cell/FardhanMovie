@@ -205,6 +205,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                var s = window.location.search;
+                if (s && (s.indexOf('movie=') !== -1 || s.indexOf('series=') !== -1)) {
+                  document.documentElement.classList.add('preview-loading-ssr');
+                  setTimeout(function() {
+                    document.documentElement.classList.remove('preview-loading-ssr');
+                  }, 3000);
+                }
+              } catch (e) {}
+            `,
+          }}
+        />
       </head>
       <body>
         <AnimeThemeProvider>

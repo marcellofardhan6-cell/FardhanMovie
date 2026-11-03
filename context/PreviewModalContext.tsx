@@ -10,7 +10,14 @@ interface PreviewModalContextValue {
   isPlaying: boolean;
   initialSeason: number;
   initialEpisode: number;
-  openPreview: (item: Movie, autoPlay?: boolean, season?: number, episode?: number) => void;
+  initialDetailData?: any;
+  openPreview: (
+    item: Movie,
+    autoPlay?: boolean,
+    season?: number,
+    episode?: number,
+    cachedDetail?: any
+  ) => void;
   closePreview: () => void;
   setIsPlaying: (playing: boolean) => void;
 }
@@ -24,21 +31,33 @@ export function PreviewModalProvider({ children }: { children: ReactNode }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [initialSeason, setInitialSeason] = useState(1);
   const [initialEpisode, setInitialEpisode] = useState(1);
+  const [initialDetailData, setInitialDetailData] = useState<any>(null);
 
-  const openPreview = useCallback((item: Movie, autoPlayFlag: boolean = false, season?: number, episode?: number) => {
-    setActiveItem(item);
-    setAutoPlay(autoPlayFlag);
-    setIsPlaying(autoPlayFlag);
-    if (season !== undefined) setInitialSeason(season);
-    else setInitialSeason(1);
-    if (episode !== undefined) setInitialEpisode(episode);
-    else setInitialEpisode(1);
-    setIsOpen(true);
-  }, []);
+  const openPreview = useCallback(
+    (
+      item: Movie,
+      autoPlayFlag: boolean = false,
+      season?: number,
+      episode?: number,
+      cachedDetail?: any
+    ) => {
+      setActiveItem(item);
+      setAutoPlay(autoPlayFlag);
+      setIsPlaying(autoPlayFlag);
+      if (season !== undefined) setInitialSeason(season);
+      else setInitialSeason(1);
+      if (episode !== undefined) setInitialEpisode(episode);
+      else setInitialEpisode(1);
+      if (cachedDetail !== undefined) setInitialDetailData(cachedDetail);
+      setIsOpen(true);
+    },
+    []
+  );
 
   const closePreview = useCallback(() => {
     if (typeof window !== "undefined") {
       try {
+        sessionStorage.removeItem("fardtv_preview_state");
         sessionStorage.removeItem("fardtv_active_session");
         sessionStorage.removeItem("fardtv_active_server");
         const currentUrl = new URL(window.location.href);
@@ -55,11 +74,15 @@ export function PreviewModalProvider({ children }: { children: ReactNode }) {
           currentUrl.pathname + (currentUrl.search ? currentUrl.search : "") + currentUrl.hash
         );
       } catch {}
+      if (typeof document !== "undefined") {
+        document.documentElement.classList.remove("preview-loading-ssr");
+      }
     }
     setIsOpen(false);
     setIsPlaying(false);
     setAutoPlay(false);
     setActiveItem(null);
+    setInitialDetailData(null);
     setInitialSeason(1);
     setInitialEpisode(1);
   }, []);
@@ -73,6 +96,7 @@ export function PreviewModalProvider({ children }: { children: ReactNode }) {
         isPlaying,
         initialSeason,
         initialEpisode,
+        initialDetailData,
         openPreview,
         closePreview,
         setIsPlaying,
