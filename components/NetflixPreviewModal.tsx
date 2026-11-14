@@ -7,6 +7,7 @@ import { usePreviewModal } from "@/context/PreviewModalContext";
 import { useFavorites } from "@/context/FavoritesContext";
 import { useWatchHistory } from "@/context/WatchHistoryContext";
 import { img, displayTitle, displayYear, isTV, Genre, Movie } from "@/lib/tmdb";
+import CustomDropdown from "@/components/CustomDropdown";
 
 export interface CastMember {
   id: number;
@@ -1477,25 +1478,17 @@ export default function NetflixPreviewModal() {
                   </div>
 
                   {validSeasons.length > 1 && (
-                    <div className="relative inline-block">
-                      <select
-                        value={selectedSeason}
-                        onChange={(e) => handleSeasonChange(Number(e.target.value))}
-                        className="appearance-none bg-[#242424] hover:bg-[#2e2e2e] border border-white/20 text-white text-xs sm:text-sm font-semibold pl-3.5 pr-8 py-1.5 rounded-lg outline-none cursor-pointer transition-colors shadow-md"
-                        aria-label="Select season"
-                      >
-                        {validSeasons.map((s) => (
-                          <option key={s.season_number} value={s.season_number} className="bg-[#1e1e1e] text-white">
-                            {s.name || `Season ${s.season_number}`}
-                          </option>
-                        ))}
-                      </select>
-                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-zinc-400">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                          <polyline points="6 9 12 15 18 9" />
-                        </svg>
-                      </div>
-                    </div>
+                    <CustomDropdown
+                      id="preview-season-select"
+                      value={String(selectedSeason)}
+                      options={validSeasons.map((s) => ({
+                        value: String(s.season_number),
+                        label: s.name || `Season ${s.season_number}`,
+                      }))}
+                      onChange={(val) => handleSeasonChange(Number(val))}
+                      showSearch={false}
+                      align="right"
+                    />
                   )}
                 </div>
 

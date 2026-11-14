@@ -1,6 +1,7 @@
 "use client";
 import { Season, Episode } from "@/lib/tmdb";
 import { useAnimeTheme } from "@/context/AnimeThemeContext";
+import CustomDropdown from "@/components/CustomDropdown";
 
 interface Props {
   seasons: Season[];
@@ -48,22 +49,19 @@ export default function EpisodeSelector({
         </div>
 
         {/* Season Selector Dropdown */}
-        <div className="relative">
-          <label htmlFor="season-select" className="sr-only">Select season</label>
-          <select
+        {validSeasons.length > 0 && (
+          <CustomDropdown
             id="season-select"
-            value={currentSeason}
-            onChange={(e) => onSeasonChange(Number(e.target.value))}
-            className="text-xs font-semibold rounded-xl px-4 py-2.5 bg-white/[0.06] border border-white/[0.12] text-zinc-200 outline-none cursor-pointer transition-colors hover:border-red-500/40"
-            aria-label="Select season"
-          >
-            {validSeasons.map((s) => (
-              <option key={s.season_number} value={s.season_number} className="bg-[#0e1018] text-white">
-                {s.name || `Season ${s.season_number}`} ({s.episode_count} Episodes)
-              </option>
-            ))}
-          </select>
-        </div>
+            value={String(currentSeason)}
+            options={validSeasons.map((s) => ({
+              value: String(s.season_number),
+              label: `${s.name || `Season ${s.season_number}`} (${s.episode_count} Episodes)`,
+            }))}
+            onChange={(val) => onSeasonChange(Number(val))}
+            showSearch={false}
+            align="right"
+          />
+        )}
       </div>
 
       {/* Episodes Grid */}
