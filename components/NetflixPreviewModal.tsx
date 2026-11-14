@@ -8,6 +8,7 @@ import { useFavorites } from "@/context/FavoritesContext";
 import { useWatchHistory } from "@/context/WatchHistoryContext";
 import { img, displayTitle, displayYear, isTV, Genre, Movie } from "@/lib/tmdb";
 import CustomDropdown from "@/components/CustomDropdown";
+import { getAbyssServerUrl } from "@/lib/customServers";
 
 export interface CastMember {
   id: number;
@@ -50,6 +51,7 @@ const SERVERS = [
   { id: "nontongo", name: "Server 3" },
   { id: "twoembed", name: "Server 4" },
   { id: "vidsrcsu", name: "Server 5" },
+  { id: "abyss", name: "Server 6" },
 ] as const;
 
 type ServerId = (typeof SERVERS)[number]["id"];
@@ -940,7 +942,7 @@ export default function NetflixPreviewModal() {
         setIsTheaterOpen(Boolean(autoPlay));
 
         // Restore server from URL or sessionStorage if previously selected
-        const validServers = ["cinesrc", "vidlink", "nontongo", "twoembed", "vidsrcsu"] as const;
+        const validServers = ["cinesrc", "vidlink", "nontongo", "twoembed", "vidsrcsu", "abyss"] as const;
         let chosenServer: typeof validServers[number] = "cinesrc";
         if (typeof window !== "undefined") {
           const urlServer = new URLSearchParams(window.location.search).get("server");
@@ -1044,9 +1046,11 @@ export default function NetflixPreviewModal() {
       ? resolvedType === "tv"
         ? `https://www.2embed.cc/embedtv/${idStr}&s=${selectedSeason}&e=${selectedEpisode}`
         : `https://www.2embed.cc/embed/${idStr}`
-      : resolvedType === "tv"
-      ? `https://vidsrc.su/embed/tv/${idStr}/${selectedSeason}/${selectedEpisode}`
-      : `https://vidsrc.su/embed/movie/${idStr}`;
+      : activeServer === "vidsrcsu"
+      ? resolvedType === "tv"
+        ? `https://vidsrc.su/embed/tv/${idStr}/${selectedSeason}/${selectedEpisode}`
+        : `https://vidsrc.su/embed/movie/${idStr}`
+      : getAbyssServerUrl(idStr, resolvedType, selectedSeason, selectedEpisode);
 
   const currentServerObj = SERVERS.find((s) => s.id === activeServer) || SERVERS[0];
 

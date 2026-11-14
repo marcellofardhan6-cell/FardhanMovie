@@ -3,6 +3,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { useWatchHistory } from "@/context/WatchHistoryContext";
 import { useAnimeTheme } from "@/context/AnimeThemeContext";
 import DownloadModal from "@/components/DownloadModal";
+import { getAbyssServerUrl } from "@/lib/customServers";
 
 interface Server {
   id: number;
@@ -49,6 +50,8 @@ function buildServerUrl(server: Server, props: Props, isAnimeTheme?: boolean, st
       return type === "movie"
         ? `https://vidsrc.su/embed/movie/${id}`
         : `https://vidsrc.su/embed/tv/${id}/${season}/${episode}`;
+    case "abyss":
+      return getAbyssServerUrl(id, type, season, episode);
     default:
       return type === "movie"
         ? `https://cinesrc.st/embed/movie/${id}`
@@ -62,6 +65,7 @@ const SERVERS: Server[] = [
   { id: 3, name: "Server 3", key: "nontongo" },
   { id: 4, name: "Server 4", key: "twoembed" },
   { id: 5, name: "Server 5", key: "vidsrcsu" },
+  { id: 6, name: "Server 6", key: "abyss" },
 ];
 
 export default function ServerSwitcher(props: Props) {

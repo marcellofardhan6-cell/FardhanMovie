@@ -190,6 +190,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://nontongo.win" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://www.2embed.cc" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://vidsrc.su" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://player.abyssplayer.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://image.tmdb.org" />
         <link rel="dns-prefetch" href="https://cinesrc.st" />
         <link rel="dns-prefetch" href="https://a.cineflix.st" />
@@ -198,6 +199,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="dns-prefetch" href="https://nontongo.win" />
         <link rel="dns-prefetch" href="https://www.2embed.cc" />
         <link rel="dns-prefetch" href="https://vidsrc.su" />
+        <link rel="dns-prefetch" href="https://player.abyssplayer.com" />
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
         <link rel="icon" type="image/png" sizes="192x192" href="/icon" />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon" />
