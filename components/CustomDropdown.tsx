@@ -130,11 +130,6 @@ export default function CustomDropdown({
           {displayLabel}
         </span>
 
-        {/* Status dot if filtered */}
-        {isFiltered && (
-          <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0 animate-pulse" />
-        )}
-
         {/* Chevron Icon */}
         <svg
           width="13"
