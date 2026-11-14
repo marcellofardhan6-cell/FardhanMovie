@@ -34,7 +34,7 @@ export default function MovieCard({ item, priority = false }: Props) {
     <Link
       href={href}
       onClick={handleCardClick}
-      className="group block relative rounded-xl overflow-hidden transition-all duration-300 ease-out hover:-translate-y-1.5 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-red-500 cursor-pointer select-none"
+      className="group block relative rounded-xl overflow-hidden transition-all duration-300 ease-out hover:-translate-y-1.5 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-red-500 cursor-pointer select-none isolate"
       style={{
         background: "var(--surface)",
         border: "1px solid rgba(255, 255, 255, 0.08)",
@@ -59,7 +59,7 @@ export default function MovieCard({ item, priority = false }: Props) {
         {/* Floating Top Rating Badge */}
         {rating && (
           <div
-            className="absolute top-2 left-2 z-20 flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold tracking-tight backdrop-blur-md bg-black/75 text-zinc-100 border border-white/10"
+            className="absolute top-2 left-2 z-10 flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold tracking-tight backdrop-blur-md bg-black/75 text-zinc-100 border border-white/10"
           >
             <span className="text-red-500 text-[11px]">★</span>
             <span>{rating}</span>
@@ -74,7 +74,7 @@ export default function MovieCard({ item, priority = false }: Props) {
             e.stopPropagation();
             toggleFavorite(item);
           }}
-          className={`absolute top-2 right-2 z-30 w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center backdrop-blur-md border transition-all duration-200 cursor-pointer shadow-md active:scale-90 hover:scale-110 ${
+          className={`absolute top-2 right-2 z-20 w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center backdrop-blur-md border transition-all duration-200 cursor-pointer shadow-md active:scale-90 hover:scale-110 ${
             fav
               ? "bg-red-600 text-white border-red-500 shadow-red-900/40"
               : "bg-black/60 text-zinc-300 border-white/15 hover:text-white hover:bg-black/85"

@@ -106,7 +106,7 @@ export default function InfiniteMovieGrid({
   }
 
   return (
-    <section aria-label="Media catalog grid">
+    <section aria-label="Media catalog grid" className="relative z-0">
       <ul
         className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-5"
         role="list"

@@ -95,7 +95,7 @@ export default function FilterBar({
 
   return (
     <div
-      className="flex flex-wrap gap-2.5 sm:gap-3 items-center p-3 sm:p-4 rounded-2xl mb-8 bg-[#0a0c12]/90 border border-white/[0.08] backdrop-blur-xl shadow-lg relative z-20"
+      className="flex flex-wrap gap-2.5 sm:gap-3 items-center p-3 sm:p-4 rounded-2xl mb-8 bg-[#0a0c12]/90 border border-white/[0.08] backdrop-blur-xl shadow-lg relative z-30"
       role="group"
       aria-label="Filter catalog"
     >

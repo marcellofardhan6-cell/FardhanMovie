@@ -106,7 +106,7 @@ export default function CustomDropdown({
   return (
     <div
       ref={dropdownRef}
-      className={`relative inline-block text-left select-none ${isOpen ? "z-40" : "z-10"} ${className}`}
+      className={`relative inline-block text-left select-none ${isOpen ? "z-50" : "z-10"} ${className}`}
     >
       {/* Trigger Button */}
       <button
