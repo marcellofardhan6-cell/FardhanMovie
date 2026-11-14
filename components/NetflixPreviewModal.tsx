@@ -46,9 +46,9 @@ interface DetailApiResponse {
 const SERVERS = [
   { id: "cinesrc", name: "Server 1" },
   { id: "vidlink", name: "Server 2" },
-  { id: "vidsrcsu", name: "Server 3" },
-  { id: "vidsrcto", name: "Server 4" },
-  { id: "vidsrcpm", name: "Server 5" },
+  { id: "nontongo", name: "Server 3" },
+  { id: "twoembed", name: "Server 4" },
+  { id: "vidsrcsu", name: "Server 5" },
 ] as const;
 
 type ServerId = (typeof SERVERS)[number]["id"];
@@ -939,7 +939,7 @@ export default function NetflixPreviewModal() {
         setIsTheaterOpen(Boolean(autoPlay));
 
         // Restore server from URL or sessionStorage if previously selected
-        const validServers = ["cinesrc", "vidlink", "vidsrcsu", "vidsrcto", "vidsrcpm"] as const;
+        const validServers = ["cinesrc", "vidlink", "nontongo", "twoembed", "vidsrcsu"] as const;
         let chosenServer: typeof validServers[number] = "cinesrc";
         if (typeof window !== "undefined") {
           const urlServer = new URLSearchParams(window.location.search).get("server");
@@ -1024,7 +1024,7 @@ export default function NetflixPreviewModal() {
   const seasonEpisodes = seasonEpisodesMap[selectedSeason] || [];
   const matchPercent = Math.min(99, Math.max(85, Math.round((rating || 7.5) * 10) + 12));
 
-  // Build stream URL for active servers (CineSrc, VidLink, VidSrc SU, VidSrc TO, VidSrc PM)
+  // Build stream URL for active servers (CineSrc, VidLink, NontonGo, 2Embed, VidSrc SU)
   const idStr = String(activeItem.id);
   const streamUrl =
     activeServer === "cinesrc"
@@ -1033,19 +1033,19 @@ export default function NetflixPreviewModal() {
         : `https://cinesrc.st/embed/movie/${idStr}`
       : activeServer === "vidlink"
       ? resolvedType === "tv"
-        ? `https://vidlink.pro/tv/${idStr}/${selectedSeason}/${selectedEpisode}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914&player=jw`
-        : `https://vidlink.pro/movie/${idStr}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914&player=jw`
-      : activeServer === "vidsrcsu"
+        ? `https://vidlink.pro/tv/${idStr}/${selectedSeason}/${selectedEpisode}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914&autoplay=true`
+        : `https://vidlink.pro/movie/${idStr}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914&autoplay=true`
+      : activeServer === "nontongo"
       ? resolvedType === "tv"
-        ? `https://vidsrc.su/embed/tv/${idStr}/${selectedSeason}/${selectedEpisode}`
-        : `https://vidsrc.su/embed/movie/${idStr}`
-      : activeServer === "vidsrcto"
+        ? `https://nontongo.win/embed/tv/${idStr}/${selectedSeason}/${selectedEpisode}`
+        : `https://nontongo.win/embed/movie/${idStr}`
+      : activeServer === "twoembed"
       ? resolvedType === "tv"
-        ? `https://vidsrc.to/embed/tv/${idStr}/${selectedSeason}/${selectedEpisode}`
-        : `https://vidsrc.to/embed/movie/${idStr}`
+        ? `https://www.2embed.cc/embedtv/${idStr}&s=${selectedSeason}&e=${selectedEpisode}`
+        : `https://www.2embed.cc/embed/${idStr}`
       : resolvedType === "tv"
-      ? `https://vidsrc.pm/embed/tv/${idStr}/${selectedSeason}/${selectedEpisode}`
-      : `https://vidsrc.pm/embed/movie/${idStr}`;
+      ? `https://vidsrc.su/embed/tv/${idStr}/${selectedSeason}/${selectedEpisode}`
+      : `https://vidsrc.su/embed/movie/${idStr}`;
 
   const currentServerObj = SERVERS.find((s) => s.id === activeServer) || SERVERS[0];
 

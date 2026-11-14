@@ -35,20 +35,20 @@ function buildServerUrl(server: Server, props: Props, isAnimeTheme?: boolean, st
         : `https://cinesrc.st/embed/tv/${id}?s=${season}&e=${episode}`;
     case "vidlink":
       return type === "movie"
-        ? `https://vidlink.pro/movie/${id}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914&player=jw`
-        : `https://vidlink.pro/tv/${id}/${season}/${episode}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914&player=jw`;
+        ? `https://vidlink.pro/movie/${id}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914&autoplay=true`
+        : `https://vidlink.pro/tv/${id}/${season}/${episode}?primaryColor=e50914&secondaryColor=12141a&iconColor=e50914&autoplay=true`;
+    case "nontongo":
+      return type === "movie"
+        ? `https://nontongo.win/embed/movie/${id}`
+        : `https://nontongo.win/embed/tv/${id}/${season}/${episode}`;
+    case "twoembed":
+      return type === "movie"
+        ? `https://www.2embed.cc/embed/${id}`
+        : `https://www.2embed.cc/embedtv/${id}&s=${season}&e=${episode}`;
     case "vidsrcsu":
       return type === "movie"
         ? `https://vidsrc.su/embed/movie/${id}`
         : `https://vidsrc.su/embed/tv/${id}/${season}/${episode}`;
-    case "vidsrcto":
-      return type === "movie"
-        ? `https://vidsrc.to/embed/movie/${id}`
-        : `https://vidsrc.to/embed/tv/${id}/${season}/${episode}`;
-    case "vidsrcpm":
-      return type === "movie"
-        ? `https://vidsrc.pm/embed/movie/${id}`
-        : `https://vidsrc.pm/embed/tv/${id}/${season}/${episode}`;
     default:
       return type === "movie"
         ? `https://cinesrc.st/embed/movie/${id}`
@@ -59,9 +59,9 @@ function buildServerUrl(server: Server, props: Props, isAnimeTheme?: boolean, st
 const SERVERS: Server[] = [
   { id: 1, name: "Server 1", key: "cinesrc" },
   { id: 2, name: "Server 2", key: "vidlink" },
-  { id: 3, name: "Server 3", key: "vidsrcsu" },
-  { id: 4, name: "Server 4", key: "vidsrcto" },
-  { id: 5, name: "Server 5", key: "vidsrcpm" },
+  { id: 3, name: "Server 3", key: "nontongo" },
+  { id: 4, name: "Server 4", key: "twoembed" },
+  { id: 5, name: "Server 5", key: "vidsrcsu" },
 ];
 
 export default function ServerSwitcher(props: Props) {
